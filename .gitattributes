@@ -1,0 +1,2 @@
+# Mapas, zonas y logos en formato LVGL: binarios, Git no debe tocarlos
+*.bin binary

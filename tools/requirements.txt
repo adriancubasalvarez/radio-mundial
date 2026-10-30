@@ -1,0 +1,6 @@
+# Dependencias de las herramientas del PC
+# Instalar con:  python -m pip install -r tools/requirements.txt
+shapely>=2.0     # geometría de los países (intersecciones, distancias)
+pillow>=10.0     # dibujo de las imágenes de los mapas
+numpy>=1.24      # cálculo de proyecciones (también lo usa Shapely)
+anyascii>=0.3    # transliteración de nombres en otros alfabetos (cirílico, árabe...)

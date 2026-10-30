@@ -1,0 +1,9 @@
+[{"n":"BRN Radio - Arabic Channel","u":"http://192.241.185.108:8094/stream","c":"AAC+","b":128},
+ {"n":"WSTX-FM 100.3 Christiansted","u":"http://wstxradio.serverroom.net:7490/;","c":"MP3","b":128},
+ {"n":"WSTX-AM 970 Christiansted","u":"http://wstxradio2.serverroom.net:8340/;","c":"MP3","b":128},
+ {"n":"Beach Bar Radio","u":"https://streaming.radio.co/s23d2a636c/listen","c":"MP3","b":192},
+ {"n":"Hiphop","u":"http://listen.181fm.com/181-oldschool_128k.mp3","c":"MP3","b":128},
+ {"n":"WTJX","u":"https://quarrel.streamguys1.com:7405/wtjxfm","c":"MP3","b":192},
+ {"n":"From The Heart Radio","u":"https://global2.citrus3.com:2020/stream/fromtheheartradio","c":"AAC","b":128},
+ {"n":"107.9 FM Da Vybe","u":"https://ice3.securenetsystems.net/WLDV","c":"AAC+","b":32},
+ {"n":"Radio Elim LLDM","u":"https://radio.elimlldm.net/listen/elim_lldm/radio.mp3","c":"MP3","b":192}]

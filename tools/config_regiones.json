@@ -1,0 +1,104 @@
+{
+  "_ayuda": [
+    "Configuración de las regiones del mapamundi para build_maps.py.",
+    "encuadre: [lon_min, lat_min, lon_max, lat_max] en grados; lon_max puede pasar de 180 para cruzar el antimeridiano.",
+    "subregiones: subregiones de Natural Earth (campo SUBREGION) que pertenecen a la región.",
+    "incluir: códigos ISO de países que van a esta región aunque su subregión diga otra cosa.",
+    "color: color base de la región (formato #RRGGBB).",
+    "nombres: corrige el nombre en español que trae Natural Earth para algunos códigos ISO."
+  ],
+  "nombres": {
+    "SX": "Sint Maarten",
+    "SZ": "Esuatini",
+    "TW": "Taiwán"
+  },
+  "colores": {
+    "oceano": "#0B1D33",
+    "borde": "#06111F",
+    "tierra_fuera": "#24364D"
+  },
+  "mundo": {
+    "ancho": 320,
+    "lat_min": -56,
+    "lat_max": 80,
+    "lon_min": -169
+  },
+  "mapa_region": {
+    "ancho": 320,
+    "alto": 210
+  },
+  "regiones": [
+    {
+      "id": "norteamerica",
+      "nombre": "Norteamérica",
+      "color": "#E07A5F",
+      "encuadre": [-170, 14, -50, 72],
+      "subregiones": ["Northern America"],
+      "incluir": ["MX"]
+    },
+    {
+      "id": "centroamerica",
+      "nombre": "Centroamérica y Caribe",
+      "color": "#F2CC8F",
+      "encuadre": [-95, 6, -59, 27],
+      "subregiones": ["Central America", "Caribbean"],
+      "incluir": []
+    },
+    {
+      "id": "sudamerica",
+      "nombre": "Sudamérica",
+      "color": "#81B29A",
+      "encuadre": [-84, -56, -33, 13],
+      "subregiones": ["South America"],
+      "incluir": []
+    },
+    {
+      "id": "europa",
+      "nombre": "Europa",
+      "color": "#6C8EBF",
+      "encuadre": [-25, 34, 45, 71],
+      "subregiones": ["Northern Europe", "Western Europe", "Southern Europe", "Eastern Europe"],
+      "incluir": []
+    },
+    {
+      "id": "africa",
+      "nombre": "África",
+      "color": "#E9A23B",
+      "encuadre": [-20, -36, 55, 38],
+      "subregiones": ["Northern Africa", "Western Africa", "Middle Africa", "Eastern Africa", "Southern Africa"],
+      "incluir": []
+    },
+    {
+      "id": "oriente_medio",
+      "nombre": "Oriente Medio",
+      "color": "#D4A373",
+      "encuadre": [25, 12, 64, 43],
+      "subregiones": ["Western Asia"],
+      "incluir": ["IR"]
+    },
+    {
+      "id": "asia_sur",
+      "nombre": "Asia central y del sur",
+      "color": "#B5838D",
+      "encuadre": [45, -1, 98, 56],
+      "subregiones": ["Central Asia", "Southern Asia"],
+      "incluir": []
+    },
+    {
+      "id": "asia_este",
+      "nombre": "Asia oriental y sudeste asiático",
+      "color": "#59A5D8",
+      "encuadre": [73, -11, 150, 54],
+      "subregiones": ["Eastern Asia", "South-Eastern Asia"],
+      "incluir": []
+    },
+    {
+      "id": "oceania",
+      "nombre": "Oceanía",
+      "color": "#9C89B8",
+      "encuadre": [110, -50, 190, 15],
+      "subregiones": ["Australia and New Zealand", "Melanesia", "Micronesia", "Polynesia"],
+      "incluir": []
+    }
+  ]
+}

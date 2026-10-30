@@ -1,0 +1,13 @@
+# Compilación de PlatformIO
+.pio/
+.vscode/
+
+# Python
+__pycache__/
+
+# Descargas de las herramientas (Natural Earth, radio-browser, fuentes):
+# se regeneran solas al ejecutar los scripts de tools/
+tools/cache/
+
+# Previsualizaciones de los mapas y el logo (se regeneran con los scripts)
+tools/preview/

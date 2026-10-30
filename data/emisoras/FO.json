@@ -1,0 +1,11 @@
+[{"n":"Kringvarp Føroya (KVF)","u":"http://netvarp.kringvarp.fo:443/uvhm","c":"MP3","b":192},
+ {"n":"KVF2","u":"http://netvarp.kringvarp.fo:4443/kvf2_2","c":"MP3","b":192},
+ {"n":"Rás 2","u":"http://stream.midlar.fo/ras2","c":"MP3","b":0},
+ {"n":"KVF - Tingvarp","u":"http://netvarp.kringvarp.fo:4443/tingvarp","c":"MP3","b":96},
+ {"n":"FM1 88,7","u":"https://stream-secure.midlar.fo/fm1-128","c":"MP3","b":128},
+ {"n":"Norðlýsið","u":"https://liveradio.stream.fo/listen/nordlysid/web","c":"MP3","b":128},
+ {"n":"FM 1","u":"http://stream.midlar.fo/fm1-128","c":"MP3","b":128},
+ {"n":"FM98,7","u":"http://lindinlow.stream.fo:8000/high","c":"AAC","b":128},
+ {"n":"VoxPop","u":"https://stream-secure.midlar.fo/voxpop-128","c":"MP3","b":128},
+ {"n":"Sjey: Kristiligt Radio","u":"https://lurta.sjey.fo/high_aac","c":"AAC+","b":128},
+ {"n":"Lindin: Kristiligt Kringvarp","u":"https://high.lindin.fo/","c":"AAC+","b":64}]

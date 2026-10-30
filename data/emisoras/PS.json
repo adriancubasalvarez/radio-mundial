@@ -1,0 +1,7 @@
+[{"n":"Quran Radio Station-Nablus","u":"http://www.quran-radio.org:8002/","c":"MP3","b":48},
+ {"n":"seba","u":"http://213.6.93.254:8000/sebafm","c":"MP3","b":128},
+ {"n":"rdyw lns","u":"https://cdna.streamgates.net/RadioNas/Live-Audio/icecast.audio","c":"AAC+","b":64},
+ {"n":"Ajyal - Palestine","u":"https://streamer.mada.ps:8208/ajyal","c":"MP3","b":128},
+ {"n":"Raya FM","u":"https://rstream.hadara.ps/proxy/raya/stream","c":"MP3","b":128},
+ {"n":"Radio alHara","u":"https://stream.radioalhara.net/ra","c":"MP3","b":128},
+ {"n":"Amen24","u":"https://rstream.hadara.ps/proxy/amen24/stream","c":"MP3","b":128}]
