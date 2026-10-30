@@ -3,6 +3,8 @@
 #include "hal.h"
 #include "imagen.h"
 
+#include <string.h>
+
 lv_obj_t *comun_pantalla(void)
 {
     lv_obj_t *pantalla = lv_obj_create(NULL);
@@ -83,6 +85,8 @@ lv_obj_t *comun_cabecera(lv_obj_t *pantalla, const char *texto, bool con_atras, 
             lv_obj_align(img, LV_ALIGN_LEFT_MID, 6, 0);
             x_titulo = 6 + mini->header.w + 6;
         }
+        /* Hueco a la derecha para dos botones de cabecera */
+        lv_obj_set_width(etiqueta, PANTALLA_ANCHO - x_titulo - 2 * 44);
         lv_obj_align(etiqueta, LV_ALIGN_LEFT_MID, x_titulo, 0);
     }
 
@@ -102,6 +106,7 @@ lv_obj_t *comun_boton_cabecera(lv_obj_t *cabecera, const char *simbolo, lv_event
 /* Estilos compartidos de las listas (se crean una sola vez) */
 static lv_style_t estilo_lista;
 static lv_style_t estilo_elemento;
+static lv_style_t estilo_elemento_pulsado;
 static lv_style_t estilo_nota;
 static lv_style_t estilo_apagado;
 
@@ -116,11 +121,24 @@ static void iniciar_estilos(void)
     lv_style_init(&estilo_lista);
     lv_style_set_radius(&estilo_lista, 0);
     lv_style_set_border_width(&estilo_lista, 0);
+    lv_style_set_pad_all(&estilo_lista, 0);
     lv_style_set_bg_color(&estilo_lista, lv_color_hex(COLOR_FONDO));
 
+    /* Elementos: fondo de la aplicación, una línea fina debajo y el
+     * contenido centrado en vertical */
     lv_style_init(&estilo_elemento);
     lv_style_set_text_font(&estilo_elemento, &radio_20);
     lv_style_set_min_height(&estilo_elemento, 44);
+    lv_style_set_bg_color(&estilo_elemento, lv_color_hex(COLOR_FONDO));
+    lv_style_set_border_side(&estilo_elemento, LV_BORDER_SIDE_BOTTOM);
+    lv_style_set_border_width(&estilo_elemento, 1);
+    lv_style_set_border_color(&estilo_elemento, lv_color_hex(COLOR_LINEA));
+    lv_style_set_pad_hor(&estilo_elemento, 12);
+    lv_style_set_flex_cross_place(&estilo_elemento, LV_FLEX_ALIGN_CENTER);
+    lv_style_set_flex_track_place(&estilo_elemento, LV_FLEX_ALIGN_CENTER);
+
+    lv_style_init(&estilo_elemento_pulsado);
+    lv_style_set_bg_color(&estilo_elemento_pulsado, lv_color_hex(COLOR_LINEA));
 
     lv_style_init(&estilo_nota);
     lv_style_set_text_font(&estilo_nota, &radio_14);
@@ -145,7 +163,33 @@ lv_obj_t *comun_elemento_lista(lv_obj_t *lista, const char *icono, const char *t
 {
     lv_obj_t *elemento = lv_list_add_btn(lista, icono, texto);
     lv_obj_add_style(elemento, &estilo_elemento, 0);
+    lv_obj_add_style(elemento, &estilo_elemento_pulsado, LV_STATE_PRESSED);
     return elemento;
+}
+
+void comun_texto_seguro(const char *origen, char *destino, size_t tam)
+{
+    size_t d = 0;
+    const unsigned char *s = (const unsigned char *)origen;
+    while (*s && d + 3 < tam) {
+        /* Decodificar un carácter UTF-8 */
+        uint32_t cp;
+        int largo;
+        if (*s < 0x80) { cp = *s; largo = 1; }
+        else if ((*s >> 5) == 6 && (s[1] >> 6) == 2) { cp = ((*s & 0x1F) << 6) | (s[1] & 0x3F); largo = 2; }
+        else if ((*s >> 4) == 14 && (s[1] >> 6) == 2 && (s[2] >> 6) == 2) { cp = 0xFFFF; largo = 3; }
+        else if ((*s >> 3) == 30 && (s[1] >> 6) == 2 && (s[2] >> 6) == 2 && (s[3] >> 6) == 2) { cp = 0xFFFF; largo = 4; }
+        else { cp = 0xFFFF; largo = 1; }
+
+        if ((cp >= 0x20 && cp <= 0x7E) || (cp >= 0xA0 && cp <= 0xFF)) {
+            memcpy(destino + d, s, largo);
+            d += largo;
+        } else if (cp >= 0x20) {
+            destino[d++] = '?';
+        }
+        s += largo;
+    }
+    destino[d] = '\0';
 }
 
 lv_obj_t *comun_nota_elemento(lv_obj_t *elemento, const char *texto)

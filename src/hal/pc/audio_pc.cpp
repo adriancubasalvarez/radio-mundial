@@ -11,6 +11,7 @@
  * rendirse y terminar; entonces el estado pasa a AUDIO_ERROR.
  */
 #include "hal.h"
+#include "icy_pc.h"
 
 #include <stdio.h>
 #include <string>
@@ -32,6 +33,7 @@ static pid_t proceso = 0;
 static uint8_t volumen_actual = 70;
 static std::string url_actual;
 static bool reproduccion_pedida = false; /* el usuario quiere oír algo */
+static bool icy_activo = false;          /* hay un lector de títulos en marcha */
 static uint32_t inicio_ms = 0;
 
 /* true si el proceso ffplay sigue vivo */
@@ -66,6 +68,12 @@ static void terminar_proceso(void)
 void audio_reproducir(const char *url)
 {
     terminar_proceso();
+    /* El lector de títulos solo se reinicia si cambia la emisora (al cambiar
+     * el volumen se relanza ffplay con la misma URL y el título se conserva) */
+    if (!icy_activo || url_actual != url) {
+        icy_empezar(url);
+        icy_activo = true;
+    }
     url_actual = url;
     reproduccion_pedida = true;
     inicio_ms = hal_millis();
@@ -97,6 +105,15 @@ void audio_parar(void)
 {
     reproduccion_pedida = false;
     terminar_proceso();
+    icy_parar();
+    icy_activo = false;
+}
+
+const char *audio_titulo(void)
+{
+    static std::string titulo;
+    titulo = reproduccion_pedida ? icy_titulo() : "";
+    return titulo.c_str();
 }
 
 EstadoAudio audio_estado(void)

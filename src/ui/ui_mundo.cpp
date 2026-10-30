@@ -2,7 +2,7 @@
  * Pantalla del mapamundi: tocas una región, se resalta y al soltar se entra.
  *
  *   +-----------------------------+  0
- *   | Radio Mundial               |  cabecera (30 px)
+ *   | logo Radio Mundial    ★  🔀 |  cabecera (30 px): favoritos y aleatoria
  *   +-----------------------------+  30
  *   |        mapamundi            |  imagen (alto según el mapa)
  *   +-----------------------------+
@@ -13,25 +13,59 @@
 #include "nav.h"
 #include "comun.h"
 #include "mapa.h"
+#include "ajustes.h"
 #include "hal.h"
 
 #include <lvgl.h>
 #include <stdio.h>
+#include <string.h>
+
+#define PERIODO_PIE 1000  /* ms entre actualizaciones del pie */
 
 static Mapa mapa_mundo;
 static lv_obj_t *img_mundo;
 static lv_obj_t *etiqueta_pie;
+static lv_timer_t *temporizador_pie;
+static bool tocando;  /* mientras se toca el mapa, el pie muestra la región */
+static char ultimo_pie[200];
 
-/* Texto del pie cuando no se toca nada: lo que suena, o una pista */
+static void poner_pie(const char *texto, uint32_t color)
+{
+    /* Solo si cambia, para no reiniciar el desplazamiento del texto */
+    if (strcmp(ultimo_pie, texto) != 0) {
+        strncpy(ultimo_pie, texto, sizeof(ultimo_pie) - 1);
+        lv_label_set_text(etiqueta_pie, texto);
+    }
+    lv_obj_set_style_text_color(etiqueta_pie, lv_color_hex(color), 0);
+}
+
+/* Texto del pie cuando no se toca nada: lo que suena (y su canción), o una pista */
 static void pie_por_defecto(void)
 {
     EstadoAudio estado = audio_estado();
     if (nav.hay_sonando && (estado == AUDIO_SONANDO || estado == AUDIO_CONECTANDO)) {
-        lv_label_set_text_fmt(etiqueta_pie, LV_SYMBOL_AUDIO "  %s", nav.sonando.nombre);
-        lv_obj_set_style_text_color(etiqueta_pie, lv_color_hex(COLOR_ACENTO), 0);
+        char titulo[120], texto[200];
+        comun_texto_seguro(audio_titulo(), titulo, sizeof(titulo));
+        if (titulo[0] != '\0') {
+            snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s · %s", nav.sonando.nombre, titulo);
+        } else {
+            snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s", nav.sonando.nombre);
+        }
+        poner_pie(texto, COLOR_ACENTO);
     } else {
-        lv_label_set_text(etiqueta_pie, "Toca una región");
-        lv_obj_set_style_text_color(etiqueta_pie, lv_color_hex(COLOR_SECUNDARIO), 0);
+        if (estado == AUDIO_ERROR) {
+            audio_parar(); /* la emisora se cortó mientras navegábamos */
+        }
+        nav.hay_sonando = false;
+        poner_pie("Toca una región", COLOR_SECUNDARIO);
+    }
+}
+
+static void al_refrescar_pie(lv_timer_t *t)
+{
+    (void)t;
+    if (!tocando) {
+        pie_por_defecto();
     }
 }
 
@@ -58,14 +92,15 @@ static void al_tocar_mapa(lv_event_t *e)
     if (codigo == LV_EVENT_PRESSED || codigo == LV_EVENT_PRESSING) {
         const Region *region = region_bajo_dedo();
         mapa_resaltar(&mapa_mundo, region ? region->indice : 0, img_mundo);
+        tocando = (region != NULL);
         if (region != NULL) {
-            lv_label_set_text(etiqueta_pie, region->nombre);
-            lv_obj_set_style_text_color(etiqueta_pie, lv_color_white(), 0);
+            poner_pie(region->nombre, COLOR_TEXTO);
         } else {
             pie_por_defecto();
         }
     } else if (codigo == LV_EVENT_RELEASED) {
         const Region *region = region_bajo_dedo();
+        tocando = false;
         if (region != NULL) {
             nav.region = *region;
             nav_ir(PANT_REGION);
@@ -74,17 +109,38 @@ static void al_tocar_mapa(lv_event_t *e)
             pie_por_defecto();
         }
     } else if (codigo == LV_EVENT_PRESS_LOST) {
+        tocando = false;
         mapa_resaltar(&mapa_mundo, 0, img_mundo);
         pie_por_defecto();
     }
 }
 
-/* Tocar el pie mientras suena algo lleva a «Reproduciendo» */
+/* Tocar el pie mientras suena algo lleva a «Reproduciendo». La última
+ * emisora guardada en los ajustes es la que suena, con su país. */
 static void al_tocar_pie(lv_event_t *e)
 {
     (void)e;
-    if (nav.hay_sonando) {
-        nav.emisora = nav.sonando;
+    if (nav.hay_sonando && ajustes.hay_ultima) {
+        nav.emisora = ajustes.ultima.emisora;
+        memset(&nav.pais, 0, sizeof(nav.pais));
+        strncpy(nav.pais.codigo, ajustes.ultima.pais, sizeof(nav.pais.codigo) - 1);
+        strncpy(nav.pais.nombre, ajustes.ultima.nombre_pais, sizeof(nav.pais.nombre) - 1);
+        nav.aleatoria = false;
+        nav_ir(PANT_SONANDO);
+    }
+}
+
+static void al_pulsar_favoritos(lv_event_t *e)
+{
+    (void)e;
+    nav_ir(PANT_FAVORITOS);
+}
+
+static void al_pulsar_aleatoria(lv_event_t *e)
+{
+    (void)e;
+    if (datos_emisora_aleatoria(&nav.emisora, &nav.pais)) {
+        nav.aleatoria = true;
         nav_ir(PANT_SONANDO);
     }
 }
@@ -92,6 +148,8 @@ static void al_tocar_pie(lv_event_t *e)
 static void al_borrar(lv_event_t *e)
 {
     (void)e;
+    lv_timer_del(temporizador_pie);
+    temporizador_pie = NULL;
     mapa_liberar(&mapa_mundo);
 }
 
@@ -99,13 +157,20 @@ lv_obj_t *pantalla_mundo(void)
 {
     lv_obj_t *pantalla = comun_pantalla();
     lv_obj_add_event_cb(pantalla, al_borrar, LV_EVENT_DELETE, NULL);
-    comun_cabecera(pantalla, "Radio Mundial", false, NULL);
+    lv_obj_t *cabecera = comun_cabecera(pantalla, "Radio Mundial", false, NULL);
+    comun_boton_cabecera(cabecera, SIMBOLO_ALEATORIO, al_pulsar_aleatoria);
+    lv_obj_t *favoritos = comun_boton_cabecera(cabecera, SIMBOLO_ESTRELLA, al_pulsar_favoritos);
+    lv_obj_align(favoritos, LV_ALIGN_RIGHT_MID, -44, 0);
+
+    /* El pie se crea antes que el mapa por si falta el mapa */
+    etiqueta_pie = lv_label_create(pantalla);
+    ultimo_pie[0] = '\0';
+    tocando = false;
+    temporizador_pie = lv_timer_create(al_refrescar_pie, PERIODO_PIE, NULL);
 
     if (!mapa_cargar(&mapa_mundo, nav.indice.imagen, nav.indice.zonas)) {
-        lv_obj_t *error = lv_label_create(pantalla);
-        lv_label_set_text(error, "Faltan los mapas en data/\nEjecuta tools/build_maps.py");
-        lv_obj_set_style_text_color(error, lv_color_white(), 0);
-        lv_obj_center(error);
+        lv_label_set_text(etiqueta_pie, "Faltan los mapas en data/\nEjecuta tools/build_maps.py");
+        lv_obj_center(etiqueta_pie);
         return pantalla;
     }
 
@@ -117,7 +182,6 @@ lv_obj_t *pantalla_mundo(void)
 
     /* Pie: ocupa todo el hueco bajo el mapa para que sea fácil de tocar */
     int y_pie = ALTO_CABECERA + mapa_mundo.imagen.header.h;
-    etiqueta_pie = lv_label_create(pantalla);
     lv_label_set_long_mode(etiqueta_pie, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_size(etiqueta_pie, PANTALLA_ANCHO - 16, LV_SIZE_CONTENT);
     lv_obj_set_style_text_font(etiqueta_pie, &radio_20, 0);
@@ -139,7 +203,9 @@ void ui_inicio(void)
                                              true, &radio_14);
     lv_disp_set_theme(disp, tema);
 
-    nav.volumen = 70;
+    ajustes_cargar();
+    audio_volumen(ajustes.volumen);
+
     if (!datos_cargar_indice(&nav.indice)) {
         lv_obj_t *error = lv_label_create(lv_scr_act());
         lv_label_set_text(error, "No se encuentra data/regiones.json\nEjecuta tools/build_maps.py");
@@ -147,5 +213,7 @@ void ui_inicio(void)
         return;
     }
     printf("Índice cargado: %d regiones\n", nav.indice.num_regiones);
+    reposo_iniciar();
     ui_arranque();
 }
+

@@ -30,6 +30,23 @@ uint32_t hal_millis(void);
 /* Pausa en milisegundos */
 void hal_esperar(uint32_t ms);
 
+/* Brillo de la pantalla de 0 a 100 */
+void hal_brillo(uint8_t porcentaje);
+
+/* Hora local. Devuelve false si aún no se sabe (la placa sin Internet). */
+bool hal_hora(int *hora, int *minuto);
+
+/* Número aleatorio de 32 bits */
+uint32_t hal_aleatorio(void);
+
+/* ---------- Ajustes persistentes ---------- */
+
+/* Lee los ajustes guardados (texto JSON). NULL si no hay. Liberar con free(). */
+char *hal_ajustes_leer(void);
+
+/* Guarda los ajustes (texto JSON) */
+bool hal_ajustes_guardar(const char *json);
+
 /* ---------- Archivos (carpeta data/) ---------- */
 
 /* Lee un archivo entero de data/ (p. ej. "mapas/mundo.bin") a memoria.
@@ -56,3 +73,7 @@ EstadoAudio audio_estado(void);
 
 /* Volumen de 0 a 100 */
 void audio_volumen(uint8_t volumen);
+
+/* Título de lo que suena (metadatos ICY), en UTF-8; "" si la emisora no
+ * lo envía o aún no ha llegado */
+const char *audio_titulo(void);

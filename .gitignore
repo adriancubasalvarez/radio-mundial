@@ -9,5 +9,8 @@ __pycache__/
 # se regeneran solas al ejecutar los scripts de tools/
 tools/cache/
 
+# Ajustes del simulador (volumen, favoritos...): son de cada usuario
+ajustes.json
+
 # Previsualizaciones de los mapas y el logo (se regeneran con los scripts)
 tools/preview/

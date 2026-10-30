@@ -41,7 +41,13 @@ RANGO_SIMBOLOS = (
     "61543,61544,61550,61552,61553,61556,61559,61560,61561,61563,61587,61589,"
     "61636,61637,61639,61641,61664,61671,61674,61683,61724,61732,61787,61931,"
     "62016,62017,62018,62019,62020,62087,62099,62212,62189,62810,63426,63650"
+    # Símbolos propios de Radio Mundial: estrella (favoritos) y aleatorio
+    ",0xF005,0xF074"
 )
+
+# Fuente grande solo con dígitos y dos puntos para el reloj del reposo
+TAM_RELOJ = 48
+RANGO_RELOJ = "0x20,0x30-0x3A"
 
 LV_FONT_CONV = "lv_font_conv@1.5.2"
 
@@ -60,16 +66,16 @@ def main():
     simbolos = descargar(SIMBOLOS)
     SALIDA.mkdir(parents=True, exist_ok=True)
 
-    for tam in TAMANOS:
-        destino = SALIDA / f"radio_{tam}.c"
-        orden = [
-            "npx", "--yes", LV_FONT_CONV,
-            "--bpp", "4", "--size", str(tam), "--no-compress",
-            "--font", str(texto), "-r", RANGO_TEXTO,
-            "--font", str(simbolos), "-r", RANGO_SIMBOLOS,
-            "--format", "lvgl", "--force-fast-kern-format",
-            "-o", str(destino),
-        ]
+    trabajos = [(f"radio_{tam}.c", tam, ["--font", str(texto), "-r", RANGO_TEXTO,
+                                          "--font", str(simbolos), "-r", RANGO_SIMBOLOS])
+                for tam in TAMANOS]
+    trabajos.append((f"radio_reloj_{TAM_RELOJ}.c", TAM_RELOJ, ["--font", str(texto), "-r", RANGO_RELOJ]))
+
+    for nombre, tam, fuentes in trabajos:
+        destino = SALIDA / nombre
+        orden = ["npx", "--yes", LV_FONT_CONV,
+                 "--bpp", "4", "--size", str(tam), "--no-compress", *fuentes,
+                 "--format", "lvgl", "--force-fast-kern-format", "-o", str(destino)]
         print(f"Generando {destino.name}")
         subprocess.run(orden, check=True, shell=(sys.platform == "win32"))
 

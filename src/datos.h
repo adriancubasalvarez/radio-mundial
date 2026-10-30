@@ -72,3 +72,7 @@ typedef struct {
 bool datos_cargar_emisoras(const char *codigo, ListaEmisoras *lista);
 
 void datos_liberar_emisoras(ListaEmisoras *lista);
+
+/* Elige una emisora al azar: primero un país al azar entre los que tienen
+ * emisoras y luego una emisora al azar de ese país. */
+bool datos_emisora_aleatoria(Emisora *emisora, Pais *pais);

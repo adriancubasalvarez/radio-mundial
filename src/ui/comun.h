@@ -4,6 +4,7 @@
 #pragma once
 
 #include <lvgl.h>
+#include <stddef.h>
 
 #define ALTO_CABECERA 30
 
@@ -13,6 +14,16 @@
 #define COLOR_TEXTO      0xFFFFFF
 #define COLOR_SECUNDARIO 0x9FB3C8
 #define COLOR_ERROR      0xFF7A6B
+#define COLOR_LINEA      0x1E3A5C  /* separadores y fondo al pulsar */
+
+/* Símbolos propios añadidos a nuestras fuentes (tools/build_fonts.py) */
+#define SIMBOLO_ESTRELLA  "\xEF\x80\x85" /* U+F005 */
+#define SIMBOLO_ALEATORIO "\xEF\x81\xB4" /* U+F074 */
+
+/* Copia un texto UTF-8 cambiando por '?' los caracteres que no tienen
+ * nuestras fuentes (fuera de ASCII y Latin-1), p. ej. títulos en otros
+ * alfabetos que llegan de las emisoras. */
+void comun_texto_seguro(const char *origen, char *destino, size_t tam);
 
 /* Crea una pantalla vacía con el fondo de la aplicación */
 lv_obj_t *comun_pantalla(void);

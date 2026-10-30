@@ -34,7 +34,8 @@
  * ni ñ), así que se desactivan y usamos las nuestras (src/fuentes/), con
  * Latin-1 y los símbolos de LVGL, generadas por tools/build_fonts.py. */
 #define LV_FONT_MONTSERRAT_14 0
-#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(radio_14) LV_FONT_DECLARE(radio_20) LV_FONT_DECLARE(radio_28)
+#define LV_FONT_CUSTOM_DECLARE LV_FONT_DECLARE(radio_14) LV_FONT_DECLARE(radio_20) LV_FONT_DECLARE(radio_28) \
+                               LV_FONT_DECLARE(radio_reloj_48)
 #define LV_FONT_DEFAULT &radio_14
 
 #endif /* LV_CONF_H */

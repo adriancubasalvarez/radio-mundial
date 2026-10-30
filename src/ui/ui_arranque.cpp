@@ -7,8 +7,10 @@
 #include "comun.h"
 #include "imagen.h"
 #include "marca.h"
+#include "ajustes.h"
 
 #include <lvgl.h>
+#include <string.h>
 
 #define TIEMPO_ARRANQUE 3000  /* ms */
 #define TIEMPO_FUNDIDO  600   /* ms de la aparición del logo */
@@ -16,12 +18,26 @@
 static Imagen logo;
 static lv_timer_t *temporizador;
 
+/* Como una radio de verdad: al encender vuelve a sonar la última emisora */
+static void reanudar(void)
+{
+    if (!ajustes.reanudar || !ajustes.hay_ultima) {
+        return;
+    }
+    nav.emisora = ajustes.ultima.emisora;
+    memset(&nav.pais, 0, sizeof(nav.pais));
+    strncpy(nav.pais.codigo, ajustes.ultima.pais, sizeof(nav.pais.codigo) - 1);
+    strncpy(nav.pais.nombre, ajustes.ultima.nombre_pais, sizeof(nav.pais.nombre) - 1);
+    nav_reproducir();
+}
+
 static void seguir(void)
 {
     if (temporizador != NULL) {
         lv_timer_del(temporizador);
         temporizador = NULL;
         nav_ir(PANT_MUNDO);
+        reanudar();
     }
 }
 

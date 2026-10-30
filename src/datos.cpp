@@ -182,3 +182,81 @@ void datos_liberar_emisoras(ListaEmisoras *lista)
     lista->emisoras = NULL;
     lista->num = 0;
 }
+
+/* Busca el nombre de un país en regiones.json */
+static bool buscar_pais(const char *codigo, Pais *pais)
+{
+    size_t tam = 0;
+    uint8_t *texto = hal_leer_archivo("regiones.json", &tam);
+    if (texto == NULL) {
+        return false;
+    }
+    JsonDocument filtro;
+    filtro["regiones"][0]["paises"][0]["codigo"] = true;
+    filtro["regiones"][0]["paises"][0]["nombre"] = true;
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, (const char *)texto, tam,
+                                                 DeserializationOption::Filter(filtro));
+    free(texto);
+    if (error) {
+        return false;
+    }
+    for (JsonObjectConst r : doc["regiones"].as<JsonArrayConst>()) {
+        for (JsonObjectConst p : r["paises"].as<JsonArrayConst>()) {
+            if (strcmp(p["codigo"] | "", codigo) == 0) {
+                memset(pais, 0, sizeof(Pais));
+                copiar(pais->codigo, sizeof(pais->codigo), p["codigo"]);
+                copiar(pais->nombre, sizeof(pais->nombre), p["nombre"]);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool datos_emisora_aleatoria(Emisora *emisora, Pais *pais)
+{
+    size_t tam = 0;
+    uint8_t *texto = hal_leer_archivo("emisoras/indice.json", &tam);
+    if (texto == NULL) {
+        return false;
+    }
+    JsonDocument indice;
+    DeserializationError error = deserializeJson(indice, (const char *)texto, tam);
+    free(texto);
+    if (error) {
+        return false;
+    }
+
+    /* Países con alguna emisora */
+    JsonObjectConst paises = indice.as<JsonObjectConst>();
+    size_t con_emisoras = 0;
+    for (JsonPairConst p : paises) {
+        con_emisoras += (p.value().as<int>() > 0);
+    }
+
+    /* Se intenta unas cuantas veces por si algún archivo falla */
+    for (int intento = 0; intento < 5 && con_emisoras > 0; intento++) {
+        size_t elegido = hal_aleatorio() % con_emisoras;
+        const char *codigo = NULL;
+        for (JsonPairConst p : paises) {
+            if (p.value().as<int>() > 0 && elegido-- == 0) {
+                codigo = p.key().c_str();
+                break;
+            }
+        }
+        ListaEmisoras lista;
+        if (codigo == NULL || !datos_cargar_emisoras(codigo, &lista) || lista.num == 0) {
+            continue;
+        }
+        *emisora = lista.emisoras[hal_aleatorio() % lista.num];
+        datos_liberar_emisoras(&lista);
+        if (!buscar_pais(codigo, pais)) {
+            memset(pais, 0, sizeof(Pais));
+            strncpy(pais->codigo, codigo, sizeof(pais->codigo) - 1);
+            strncpy(pais->nombre, codigo, sizeof(pais->nombre) - 1);
+        }
+        return true;
+    }
+    return false;
+}

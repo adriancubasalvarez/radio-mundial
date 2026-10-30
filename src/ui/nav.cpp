@@ -1,4 +1,6 @@
 #include "nav.h"
+#include "ajustes.h"
+#include "hal.h"
 
 #include <stdio.h>
 
@@ -18,6 +20,7 @@ static lv_obj_t *construir(Pantalla pantalla)
     case PANT_PAISES:   return pantalla_paises();
     case PANT_EMISORAS: return pantalla_emisoras();
     case PANT_SONANDO:  return pantalla_sonando();
+    case PANT_FAVORITOS: return pantalla_favoritos();
     }
     return pantalla_mundo();
 }
@@ -47,6 +50,15 @@ void nav_ir(Pantalla pantalla)
     pila[++tope] = pantalla;
     /* La primera pantalla (tras el logo) aparece con un fundido */
     mostrar(pantalla, tope == 0 ? LV_SCR_LOAD_ANIM_FADE_ON : LV_SCR_LOAD_ANIM_MOVE_LEFT);
+}
+
+void nav_reproducir(void)
+{
+    audio_reproducir(nav.emisora.url);
+    nav.sonando = nav.emisora;
+    nav.hay_sonando = true;
+    ajustes_recordar_ultima(&nav.emisora, &nav.pais);
+    printf("Reproduciendo: %s (%s)\n  %s\n", nav.emisora.nombre, nav.pais.codigo, nav.emisora.url);
 }
 
 void nav_atras(void)

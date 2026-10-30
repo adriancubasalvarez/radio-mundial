@@ -31,6 +31,15 @@ static bool raton_pulsado;
 
 static uint32_t ultimo_tick;
 
+/* Sube el marco a la ventana */
+static void presentar(void)
+{
+    SDL_UpdateTexture(textura, NULL, marco, PANTALLA_ANCHO * sizeof(uint16_t));
+    SDL_RenderClear(renderizador);
+    SDL_RenderCopy(renderizador, textura, NULL, NULL);
+    SDL_RenderPresent(renderizador);
+}
+
 /* LVGL nos entrega un trozo de pantalla ya dibujado */
 static void volcar_pantalla(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color)
 {
@@ -43,12 +52,20 @@ static void volcar_pantalla(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_
 
     /* Cuando llega el último trozo del fotograma, se muestra en la ventana */
     if (lv_disp_flush_is_last(drv)) {
-        SDL_UpdateTexture(textura, NULL, marco, PANTALLA_ANCHO * sizeof(uint16_t));
-        SDL_RenderClear(renderizador);
-        SDL_RenderCopy(renderizador, textura, NULL, NULL);
-        SDL_RenderPresent(renderizador);
+        presentar();
     }
     lv_disp_flush_ready(drv);
+}
+
+void hal_brillo(uint8_t porcentaje)
+{
+    /* Se simula oscureciendo la imagen; en la placa será la retroiluminación */
+    if (porcentaje > 100) {
+        porcentaje = 100;
+    }
+    uint8_t factor = (uint8_t)(porcentaje * 255 / 100);
+    SDL_SetTextureColorMod(textura, factor, factor, factor);
+    presentar();
 }
 
 /* LVGL pregunta dónde está el dedo */

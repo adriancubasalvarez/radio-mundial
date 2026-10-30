@@ -19,6 +19,7 @@ typedef enum {
     PANT_PAISES,
     PANT_EMISORAS,
     PANT_SONANDO,
+    PANT_FAVORITOS,
 } Pantalla;
 
 /* Lo elegido hasta ahora en el recorrido */
@@ -29,7 +30,7 @@ typedef struct {
     Emisora emisora;      /* emisora elegida en la lista */
     Emisora sonando;      /* emisora que está sonando (puede ser otra) */
     bool hay_sonando;     /* true si deberíamos estar oyendo "sonando" */
-    uint8_t volumen;      /* 0..100 */
+    bool aleatoria;       /* «Reproduciendo» en modo emisora aleatoria */
 } EstadoNav;
 
 extern EstadoNav nav;
@@ -46,3 +47,7 @@ lv_obj_t *pantalla_region(void);
 lv_obj_t *pantalla_paises(void);
 lv_obj_t *pantalla_emisoras(void);
 lv_obj_t *pantalla_sonando(void);
+lv_obj_t *pantalla_favoritos(void);
+
+/* Pone a sonar nav.emisora (de nav.pais) y la recuerda como última */
+void nav_reproducir(void);
