@@ -159,6 +159,33 @@ static void atender_improv(void)
     }
 }
 
+/* ---------- Conexión a la WiFi guardada ----------
+ * Primero sin PMF (Protected Management Frames). Con PMF, si la radio se
+ * reinicia (p. ej. al desenchufarla), muchos routers creen que la conexión
+ * anterior sigue viva y la rechazan durante minutos («Association refused
+ * temporarily, comeback time ...»). Sin PMF aceptan al momento. Si así no
+ * conecta (redes WPA3 puras, que exigen PMF), se reintenta con PMF. */
+
+#define TIEMPO_SIN_PMF 15000   /* ms antes de reintentar con PMF */
+
+static bool con_pmf = false;
+
+static void conectar_guardada(bool pmf)
+{
+    wifi_config_t config;
+    if (esp_wifi_get_config(WIFI_IF_STA, &config) == ESP_OK) {
+        config.sta.pmf_cfg.capable = pmf;
+        config.sta.pmf_cfg.required = false;
+        esp_wifi_set_config(WIFI_IF_STA, &config);
+    }
+    con_pmf = pmf;
+    WiFi.disconnect(false, false);  /* sin borrar la WiFi guardada */
+    esp_wifi_connect();
+    Serial.printf("Conectando a la WiFi guardada (%s PMF)...\n", pmf ? "con" : "sin");
+    estado = RED_CONECTANDO;
+    inicio_conexion = millis();
+}
+
 /* ---------- Llamadas desde main_esp32.cpp ---------- */
 
 void red_iniciar(void)
@@ -173,10 +200,7 @@ void red_iniciar(void)
     configTzTime(ZONA_HORARIA, "pool.ntp.org", "time.google.com");
 
     if (hay_wifi_guardada()) {
-        Serial.println("Conectando a la WiFi guardada...");
-        WiFi.begin();
-        estado = RED_CONECTANDO;
-        inicio_conexion = millis();
+        conectar_guardada(false);
     } else {
         Serial.println("No hay WiFi guardada");
         abrir_portal();
@@ -205,6 +229,9 @@ void red_atender(void)
         Serial.println("WiFi perdida: se reintenta sola");
         estado = RED_CONECTANDO;
         inicio_conexion = millis();
+    } else if (!conectada && estado == RED_CONECTANDO && !con_pmf &&
+               millis() - inicio_conexion > TIEMPO_SIN_PMF) {
+        conectar_guardada(true);  // quizá la red exige PMF (WPA3)
     } else if (!conectada && estado == RED_CONECTANDO && millis() - inicio_conexion > TIEMPO_CONEXION) {
         abrir_portal();  // no hay manera: que el usuario revise la WiFi
     }
@@ -234,8 +261,6 @@ void hal_red_cancelar(void)
     if (estado == RED_PORTAL) {
         gestor.stopConfigPortal();
         WiFi.mode(WIFI_STA);
-        WiFi.begin();
-        estado = RED_CONECTANDO;
-        inicio_conexion = millis();
+        conectar_guardada(false);
     }
 }

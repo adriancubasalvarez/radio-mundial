@@ -21,6 +21,11 @@
 /* Si no empieza a sonar en este tiempo, se da por fallida */
 #define TIEMPO_MAX_CONEXION 12000
 
+/* Tiempo máximo esperando a que conecte la WiFi antes de dar error */
+#define TIEMPO_ESPERA_WIFI 60000
+
+static bool esperando_wifi = false;
+
 /* Memoria interna mínima para crear el audio (búferes y decodificador) */
 #define MEMORIA_MINIMA_AUDIO (60 * 1024)
 
@@ -158,13 +163,34 @@ static void tarea_audio(void *parametro)
             inicio_conexion = millis();
             estado = AUDIO_CONECTANDO;
             if (WiFi.status() != WL_CONNECTED) {
-                Serial.println("[audio] sin WiFi");
-                estado = AUDIO_ERROR;
+                /* Aún no hay WiFi (p. ej. al reanudar justo tras encender):
+                 * se espera a que conecte en lugar de dar error */
+                Serial.println("[audio] esperando a la WiFi...");
+                esperando_wifi = true;
             } else if (audio->connecttohost(url)) {
                 amplificador(true);
             } else {
                 estado = AUDIO_ERROR;
             }
+        }
+
+        if (esperando_wifi) {
+            if (estado != AUDIO_CONECTANDO) {
+                esperando_wifi = false;  /* se paró o se pidió otra cosa */
+            } else if (WiFi.status() == WL_CONNECTED) {
+                esperando_wifi = false;
+                inicio_conexion = millis();
+                if (audio->connecttohost(url)) {
+                    amplificador(true);
+                } else {
+                    estado = AUDIO_ERROR;
+                }
+            } else if (millis() - inicio_conexion > TIEMPO_ESPERA_WIFI) {
+                esperando_wifi = false;
+                estado = AUDIO_ERROR;
+            }
+            vTaskDelay(pdMS_TO_TICKS(100));
+            continue;
         }
 
         if (estado == AUDIO_CONECTANDO || estado == AUDIO_SONANDO) {
