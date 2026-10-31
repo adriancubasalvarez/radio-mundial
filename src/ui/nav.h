@@ -20,6 +20,9 @@ typedef enum {
     PANT_EMISORAS,
     PANT_SONANDO,
     PANT_FAVORITOS,
+    PANT_BUSCAR,
+    PANT_GENERO,
+    PANT_MIS_EMISORAS,
 } Pantalla;
 
 /* Lo elegido hasta ahora en el recorrido */
@@ -31,6 +34,7 @@ typedef struct {
     Emisora sonando;      /* emisora que está sonando (puede ser otra) */
     bool hay_sonando;     /* true si deberíamos estar oyendo "sonando" */
     bool aleatoria;       /* «Reproduciendo» en modo emisora aleatoria */
+    int genero;           /* posición en GENEROS del género elegido */
 } EstadoNav;
 
 extern EstadoNav nav;
@@ -48,6 +52,12 @@ lv_obj_t *pantalla_paises(void);
 lv_obj_t *pantalla_emisoras(void);
 lv_obj_t *pantalla_sonando(void);
 lv_obj_t *pantalla_favoritos(void);
+lv_obj_t *pantalla_buscar(void);
+lv_obj_t *pantalla_genero(void);
+lv_obj_t *pantalla_mis_emisoras(void);
+
+/* Olvida la última búsqueda (al entrar en «Buscar» desde el mapamundi) */
+void buscar_desde_cero(void);
 
 /* Pone a sonar nav.emisora (de nav.pais) y la recuerda como última */
 void nav_reproducir(void);

@@ -136,6 +136,13 @@ static void al_pulsar_favoritos(lv_event_t *e)
     nav_ir(PANT_FAVORITOS);
 }
 
+static void al_pulsar_buscar(lv_event_t *e)
+{
+    (void)e;
+    buscar_desde_cero();
+    nav_ir(PANT_BUSCAR);
+}
+
 static void al_pulsar_aleatoria(lv_event_t *e)
 {
     (void)e;
@@ -161,6 +168,8 @@ lv_obj_t *pantalla_mundo(void)
     comun_boton_cabecera(cabecera, SIMBOLO_ALEATORIO, al_pulsar_aleatoria);
     lv_obj_t *favoritos = comun_boton_cabecera(cabecera, SIMBOLO_ESTRELLA, al_pulsar_favoritos);
     lv_obj_align(favoritos, LV_ALIGN_RIGHT_MID, -44, 0);
+    lv_obj_t *buscar = comun_boton_cabecera(cabecera, SIMBOLO_BUSCAR, al_pulsar_buscar);
+    lv_obj_align(buscar, LV_ALIGN_RIGHT_MID, -88, 0);
 
     /* El pie se crea antes que el mapa por si falta el mapa */
     etiqueta_pie = lv_label_create(pantalla);

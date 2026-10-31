@@ -41,8 +41,8 @@ RANGO_SIMBOLOS = (
     "61543,61544,61550,61552,61553,61556,61559,61560,61561,61563,61587,61589,"
     "61636,61637,61639,61641,61664,61671,61674,61683,61724,61732,61787,61931,"
     "62016,62017,62018,62019,62020,62087,62099,62212,62189,62810,63426,63650"
-    # Símbolos propios de Radio Mundial: estrella (favoritos) y aleatorio
-    ",0xF005,0xF074"
+    # Símbolos propios de Radio Mundial: estrella (favoritos), aleatorio y lupa
+    ",0xF005,0xF074,0xF002"
 )
 
 # Fuente grande solo con dígitos y dos puntos para el reloj del reposo

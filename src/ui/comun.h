@@ -19,6 +19,7 @@
 /* Símbolos propios añadidos a nuestras fuentes (tools/build_fonts.py) */
 #define SIMBOLO_ESTRELLA  "\xEF\x80\x85" /* U+F005 */
 #define SIMBOLO_ALEATORIO "\xEF\x81\xB4" /* U+F074 */
+#define SIMBOLO_BUSCAR    "\xEF\x80\x82" /* U+F002 */
 
 /* Copia un texto UTF-8 cambiando por '?' los caracteres que no tienen
  * nuestras fuentes (fuera de ASCII y Latin-1), p. ej. títulos en otros

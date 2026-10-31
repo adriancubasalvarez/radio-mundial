@@ -1,0 +1,7 @@
+# Mis emisoras - Radio Mundial
+# Copia este archivo a la raíz de la tarjeta microSD de la radio.
+# Una emisora por línea:  nombre;url
+# La URL debe ser un stream directo MP3 o AAC (no listas .m3u/.pls ni HLS .m3u8).
+# Las líneas que empiezan por # se ignoran.
+Radio Paradise;http://stream.radioparadise.com/mp3-128
+Cadena SER España;http://playerservices.streamtheworld.com/api/livestream-redirect/CADENASER.mp3

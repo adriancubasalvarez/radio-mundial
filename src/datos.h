@@ -76,3 +76,46 @@ void datos_liberar_emisoras(ListaEmisoras *lista);
 /* Elige una emisora al azar: primero un país al azar entre los que tienen
  * emisoras y luego una emisora al azar de ese país. */
 bool datos_emisora_aleatoria(Emisora *emisora, Pais *pais);
+
+/* Busca el nombre de un país por su código ISO */
+bool datos_buscar_pais(const char *codigo, Pais *pais);
+
+/* ---------- Búsqueda y géneros (buscar.txt) ---------- */
+
+typedef struct {
+    char letra;          /* la misma letra que GENEROS en build_stations.py */
+    const char *nombre;
+} Genero;
+
+extern const Genero GENEROS[];
+extern const int NUM_GENEROS;
+
+#define MAX_RESULTADOS 40
+
+typedef struct {
+    char codigo[3];      /* país */
+    uint16_t posicion;   /* posición de la emisora en emisoras/<codigo>.json */
+    char nombre[64];
+} Resultado;
+
+/* Busca emisoras por nombre y/o género, de la más popular a la menos.
+ * texto: palabras tecleadas (todas deben aparecer en el nombre; mayúsculas
+ * y tildes dan igual); "" para no filtrar por nombre.
+ * genero: letra de GENEROS, o 0 para no filtrar por género.
+ * Devuelve cuántos resultados ha escrito (como mucho max). */
+int datos_buscar(const char *texto, char genero, Resultado *resultados, int max);
+
+/* Carga la emisora completa de un resultado de búsqueda */
+bool datos_emisora_de_resultado(const Resultado *resultado, Emisora *emisora, Pais *pais);
+
+/* ---------- Emisoras propias en la tarjeta SD ----------
+ * Archivo mis_emisoras.csv en la raíz de la SD, una emisora por línea:
+ *     nombre;url
+ * Las líneas vacías y las que empiezan por # se ignoran. */
+#define ARCHIVO_MIS_EMISORAS "mis_emisoras.csv"
+
+/* true si hay tarjeta con mis_emisoras.csv */
+bool datos_hay_mis_emisoras(void);
+
+/* Lee mis_emisoras.csv. Devuelve false si no hay tarjeta o archivo. */
+bool datos_cargar_mis_emisoras(ListaEmisoras *lista);

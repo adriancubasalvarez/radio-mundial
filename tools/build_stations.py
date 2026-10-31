@@ -6,6 +6,8 @@ las filtra para que las pueda reproducir el ESP32 y genera:
 
   data/emisoras/XX.json      emisoras de cada país (XX = código ISO del país)
   data/emisoras/indice.json  número de emisoras de cada país
+  data/buscar.txt            índice de búsqueda: una emisora por línea con
+                             país, posición, géneros y nombre (ver más abajo)
 
 Filtros: códec MP3, AAC o AAC+; bitrate <= 192 kbps (o desconocido);
 última comprobación de radio-browser correcta; sin HLS ni listas de
@@ -21,6 +23,9 @@ Uso:
                                               ffprobe y descarta las que no
                                               responden (tarda 10-20 minutos)
   python tools/build_stations.py --max 20     otro límite por país
+  python tools/build_stations.py --destino sd --max 100 --probar
+                                              base grande para la tarjeta SD
+                                              (se guarda en sd/radio/)
 """
 
 import argparse
@@ -44,7 +49,8 @@ from anyascii import anyascii
 RAIZ = Path(__file__).resolve().parent.parent
 CACHE = RAIZ / "tools" / "cache"
 DATA = RAIZ / "data"
-SALIDA = DATA / "emisoras"
+# Destinos posibles: memoria interna (data/) o tarjeta SD (sd/radio/)
+DESTINOS = {"data": DATA, "sd": RAIZ / "sd" / "radio"}
 
 ARCHIVO_BASE = CACHE / "radio-browser.json"
 ARCHIVO_PRUEBAS = CACHE / "pruebas_emisoras.json"
@@ -64,6 +70,29 @@ SEGUNDOS_PRUEBA = 15
 
 # Extensiones de listas de reproducción (no son audio directo)
 LISTAS = re.compile(r"\.(m3u8?|pls|asx|xspf)(\?|$)", re.IGNORECASE)
+
+# Géneros: letra que se guarda en buscar.txt y palabras de las etiquetas de
+# radio-browser que los identifican (se busca la palabra dentro de cada
+# etiqueta). La misma tabla de letras está en src/datos.cpp: si se cambia
+# aquí, hay que cambiarla allí.
+GENEROS = {
+    "p": ["pop", "top 40", "top40", "hits", "chart", "adult contemporary"],
+    "r": ["rock", "metal", "punk", "alternative", "indie", "grunge"],
+    "n": ["news", "talk", "noticias", "informaci", "politic", "public radio"],
+    "d": ["sport", "deporte", "football", "futbol", "fútbol"],
+    "j": ["jazz", "blues", "soul", "swing"],
+    "c": ["classical", "clasica", "clásica", "opera", "baroque", "orchestra", "symphon"],
+    "e": ["electronic", "dance", "house", "techno", "trance", "edm", "electro", "club",
+          "dubstep", "drum and bass"],
+    "l": ["latin", "salsa", "reggaeton", "bachata", "cumbia", "merengue", "tropical",
+          "ranchera", "regional mexican", "banda"],
+    "h": ["hip hop", "hip-hop", "hiphop", "rap", "r&b", "rnb", "urban"],
+    "o": ["oldies", "60s", "70s", "80s", "90s", "classic hits", "retro", "decades"],
+    "f": ["christian", "religio", "gospel", "catholic", "católic", "islam", "quran",
+          "church", "worship"],
+    "t": ["folk", "traditional", "world", "ethnic", "country"],
+    "a": ["chill", "lounge", "ambient", "relax", "easy listening", "smooth"],
+}
 
 
 # ---------------------------------------------------------------------------
@@ -170,7 +199,23 @@ def candidata(e):
     # Nombres en árabe o hebreo transliterados se leen mal: mejor otras primero
     if any(es_abyad(c) for c in original):
         puntos *= 0.3
-    return {"pais": codigo, "puntos": puntos, "n": nombre, "u": url, "c": codec, "b": bitrate}
+    return {"pais": codigo, "puntos": puntos, "n": nombre, "u": url, "c": codec, "b": bitrate,
+            "g": generos(e.get("tags") or "")}
+
+
+def generos(etiquetas):
+    """Letras de los géneros (ver GENEROS) a partir de las etiquetas de
+    radio-browser, separadas por comas. Ej.: "pop,dance,80s" -> "peo"."""
+    lista = [t.strip().lower() for t in etiquetas.split(",") if t.strip()]
+    return "".join(letra for letra, palabras in GENEROS.items()
+                   if any(p in t for t in lista for p in palabras))
+
+
+def clave_busqueda(nombre):
+    """Nombre preparado para buscar: minúsculas, sin tildes y solo letras,
+    números y espacios. El firmware compara con el texto tecleado así."""
+    base = unicodedata.normalize("NFD", nombre).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]", " ", base)).strip()
 
 
 def agrupar_por_pais(emisoras):
@@ -265,31 +310,50 @@ def paises_del_mapa():
     return {p["codigo"]: p["nombre"] for r in indice["regiones"] for p in r["paises"]}
 
 
-def guardar(por_pais, maximo):
-    SALIDA.mkdir(parents=True, exist_ok=True)
-    for viejo in SALIDA.glob("*.json"):
+def guardar(por_pais, maximo, destino):
+    salida = destino / "emisoras"
+    salida.mkdir(parents=True, exist_ok=True)
+    for viejo in salida.glob("*.json"):
         viejo.unlink()
 
     mapa = paises_del_mapa()
     conteo = {}
     total_bytes = 0
+    buscar = []  # (puntos, línea) de todas las emisoras guardadas
     for codigo in sorted(por_pais):
         if codigo not in mapa:
             continue  # país que no sale en nuestros mapas
-        lista = [{k: c[k] for k in ("n", "u", "c", "b")} for c in por_pais[codigo][:maximo]]
-        if not lista:
+        elegidas = por_pais[codigo][:maximo]
+        if not elegidas:
             continue
+        lista = [{k: c[k] for k in ("n", "u", "c", "b")} for c in elegidas]
         # Una emisora por línea: compacto y fácil de revisar a mano
         texto = "[" + ",\n ".join(json.dumps(e, ensure_ascii=False, separators=(",", ":")) for e in lista) + "]"
-        (SALIDA / f"{codigo}.json").write_text(texto, encoding="utf-8")
+        (salida / f"{codigo}.json").write_text(texto, encoding="utf-8")
         conteo[codigo] = len(lista)
         total_bytes += len(texto.encode("utf-8"))
+        for i, c in enumerate(elegidas):
+            buscar.append((c["puntos"], f"{codigo}\t{i}\t{c['g']}\t{clave_busqueda(c['n'])}\t{c['n']}"))
 
-    (SALIDA / "indice.json").write_text(json.dumps(conteo, separators=(",", ":")), encoding="utf-8")
+    (salida / "indice.json").write_text(json.dumps(conteo, separators=(",", ":")), encoding="utf-8")
+
+    # Índice de búsqueda, de la más popular del mundo a la menos: así los
+    # primeros resultados que encuentra el firmware son los más conocidos.
+    # Formato de cada línea (separada por tabuladores):
+    #   país  posición-en-XX.json  géneros  nombre-para-buscar  nombre
+    buscar.sort(key=lambda b: -b[0])
+    texto_buscar = "\n".join(linea for _, linea in buscar) + "\n"
+    (destino / "buscar.txt").write_text(texto_buscar, encoding="utf-8")
 
     sin = sorted(nombre for codigo, nombre in mapa.items() if codigo not in conteo)
-    print(f"\nPaíses con emisoras: {len(conteo)} de {len(mapa)}")
+    con_genero = sum(1 for _, l in buscar if l.split("\t")[2])
+    print(f"\nDestino: {destino}")
+    print(f"Países con emisoras: {len(conteo)} de {len(mapa)}")
     print(f"Emisoras guardadas: {sum(conteo.values())}  ({total_bytes / 1024:.0f} KB)")
+    print(f"Índice de búsqueda: {len(texto_buscar.encode('utf-8')) / 1024:.0f} KB, "
+          f"{con_genero} emisoras con algún género")
+    for letra in GENEROS:
+        print(f"  género {letra}: {sum(1 for _, l in buscar if letra in l.split(chr(9))[2])}")
     print(f"Países sin emisoras ({len(sin)}): {', '.join(sin)}")
 
 
@@ -298,6 +362,8 @@ def main():
     parser.add_argument("--probar", action="store_true", help="probar cada emisora con ffprobe")
     parser.add_argument("--max", type=int, default=MAX_POR_PAIS, help="máximo de emisoras por país")
     parser.add_argument("--descargar", action="store_true", help="descargar la base aunque haya caché")
+    parser.add_argument("--destino", choices=DESTINOS, default="data",
+                        help="data = memoria interna (por defecto); sd = tarjeta SD (sd/radio/)")
     args = parser.parse_args()
 
     emisoras = descargar_base(args.descargar)
@@ -309,7 +375,7 @@ def main():
     if args.probar:
         por_pais = filtrar_probando(por_pais, args.max)
 
-    guardar(por_pais, args.max)
+    guardar(por_pais, args.max, DESTINOS[args.destino])
 
 
 if __name__ == "__main__":

@@ -8,6 +8,11 @@
 
 Ajustes ajustes;
 
+/* Copia de seguridad en la raíz de la tarjeta SD (si hay tarjeta). Sirve
+ * para no perder favoritos al reflashear la placa o para pasarlos a otra
+ * radio: si la memoria interna está vacía, se recupera de aquí. */
+#define COPIA_SD "radio_mundial_ajustes.json"
+
 static void copiar(char *destino, size_t tam, JsonVariantConst origen)
 {
     const char *texto = origen | "";
@@ -53,6 +58,12 @@ void ajustes_cargar(void)
     ajustes.reanudar = true;
 
     char *texto = hal_ajustes_leer();
+    bool de_la_sd = false;
+    if (texto == NULL) {
+        size_t tam = 0;
+        texto = (char *)hal_sd_leer(COPIA_SD, &tam);
+        de_la_sd = texto != NULL;
+    }
     if (texto == NULL) {
         return;
     }
@@ -76,6 +87,11 @@ void ajustes_cargar(void)
             break;
         }
         de_json(f, &ajustes.favoritos[ajustes.num_favoritos++]);
+    }
+
+    if (de_la_sd) {
+        printf("Ajustes recuperados de la tarjeta SD (%d favoritos)\n", ajustes.num_favoritos);
+        ajustes_guardar(); /* pasarlos también a la memoria interna */
     }
 }
 
@@ -102,6 +118,7 @@ void ajustes_guardar(void)
     if (!hal_ajustes_guardar(texto)) {
         fprintf(stderr, "No se pudieron guardar los ajustes\n");
     }
+    hal_sd_escribir(COPIA_SD, texto); /* copia en la SD; si no hay tarjeta no hace nada */
     free(texto);
 }
 

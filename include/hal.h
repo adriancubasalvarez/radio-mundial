@@ -47,11 +47,33 @@ char *hal_ajustes_leer(void);
 /* Guarda los ajustes (texto JSON) */
 bool hal_ajustes_guardar(const char *json);
 
-/* ---------- Archivos (carpeta data/) ---------- */
+/* ---------- Archivos de datos ----------
+ * Las rutas son relativas a la carpeta de datos (p. ej. "mapas/mundo.bin").
+ * Si hay tarjeta SD y el archivo existe en su carpeta radio/, se usa el de
+ * la SD (así una base de emisoras más grande en la SD manda); si no, el de
+ * la memoria interna (data/ en el PC, LittleFS en la placa). */
 
-/* Lee un archivo entero de data/ (p. ej. "mapas/mundo.bin") a memoria.
- * Devuelve NULL si no existe. El llamante libera el búfer con free(). */
+/* Lee un archivo entero a memoria. NULL si no existe. Liberar con free(). */
 uint8_t *hal_leer_archivo(const char *ruta, size_t *tam);
+
+/* Lectura línea a línea, para archivos grandes como buscar.txt */
+typedef struct HalArchivo HalArchivo;
+HalArchivo *hal_archivo_abrir(const char *ruta);
+/* Lee la siguiente línea sin el salto final; false al llegar al final */
+bool hal_archivo_linea(HalArchivo *archivo, char *linea, size_t tam);
+void hal_archivo_cerrar(HalArchivo *archivo);
+
+/* ---------- Tarjeta SD (opcional) ----------
+ * Rutas relativas a la raíz de la tarjeta. */
+
+/* true si hay tarjeta SD montada */
+bool hal_sd_presente(void);
+
+/* Lee un archivo de la SD. NULL si no hay tarjeta o no existe. Liberar con free(). */
+uint8_t *hal_sd_leer(const char *ruta, size_t *tam);
+
+/* Escribe (sustituye) un archivo de texto en la SD */
+bool hal_sd_escribir(const char *ruta, const char *texto);
 
 /* ---------- Audio ---------- */
 

@@ -12,5 +12,8 @@ tools/cache/
 # Ajustes del simulador (volumen, favoritos...): son de cada usuario
 ajustes.json
 
+# «Tarjeta SD» del simulador (se genera con build_stations.py --destino sd)
+sd/
+
 # Previsualizaciones de los mapas y el logo (se regeneran con los scripts)
 tools/preview/

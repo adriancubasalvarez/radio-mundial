@@ -85,8 +85,8 @@ lv_obj_t *comun_cabecera(lv_obj_t *pantalla, const char *texto, bool con_atras, 
             lv_obj_align(img, LV_ALIGN_LEFT_MID, 6, 0);
             x_titulo = 6 + mini->header.w + 6;
         }
-        /* Hueco a la derecha para dos botones de cabecera */
-        lv_obj_set_width(etiqueta, PANTALLA_ANCHO - x_titulo - 2 * 44);
+        /* Hueco a la derecha para tres botones de cabecera */
+        lv_obj_set_width(etiqueta, PANTALLA_ANCHO - x_titulo - 3 * 44);
         lv_obj_align(etiqueta, LV_ALIGN_LEFT_MID, x_titulo, 0);
     }
 
