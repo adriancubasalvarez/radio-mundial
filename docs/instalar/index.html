@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instalar Radio Mundial</title>
+<meta name="description" content="Instala Radio Mundial en tu placa ESP32 desde el navegador, sin programas.">
+<!-- ESP Web Tools (Apache-2.0): instala el firmware por USB desde el navegador -->
+<script type="module" src="https://unpkg.com/esp-web-tools@10.4.0/dist/web/install-button.js?module"></script>
+<style>
+  :root {
+    --fondo: #0B1D33;
+    --tarjeta: #12304F;
+    --linea: #1E3A5C;
+    --acento: #FFC845;
+    --texto: #FFFFFF;
+    --suave: #9FB3C8;
+    --error: #FF7A6B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 48px; }
+  header { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+  header svg { flex: none; }
+  h1 { margin: 0; font-size: 2rem; color: var(--acento); letter-spacing: .01em; }
+  .lema { margin: 4px 0 28px; color: var(--suave); }
+  h2 { font-size: 1.15rem; margin: 32px 0 12px; }
+  .paso { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+          border-radius: 50%; background: var(--acento); color: var(--fondo); font-weight: 700; margin-right: 8px; }
+  .placas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .placa { background: var(--tarjeta); border: 2px solid var(--linea); border-radius: 12px; padding: 16px;
+           cursor: pointer; text-align: left; color: inherit; font: inherit; }
+  .placa:hover:not(:disabled) { border-color: var(--suave); }
+  .placa[aria-pressed="true"] { border-color: var(--acento); }
+  .placa:disabled { opacity: .5; cursor: not-allowed; }
+  .placa strong { display: block; font-size: 1.05rem; }
+  .placa span { color: var(--suave); font-size: .9rem; }
+  .etiqueta { display: inline-block; margin-top: 8px; padding: 2px 8px; border-radius: 6px; font-size: .8rem;
+              background: var(--linea); color: var(--suave); }
+  .instalar { background: var(--tarjeta); border-radius: 12px; padding: 20px; margin-top: 12px; }
+  esp-web-install-button button[slot="activate"] {
+    background: var(--acento); color: var(--fondo); border: 0; border-radius: 10px;
+    padding: 14px 28px; font: 700 1.05rem system-ui, sans-serif; cursor: pointer;
+  }
+  esp-web-install-button button[slot="activate"]:hover { filter: brightness(1.08); }
+  .aviso { color: var(--error); }
+  ol, ul { padding-left: 1.3em; }
+  li { margin: 6px 0; }
+  a { color: var(--acento); }
+  code { background: var(--linea); padding: 1px 6px; border-radius: 4px; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--linea); color: var(--suave); font-size: .9rem; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <!-- Logo: globo con ondas de radio -->
+    <svg width="56" height="56" viewBox="0 0 64 64" aria-hidden="true">
+      <g fill="none" stroke="#FFC845" stroke-width="2.5" stroke-linecap="round">
+        <path d="M10 22a26 26 0 0 0 0 20M5 17a33 33 0 0 0 0 30M54 22a26 26 0 0 1 0 20M59 17a33 33 0 0 1 0 30"/>
+      </g>
+      <circle cx="32" cy="32" r="18" fill="#2F6FA8" stroke="#FFC845" stroke-width="2.5"/>
+      <g fill="none" stroke="#FFC845" stroke-width="1.6">
+        <ellipse cx="32" cy="32" rx="8" ry="18"/><path d="M32 14v36M14 32h36M17 23h30M17 41h30"/>
+      </g>
+    </svg>
+    <div>
+      <h1>Radio Mundial</h1>
+    </div>
+  </header>
+  <p class="lema">Radio por Internet con mapamundi táctil. Instálala en tu placa desde aquí: sin programas, solo con el navegador y un cable USB.</p>
+
+  <h2><span class="paso">1</span>Elige tu placa</h2>
+  <div class="placas" role="group" aria-label="Placa">
+    <button class="placa" data-placa="cyd" aria-pressed="true">
+      <strong>CYD 2,8" Freenove FNK0114F</strong>
+      <span>ESP32, pantalla táctil resistiva</span><br>
+      <span class="etiqueta">En pruebas</span>
+    </button>
+    <button class="placa" data-placa="fnk0104" disabled>
+      <strong>Freenove FNK0104</strong>
+      <span>ESP32-S3, táctil capacitivo y audio</span><br>
+      <span class="etiqueta">Próximamente</span>
+    </button>
+  </div>
+
+  <h2><span class="paso">2</span>Conecta e instala</h2>
+  <div class="instalar">
+    <ol>
+      <li>Conecta la placa al ordenador con un <strong>cable USB de datos</strong> (algunos cables solo cargan).</li>
+      <li>Pulsa <strong>Instalar</strong>, elige el puerto de la placa en la ventana del navegador y confirma.</li>
+      <li>Espera a que termine (1–2 minutos). No desconectes la placa.</li>
+    </ol>
+    <esp-web-install-button id="instalador" manifest="manifest-cyd.json">
+      <button slot="activate">Instalar Radio Mundial</button>
+      <span slot="unsupported" class="aviso">Tu navegador no puede instalar: usa <strong>Chrome</strong> o <strong>Edge</strong> en un ordenador (no en el móvil).</span>
+      <span slot="not-allowed" class="aviso">La instalación necesita una página segura (https).</span>
+    </esp-web-install-button>
+  </div>
+
+  <h2><span class="paso">3</span>Conéctala a tu WiFi</h2>
+  <ul>
+    <li><strong>Al terminar la instalación</strong>, la misma ventana te ofrecerá conectar la radio a tu WiFi: elige tu red y escribe la contraseña.</li>
+    <li><strong>O desde el móvil</strong>: si la radio no tiene WiFi, en su pantalla verás «Conecta la radio a tu WiFi» y un código QR. Únete con el móvil a la red <code>RadioMundial-XXXX</code>, se abrirá una página para elegir tu WiFi.</li>
+    <li>Para cambiar de WiFi más adelante: mantén pulsado <strong>2 segundos</strong> el título «Radio Mundial» en la pantalla.</li>
+  </ul>
+  <p>La WiFi debe ser de <strong>2,4 GHz</strong> (las placas ESP32 no usan 5 GHz).</p>
+
+  <h2>¿No aparece la placa en la lista?</h2>
+  <ul>
+    <li>Prueba con otro cable USB o con otro puerto del ordenador.</li>
+    <li>La CYD usa el chip USB <strong>CH340</strong>: en Windows y macOS puede hacer falta instalar su <a href="https://www.wch-ic.com/downloads/CH341SER_EXE.html" rel="noopener">driver oficial</a>.</li>
+    <li>Si sigue sin aparecer: mantén pulsado el botón <strong>BOOT</strong> de la placa mientras la conectas.</li>
+  </ul>
+
+  <footer>
+    Un proyecto de <strong>@Adriancubas1980</strong> ·
+    <a href="https://www.youtube.com/@Adriancubas1980" rel="noopener">YouTube</a> ·
+    <a href="https://github.com/adriancubasalvarez/radio-mundial" rel="noopener">Código en GitHub</a><br>
+    Código GPL-3.0 · Contenido CC BY-NC-SA 4.0 · Emisoras de <a href="https://www.radio-browser.info/" rel="noopener">radio-browser.info</a> · Mapas de Natural Earth
+  </footer>
+</main>
+<script>
+  // Cambiar de placa: cada una tiene su manifest (manifest-<placa>.json)
+  const instalador = document.getElementById("instalador");
+  document.querySelectorAll(".placa").forEach((boton) => {
+    boton.addEventListener("click", () => {
+      if (boton.disabled) return;
+      document.querySelectorAll(".placa").forEach((b) => b.setAttribute("aria-pressed", b === boton));
+      instalador.setAttribute("manifest", `manifest-${boton.dataset.placa}.json`);
+    });
+  });
+</script>
+</body>
+</html>

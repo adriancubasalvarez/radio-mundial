@@ -1,0 +1,17 @@
+{
+  "name": "Radio Mundial",
+  "version": "0.1",
+  "new_install_prompt_erase": true,
+  "new_install_improv_wait_time": 15,
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        {
+          "path": "firmware/radio-mundial-cyd.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
