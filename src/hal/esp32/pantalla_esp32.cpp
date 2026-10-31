@@ -57,8 +57,11 @@ public:
 static Pantalla lcd;
 static uint32_t ultimo_tick;
 
-/* Búfer de dibujo de LVGL: 20 líneas (12,8 KB), en RAM interna */
+/* Búfer de dibujo de LVGL en RAM interna; cada línea son 640 bytes. La
+ * placa puede fijar otro valor en platformio.ini. */
+#ifndef LINEAS_BUFER
 #define LINEAS_BUFER 20
+#endif
 static lv_color_t bufer[PANTALLA_ANCHO * LINEAS_BUFER];
 
 static void volcar_pantalla(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color)

@@ -11,3 +11,6 @@ void ui_arranque(void);
 
 /* Activa la pantalla de reposo (reloj) tras un rato sin tocar la pantalla */
 void reposo_iniciar(void);
+
+/* Muestra la pantalla del portal WiFi cuando está abierto */
+void red_ui_iniciar(void);

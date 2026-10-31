@@ -12,10 +12,9 @@
 
 static ListaEmisoras emisoras;
 
-static void al_elegir(lv_event_t *e)
+static void al_elegir(uint16_t fila)
 {
-    uintptr_t i = (uintptr_t)lv_event_get_user_data(e);
-    nav.emisora = emisoras.emisoras[i];
+    nav.emisora = emisoras.emisoras[fila];
     nav.aleatoria = false;
     nav_ir(PANT_SONANDO);
 }
@@ -42,15 +41,14 @@ lv_obj_t *pantalla_emisoras(void)
         return pantalla;
     }
 
-    lv_obj_t *lista = comun_lista(pantalla);
-    for (uintptr_t i = 0; i < emisoras.num; i++) {
+    lv_obj_t *lista = comun_lista(pantalla, al_elegir);
+    for (uint16_t i = 0; i < emisoras.num; i++) {
         const Emisora *em = &emisoras.emisoras[i];
         /* Icono: altavoz si está sonando, estrella si es favorita, nota si no */
         bool suena = nav.hay_sonando && strcmp(nav.sonando.url, em->url) == 0;
         const char *icono = suena ? LV_SYMBOL_VOLUME_MAX
                           : ajustes_es_favorito(em->url) ? SIMBOLO_ESTRELLA : LV_SYMBOL_AUDIO;
-        lv_obj_t *elemento = comun_elemento_lista(lista, icono, em->nombre);
-        lv_obj_add_event_cb(elemento, al_elegir, LV_EVENT_CLICKED, (void *)i);
+        comun_lista_agregar(lista, icono, em->nombre, NULL, false);
     }
     return pantalla;
 }

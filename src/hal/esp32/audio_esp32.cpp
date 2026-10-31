@@ -21,6 +21,9 @@
 /* Si no empieza a sonar en este tiempo, se da por fallida */
 #define TIEMPO_MAX_CONEXION 12000
 
+/* Memoria interna mínima para crear el audio (búferes y decodificador) */
+#define MEMORIA_MINIMA_AUDIO (60 * 1024)
+
 static Audio *audio;
 static SemaphoreHandle_t cerrojo;
 
@@ -36,6 +39,16 @@ static volatile bool sonido_detectado = false;
 static volatile bool fin_de_stream = false;
 static uint32_t inicio_conexion;
 static char titulo[160];
+
+/* El cerrojo se crea en la primera llamada: la interfaz puede pedir cosas
+ * (p. ej. el volumen guardado) antes de que arranque la tarea de audio, y
+ * esas órdenes quedan pendientes hasta entonces. */
+static void preparar_cerrojo(void)
+{
+    if (cerrojo == NULL) {
+        cerrojo = xSemaphoreCreateMutex();
+    }
+}
 
 /* Volumen 0..100 de la interfaz -> 0..21 de la librería */
 static uint8_t a_volumen_libreria(uint8_t v)
@@ -61,6 +74,7 @@ void audio_info(const char *info)
 
 void audio_showstreamtitle(const char *texto)
 {
+    preparar_cerrojo();
     xSemaphoreTake(cerrojo, portMAX_DELAY);
     strncpy(titulo, texto, sizeof(titulo) - 1);
     titulo[sizeof(titulo) - 1] = '\0';
@@ -74,6 +88,33 @@ void audio_eof_stream(const char *info)
 }
 
 /* ---------- Tarea de audio (núcleo 0) ---------- */
+
+static uint8_t volumen_actual = 70;
+
+/* La librería se crea al pedir la primera emisora, no al arrancar: durante
+ * el arranque la pantalla de bienvenida (logo) ocupa memoria que luego se
+ * libera. Reserva 32 KB de búferes DMA para el I2S y, al conectar, unos
+ * 30 KB más para el decodificador; si no hay memoria, se avisa en vez de
+ * colgarse. */
+static bool crear_libreria(void)
+{
+    if (audio != NULL) {
+        return true;
+    }
+    size_t dma_libre = heap_caps_get_free_size(MALLOC_CAP_DMA);
+    if (dma_libre < MEMORIA_MINIMA_AUDIO) {
+        Serial.printf("[audio] NO HAY MEMORIA: quedan %u bytes de memoria DMA (hacen falta %u)\n",
+                      (unsigned)dma_libre, (unsigned)MEMORIA_MINIMA_AUDIO);
+        return false;
+    }
+    /* true: DAC interno; I2S_DAC_CHANNEL_LEFT_EN: solo el GPIO26 */
+    audio = new Audio(true, I2S_DAC_CHANNEL_LEFT_EN);
+    audio->setVolume(a_volumen_libreria(volumen_actual));
+    audio->setConnectionTimeout(5000, 8000);
+    Serial.printf("[audio] librería creada; memoria DMA libre %u\n",
+                  (unsigned)heap_caps_get_free_size(MALLOC_CAP_DMA));
+    return true;
+}
 
 static void tarea_audio(void *parametro)
 {
@@ -95,12 +136,19 @@ static void tarea_audio(void *parametro)
         xSemaphoreGive(cerrojo);
 
         if (volumen >= 0) {
-            audio->setVolume(a_volumen_libreria(volumen));
+            volumen_actual = volumen;
+            if (audio != NULL) {
+                audio->setVolume(a_volumen_libreria(volumen));
+            }
         }
-        if (parar) {
+        if (parar && audio != NULL) {
             audio->stopSong();
             amplificador(false);
             estado = AUDIO_PARADO;
+        }
+        if (conectar && !crear_libreria()) {
+            estado = AUDIO_ERROR;  /* no hay memoria para el audio */
+            conectar = false;
         }
         if (conectar) {
             audio->stopSong();
@@ -143,11 +191,7 @@ void audio_iniciar(void)
 {
     pinMode(PIN_AUDIO_EN, OUTPUT);
     amplificador(false);
-    cerrojo = xSemaphoreCreateMutex();
-    /* true: DAC interno; I2S_DAC_CHANNEL_LEFT_EN: solo el GPIO26 */
-    audio = new Audio(true, I2S_DAC_CHANNEL_LEFT_EN);
-    audio->setVolume(a_volumen_libreria(70));
-    audio->setConnectionTimeout(5000, 8000);
+    preparar_cerrojo();
     xTaskCreatePinnedToCore(tarea_audio, "audio", 8192, NULL, 2, NULL, 0);
 }
 
@@ -155,6 +199,7 @@ void audio_iniciar(void)
 
 void audio_reproducir(const char *url)
 {
+    preparar_cerrojo();
     xSemaphoreTake(cerrojo, portMAX_DELAY);
     strncpy(url_pedida, url, sizeof(url_pedida) - 1);
     url_pedida[sizeof(url_pedida) - 1] = '\0';
@@ -167,6 +212,7 @@ void audio_reproducir(const char *url)
 
 void audio_parar(void)
 {
+    preparar_cerrojo();
     xSemaphoreTake(cerrojo, portMAX_DELAY);
     parar_pedido = true;
     hay_url_pedida = false;
@@ -181,6 +227,7 @@ EstadoAudio audio_estado(void)
 
 void audio_volumen(uint8_t volumen)
 {
+    preparar_cerrojo();
     xSemaphoreTake(cerrojo, portMAX_DELAY);
     volumen_pedido = volumen;
     xSemaphoreGive(cerrojo);
@@ -189,6 +236,7 @@ void audio_volumen(uint8_t volumen)
 const char *audio_titulo(void)
 {
     static char copia[160];
+    preparar_cerrojo();
     xSemaphoreTake(cerrojo, portMAX_DELAY);
     strcpy(copia, estado == AUDIO_SONANDO ? titulo : "");
     xSemaphoreGive(cerrojo);

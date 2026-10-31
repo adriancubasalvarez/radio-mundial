@@ -30,6 +30,8 @@ bool archivos_iniciar(void)
     if (!interna) {
         Serial.println("No se pudo montar LittleFS: ¿has subido los datos (uploadfs)?");
     }
+    Serial.printf("[memoria] tras LittleFS: libre %u, DMA libre %u\n", (unsigned)ESP.getFreeHeap(),
+                  (unsigned)heap_caps_get_free_size(MALLOC_CAP_DMA));
     bus_sd.begin(PIN_SD_SCK, PIN_SD_MISO, PIN_SD_MOSI, PIN_SD_CS);
     sd_montada = SD.begin(PIN_SD_CS, bus_sd, 20000000) && SD.cardType() != CARD_NONE;
     Serial.printf("Tarjeta SD: %s\n", sd_montada ? "sí" : "no");

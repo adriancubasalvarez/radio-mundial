@@ -12,10 +12,9 @@
 
 static ListaPaises paises;
 
-static void al_elegir(lv_event_t *e)
+static void al_elegir(uint16_t fila)
 {
-    uintptr_t i = (uintptr_t)lv_event_get_user_data(e);
-    nav.pais = paises.paises[i];
+    nav.pais = paises.paises[fila];
     nav_ir(PANT_EMISORAS);
 }
 
@@ -23,22 +22,14 @@ lv_obj_t *pantalla_paises(void)
 {
     lv_obj_t *pantalla = comun_pantalla();
     comun_cabecera(pantalla, nav.region.nombre, true, NULL);
-    lv_obj_t *lista = comun_lista(pantalla);
+    lv_obj_t *lista = comun_lista(pantalla, al_elegir);
 
     datos_cargar_paises(nav.region.id, &paises);
-    for (uintptr_t i = 0; i < paises.num; i++) {
+    for (uint8_t i = 0; i < paises.num; i++) {
         const Pais *pais = &paises.paises[i];
-        lv_obj_t *elemento = comun_elemento_lista(lista, NULL, pais->nombre);
-
         char cuenta[8];
         snprintf(cuenta, sizeof(cuenta), "%d", pais->emisoras);
-        comun_nota_elemento(elemento, cuenta);
-
-        if (pais->emisoras == 0) {
-            comun_apagar_elemento(elemento);
-        } else {
-            lv_obj_add_event_cb(elemento, al_elegir, LV_EVENT_CLICKED, (void *)i);
-        }
+        comun_lista_agregar(lista, NULL, pais->nombre, cuenta, pais->emisoras == 0);
     }
     return pantalla;
 }

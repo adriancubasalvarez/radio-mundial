@@ -10,10 +10,9 @@
 #include <lvgl.h>
 #include <string.h>
 
-static void al_elegir(lv_event_t *e)
+static void al_elegir(uint16_t fila)
 {
-    uintptr_t i = (uintptr_t)lv_event_get_user_data(e);
-    const EmisoraGuardada *f = &ajustes.favoritos[i];
+    const EmisoraGuardada *f = &ajustes.favoritos[fila];
     nav.emisora = f->emisora;
     memset(&nav.pais, 0, sizeof(nav.pais));
     strncpy(nav.pais.codigo, f->pais, sizeof(nav.pais.codigo) - 1);
@@ -37,14 +36,11 @@ lv_obj_t *pantalla_favoritos(void)
         return pantalla;
     }
 
-    lv_obj_t *lista = comun_lista(pantalla);
-    for (uintptr_t i = 0; i < ajustes.num_favoritos; i++) {
+    lv_obj_t *lista = comun_lista(pantalla, al_elegir);
+    for (uint8_t i = 0; i < ajustes.num_favoritos; i++) {
         const EmisoraGuardada *f = &ajustes.favoritos[i];
         bool suena = nav.hay_sonando && strcmp(nav.sonando.url, f->emisora.url) == 0;
-        lv_obj_t *elemento = comun_elemento_lista(lista, suena ? LV_SYMBOL_VOLUME_MAX : SIMBOLO_ESTRELLA,
-                                                  f->emisora.nombre);
-        comun_nota_elemento(elemento, f->pais);
-        lv_obj_add_event_cb(elemento, al_elegir, LV_EVENT_CLICKED, (void *)i);
+        comun_lista_agregar(lista, suena ? LV_SYMBOL_VOLUME_MAX : SIMBOLO_ESTRELLA, f->emisora.nombre, f->pais, false);
     }
     return pantalla;
 }

@@ -19,11 +19,9 @@
 #define ALTO_TECLADO 130
 #define ESPERA_BUSQUEDA 300  /* ms sin teclear antes de buscar */
 
-/* ---------- Resultados (común a «Buscar» y «Género») ---------- */
-
-static void al_elegir_resultado(lv_event_t *e)
+/* Abre «Reproduciendo» con la emisora de un resultado de búsqueda */
+static void abrir_resultado(const Resultado *r)
 {
-    const Resultado *r = (const Resultado *)lv_event_get_user_data(e);
     if (datos_emisora_de_resultado(r, &nav.emisora, &nav.pais)) {
         nav.aleatoria = false;
         nav_ir(PANT_SONANDO);
@@ -33,25 +31,29 @@ static void al_elegir_resultado(lv_event_t *e)
 static void llenar_resultados(lv_obj_t *lista, const Resultado *resultados, int num)
 {
     for (int i = 0; i < num; i++) {
-        lv_obj_t *el = comun_elemento_lista(lista, LV_SYMBOL_AUDIO, resultados[i].nombre);
-        comun_nota_elemento(el, resultados[i].codigo);
-        lv_obj_add_event_cb(el, al_elegir_resultado, LV_EVENT_CLICKED, (void *)&resultados[i]);
+        comun_lista_agregar(lista, LV_SYMBOL_AUDIO, resultados[i].nombre, resultados[i].codigo, false);
     }
 }
 
 /* ---------- Pantalla «Buscar» ---------- */
 
 static Resultado resultados_buscar[MAX_RESULTADOS];
+static int num_resultados;
 static char consulta[40];         /* se conserva al volver de «Reproduciendo» */
+static bool hay_mis_emisoras;     /* la primera fila de inicio es «Mis emisoras» */
+static bool mostrando_inicio;     /* la lista muestra géneros, no resultados */
+static bool teclado_visible;
+
+static lv_obj_t *pantalla_actual;
+static lv_obj_t *campo;
+static lv_obj_t *lista_buscar;
+static lv_obj_t *teclado;
+static lv_timer_t *temporizador;
 
 void buscar_desde_cero(void)
 {
     consulta[0] = '\0';
 }
-static lv_obj_t *campo;
-static lv_obj_t *lista_buscar;
-static lv_obj_t *teclado;
-static lv_timer_t *temporizador;
 
 /* Teclado propio: solo mayúsculas, números y espacio (lo que hace falta
  * para buscar), con teclas más grandes que el de serie. «1#» y «ABC» son
@@ -76,28 +78,52 @@ static const lv_btnmatrix_ctrl_t control_numeros[] = {
     1, 1, 1, 1, 1,
     LV_KEYBOARD_CTRL_BTN_FLAGS | 1, 2, LV_BTNMATRIX_CTRL_CHECKED | 1, LV_KEYBOARD_CTRL_BTN_FLAGS | 1};
 
-static void al_elegir_genero(lv_event_t *e)
+static void al_elegir_fila(uint16_t fila)
 {
-    nav.genero = (int)(uintptr_t)lv_event_get_user_data(e);
+    if (!mostrando_inicio) {
+        if (fila < num_resultados) {
+            abrir_resultado(&resultados_buscar[fila]);
+        }
+        return;
+    }
+    if (hay_mis_emisoras) {
+        if (fila == 0) {
+            nav_ir(PANT_MIS_EMISORAS);
+            return;
+        }
+        fila--;
+    }
+    nav.genero = fila;
     nav_ir(PANT_GENERO);
 }
 
-static void al_elegir_mis_emisoras(lv_event_t *e)
+static void ajustar_alto_lista(void)
 {
-    (void)e;
-    nav_ir(PANT_MIS_EMISORAS);
+    lv_obj_set_height(lista_buscar, PANTALLA_ALTO - ALTO_CABECERA - (teclado_visible ? ALTO_TECLADO : 0));
+}
+
+/* Crea la lista de nuevo (vacía) debajo del teclado */
+static void nueva_lista(void)
+{
+    if (lista_buscar != NULL) {
+        lv_obj_del(lista_buscar);
+    }
+    lista_buscar = comun_lista(pantalla_actual, al_elegir_fila);
+    lv_obj_move_background(lista_buscar);  /* el teclado queda por encima */
+    ajustar_alto_lista();
 }
 
 /* Sin texto: géneros y, si hay tarjeta con el archivo, «Mis emisoras» */
 static void mostrar_inicio(void)
 {
-    if (datos_hay_mis_emisoras()) {
-        lv_obj_t *el = comun_elemento_lista(lista_buscar, LV_SYMBOL_SD_CARD, "Mis emisoras (SD)");
-        lv_obj_add_event_cb(el, al_elegir_mis_emisoras, LV_EVENT_CLICKED, NULL);
+    nueva_lista();
+    mostrando_inicio = true;
+    hay_mis_emisoras = datos_hay_mis_emisoras();
+    if (hay_mis_emisoras) {
+        comun_lista_agregar(lista_buscar, LV_SYMBOL_SD_CARD, "Mis emisoras (SD)", NULL, false);
     }
     for (int i = 0; i < NUM_GENEROS; i++) {
-        lv_obj_t *el = comun_elemento_lista(lista_buscar, LV_SYMBOL_LIST, GENEROS[i].nombre);
-        lv_obj_add_event_cb(el, al_elegir_genero, LV_EVENT_CLICKED, (void *)(uintptr_t)i);
+        comun_lista_agregar(lista_buscar, LV_SYMBOL_LIST, GENEROS[i].nombre, NULL, false);
     }
 }
 
@@ -108,9 +134,6 @@ static void buscar_ahora(lv_timer_t *t)
     const char *texto = lv_textarea_get_text(campo);
     strncpy(consulta, texto, sizeof(consulta) - 1);
     consulta[sizeof(consulta) - 1] = '\0';
-
-    lv_obj_clean(lista_buscar);
-    lv_obj_scroll_to_y(lista_buscar, 0, LV_ANIM_OFF);
 
     /* ¿Hay algo más que espacios? */
     bool vacio = true;
@@ -123,14 +146,15 @@ static void buscar_ahora(lv_timer_t *t)
     }
 
     uint32_t inicio = hal_millis();
-    int num = datos_buscar(consulta, 0, resultados_buscar, MAX_RESULTADOS);
-    printf("[buscar] «%s»: %d resultados en %u ms\n", consulta, num, (unsigned)(hal_millis() - inicio));
-    if (num == 0) {
-        lv_obj_t *el = comun_elemento_lista(lista_buscar, NULL, "Sin resultados");
-        comun_apagar_elemento(el);
+    num_resultados = datos_buscar(consulta, 0, resultados_buscar, MAX_RESULTADOS);
+    printf("[buscar] «%s»: %d resultados en %u ms\n", consulta, num_resultados, (unsigned)(hal_millis() - inicio));
+    nueva_lista();
+    mostrando_inicio = false;
+    if (num_resultados == 0) {
+        comun_lista_agregar(lista_buscar, NULL, "Sin resultados", NULL, true);
         return;
     }
-    llenar_resultados(lista_buscar, resultados_buscar, num);
+    llenar_resultados(lista_buscar, resultados_buscar, num_resultados);
 }
 
 static void programar_busqueda(void)
@@ -145,13 +169,13 @@ static void programar_busqueda(void)
 
 static void mostrar_teclado(bool visible)
 {
+    teclado_visible = visible;
     if (visible) {
         lv_obj_clear_flag(teclado, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_set_height(lista_buscar, PANTALLA_ALTO - ALTO_CABECERA - ALTO_TECLADO);
     } else {
         lv_obj_add_flag(teclado, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_set_height(lista_buscar, PANTALLA_ALTO - ALTO_CABECERA);
     }
+    ajustar_alto_lista();
 }
 
 static void al_cambiar_campo(lv_event_t *e)
@@ -179,11 +203,14 @@ static void al_borrar_buscar(lv_event_t *e)
         lv_timer_del(temporizador);
         temporizador = NULL;
     }
+    lista_buscar = NULL;  /* se borra con la pantalla */
 }
 
 lv_obj_t *pantalla_buscar(void)
 {
     lv_obj_t *pantalla = comun_pantalla();
+    pantalla_actual = pantalla;
+    lista_buscar = NULL;
     lv_obj_add_event_cb(pantalla, al_borrar_buscar, LV_EVENT_DELETE, NULL);
 
     /* Cabecera con «Atrás» y el campo de búsqueda en lugar del título */
@@ -203,8 +230,6 @@ lv_obj_t *pantalla_buscar(void)
     lv_obj_set_style_bg_color(campo, lv_color_hex(COLOR_LINEA), 0);
     lv_obj_add_event_cb(campo, al_cambiar_campo, LV_EVENT_ALL, NULL);
 
-    lista_buscar = comun_lista(pantalla);
-
     teclado = lv_keyboard_create(pantalla);
     lv_obj_set_size(teclado, PANTALLA_ANCHO, ALTO_TECLADO);
     lv_obj_align(teclado, LV_ALIGN_BOTTOM_MID, 0, 0);
@@ -221,11 +246,13 @@ lv_obj_t *pantalla_buscar(void)
      * lista se ve entera; la primera vez se abre con el teclado a la vista */
     temporizador = NULL;
     if (consulta[0] != '\0') {
-        lv_textarea_set_text(campo, consulta);
-        mostrar_teclado(false);
+        teclado_visible = false;
+        lv_obj_add_flag(teclado, LV_OBJ_FLAG_HIDDEN);
+        lv_textarea_set_text(campo, consulta);  /* programa la búsqueda */
+        nueva_lista();
     } else {
+        teclado_visible = true;
         mostrar_inicio();
-        mostrar_teclado(true);
     }
     return pantalla;
 }
@@ -233,15 +260,23 @@ lv_obj_t *pantalla_buscar(void)
 /* ---------- Pantalla «Género» ---------- */
 
 static Resultado resultados_genero[MAX_RESULTADOS];
+static int num_genero;
+
+static void al_elegir_genero(uint16_t fila)
+{
+    if (fila < num_genero) {
+        abrir_resultado(&resultados_genero[fila]);
+    }
+}
 
 lv_obj_t *pantalla_genero(void)
 {
     lv_obj_t *pantalla = comun_pantalla();
     const Genero *g = &GENEROS[nav.genero];
     comun_cabecera(pantalla, g->nombre, true, NULL);
-    lv_obj_t *lista = comun_lista(pantalla);
-    int num = datos_buscar("", g->letra, resultados_genero, MAX_RESULTADOS);
-    llenar_resultados(lista, resultados_genero, num);
+    lv_obj_t *lista = comun_lista(pantalla, al_elegir_genero);
+    num_genero = datos_buscar("", g->letra, resultados_genero, MAX_RESULTADOS);
+    llenar_resultados(lista, resultados_genero, num_genero);
     return pantalla;
 }
 
@@ -249,10 +284,9 @@ lv_obj_t *pantalla_genero(void)
 
 static ListaEmisoras mis_emisoras;
 
-static void al_elegir_mia(lv_event_t *e)
+static void al_elegir_mia(uint16_t fila)
 {
-    uintptr_t i = (uintptr_t)lv_event_get_user_data(e);
-    nav.emisora = mis_emisoras.emisoras[i];
+    nav.emisora = mis_emisoras.emisoras[fila];
     memset(&nav.pais, 0, sizeof(nav.pais));
     strcpy(nav.pais.codigo, "SD");
     strcpy(nav.pais.nombre, "Mis emisoras");
@@ -280,10 +314,9 @@ lv_obj_t *pantalla_mis_emisoras(void)
         lv_obj_align(aviso, LV_ALIGN_CENTER, 0, ALTO_CABECERA / 2);
         return pantalla;
     }
-    lv_obj_t *lista = comun_lista(pantalla);
-    for (uintptr_t i = 0; i < mis_emisoras.num; i++) {
-        lv_obj_t *el = comun_elemento_lista(lista, LV_SYMBOL_SD_CARD, mis_emisoras.emisoras[i].nombre);
-        lv_obj_add_event_cb(el, al_elegir_mia, LV_EVENT_CLICKED, (void *)i);
+    lv_obj_t *lista = comun_lista(pantalla, al_elegir_mia);
+    for (uint16_t i = 0; i < mis_emisoras.num; i++) {
+        comun_lista_agregar(lista, LV_SYMBOL_SD_CARD, mis_emisoras.emisoras[i].nombre, NULL, false);
     }
     return pantalla;
 }

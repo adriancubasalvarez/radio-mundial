@@ -46,9 +46,15 @@ bool guion_atender(uint32_t ahora, int *x, int *y, bool *pulsado, bool *salir)
             archivo = NULL;
             return false;
         }
-        int a, b;
+        int a, b, c;
         char nombre[256];
-        if (sscanf(linea, "espera %d", &a) == 1) {
+        if (sscanf(linea, "mantener %d %d %d", &a, &b, &c) == 3) {
+            toque_x = a;
+            toque_y = b;
+            toque_hasta = ahora + c;
+            espera_hasta = toque_hasta + 50;
+            printf("[guion] mantener %d %d %d ms\n", a, b, c);
+        } else if (sscanf(linea, "espera %d", &a) == 1) {
             espera_hasta = ahora + a;
         } else if (sscanf(linea, "toca %d %d", &a, &b) == 2) {
             toque_x = a;

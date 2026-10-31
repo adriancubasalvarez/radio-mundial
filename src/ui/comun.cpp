@@ -103,12 +103,20 @@ lv_obj_t *comun_boton_cabecera(lv_obj_t *cabecera, const char *simbolo, lv_event
     return boton;
 }
 
-/* Estilos compartidos de las listas (se crean una sola vez) */
+/* ---------- Listas ----------
+ * Una lista es una tabla de LVGL (lv_table) de dos columnas: texto (con su
+ * icono) y una nota pequeña a la derecha. Toda la lista es UN objeto; con
+ * un botón por fila, 56 filas gastaban unos 60 KB de la memoria de LVGL,
+ * demasiado para una placa sin PSRAM. */
+
+#define ANCHO_NOTA 54
+#define ALTO_FILA_PAD 11   /* relleno arriba y abajo de cada fila (≈ 44 px de alto) */
+
+/* Filas apagadas: se marcan con este control de celda */
+#define FILA_APAGADA LV_TABLE_CELL_CTRL_CUSTOM_1
+
 static lv_style_t estilo_lista;
-static lv_style_t estilo_elemento;
-static lv_style_t estilo_elemento_pulsado;
-static lv_style_t estilo_nota;
-static lv_style_t estilo_apagado;
+static lv_style_t estilo_filas;
 
 static void iniciar_estilos(void)
 {
@@ -124,47 +132,99 @@ static void iniciar_estilos(void)
     lv_style_set_pad_all(&estilo_lista, 0);
     lv_style_set_bg_color(&estilo_lista, lv_color_hex(COLOR_FONDO));
 
-    /* Elementos: fondo de la aplicación, una línea fina debajo y el
-     * contenido centrado en vertical */
-    lv_style_init(&estilo_elemento);
-    lv_style_set_text_font(&estilo_elemento, &radio_20);
-    lv_style_set_min_height(&estilo_elemento, 44);
-    lv_style_set_bg_color(&estilo_elemento, lv_color_hex(COLOR_FONDO));
-    lv_style_set_border_side(&estilo_elemento, LV_BORDER_SIDE_BOTTOM);
-    lv_style_set_border_width(&estilo_elemento, 1);
-    lv_style_set_border_color(&estilo_elemento, lv_color_hex(COLOR_LINEA));
-    lv_style_set_pad_hor(&estilo_elemento, 12);
-    lv_style_set_flex_cross_place(&estilo_elemento, LV_FLEX_ALIGN_CENTER);
-    lv_style_set_flex_track_place(&estilo_elemento, LV_FLEX_ALIGN_CENTER);
-
-    lv_style_init(&estilo_elemento_pulsado);
-    lv_style_set_bg_color(&estilo_elemento_pulsado, lv_color_hex(COLOR_LINEA));
-
-    lv_style_init(&estilo_nota);
-    lv_style_set_text_font(&estilo_nota, &radio_14);
-    lv_style_set_text_color(&estilo_nota, lv_color_hex(COLOR_SECUNDARIO));
-
-    lv_style_init(&estilo_apagado);
-    lv_style_set_text_color(&estilo_apagado, lv_color_hex(COLOR_SECUNDARIO));
-    lv_style_set_text_opa(&estilo_apagado, LV_OPA_50);
+    /* Filas: fondo de la aplicación, letra grande y una línea fina debajo */
+    lv_style_init(&estilo_filas);
+    lv_style_set_bg_color(&estilo_filas, lv_color_hex(COLOR_FONDO));
+    lv_style_set_bg_opa(&estilo_filas, LV_OPA_COVER);
+    lv_style_set_text_font(&estilo_filas, &radio_20);
+    lv_style_set_text_color(&estilo_filas, lv_color_hex(COLOR_TEXTO));
+    lv_style_set_border_side(&estilo_filas, LV_BORDER_SIDE_BOTTOM);
+    lv_style_set_border_width(&estilo_filas, 1);
+    lv_style_set_border_color(&estilo_filas, lv_color_hex(COLOR_LINEA));
+    lv_style_set_pad_ver(&estilo_filas, ALTO_FILA_PAD);
+    lv_style_set_pad_left(&estilo_filas, 12);
+    lv_style_set_pad_right(&estilo_filas, 10);
 }
 
-lv_obj_t *comun_lista(lv_obj_t *pantalla)
+/* Al dibujar cada celda: la nota pequeña y a la derecha, las filas apagadas
+ * en gris y la fila que se está pulsando, resaltada */
+static void al_dibujar_celda(lv_event_t *e)
+{
+    lv_obj_t *tabla = lv_event_get_target(e);
+    lv_obj_draw_part_dsc_t *dsc = lv_event_get_draw_part_dsc(e);
+    if (dsc->part != LV_PART_ITEMS) {
+        return;
+    }
+    uint32_t fila = dsc->id / 2;
+    uint32_t columna = dsc->id % 2;
+
+    if (columna == 1 && dsc->label_dsc != NULL) {
+        dsc->label_dsc->font = &radio_14;
+        dsc->label_dsc->color = lv_color_hex(COLOR_SECUNDARIO);
+        dsc->label_dsc->align = LV_TEXT_ALIGN_RIGHT;
+    }
+    if (lv_table_has_cell_ctrl(tabla, fila, 0, FILA_APAGADA) && dsc->label_dsc != NULL) {
+        dsc->label_dsc->color = lv_color_hex(COLOR_SECUNDARIO);
+        dsc->label_dsc->opa = LV_OPA_50;
+    }
+    uint16_t f, c;
+    lv_table_get_selected_cell(tabla, &f, &c);
+    if (f == fila && lv_obj_has_state(tabla, LV_STATE_PRESSED) && dsc->rect_dsc != NULL &&
+        !lv_table_has_cell_ctrl(tabla, fila, 0, FILA_APAGADA)) {
+        dsc->rect_dsc->bg_color = lv_color_hex(COLOR_LINEA);
+    }
+}
+
+static void al_soltar_celda(lv_event_t *e)
+{
+    lv_obj_t *tabla = lv_event_get_target(e);
+    AlElegirFila accion = (AlElegirFila)lv_event_get_user_data(e);
+    uint16_t fila, columna;
+    lv_table_get_selected_cell(tabla, &fila, &columna);
+    if (fila == LV_TABLE_CELL_NONE || fila >= comun_lista_filas(tabla) ||
+        lv_table_has_cell_ctrl(tabla, fila, 0, FILA_APAGADA)) {
+        return;
+    }
+    if (accion != NULL) {
+        accion(fila);
+    }
+}
+
+lv_obj_t *comun_lista(lv_obj_t *pantalla, AlElegirFila accion)
 {
     iniciar_estilos();
-    lv_obj_t *lista = lv_list_create(pantalla);
-    lv_obj_set_size(lista, PANTALLA_ANCHO, PANTALLA_ALTO - ALTO_CABECERA);
-    lv_obj_set_pos(lista, 0, ALTO_CABECERA);
-    lv_obj_add_style(lista, &estilo_lista, 0);
-    return lista;
+    lv_obj_t *tabla = lv_table_create(pantalla);
+    lv_obj_set_size(tabla, PANTALLA_ANCHO, PANTALLA_ALTO - ALTO_CABECERA);
+    lv_obj_set_pos(tabla, 0, ALTO_CABECERA);
+    lv_obj_add_style(tabla, &estilo_lista, 0);
+    lv_obj_add_style(tabla, &estilo_filas, LV_PART_ITEMS);
+    lv_table_set_col_cnt(tabla, 2);
+    lv_table_set_col_width(tabla, 0, PANTALLA_ANCHO - ANCHO_NOTA);
+    lv_table_set_col_width(tabla, 1, ANCHO_NOTA);
+    lv_obj_set_user_data(tabla, (void *)0);  /* número de filas añadidas */
+    lv_obj_add_event_cb(tabla, al_dibujar_celda, LV_EVENT_DRAW_PART_BEGIN, NULL);
+    lv_obj_add_event_cb(tabla, al_soltar_celda, LV_EVENT_VALUE_CHANGED, (void *)accion);
+    return tabla;
 }
 
-lv_obj_t *comun_elemento_lista(lv_obj_t *lista, const char *icono, const char *texto)
+uint16_t comun_lista_filas(lv_obj_t *lista)
 {
-    lv_obj_t *elemento = lv_list_add_btn(lista, icono, texto);
-    lv_obj_add_style(elemento, &estilo_elemento, 0);
-    lv_obj_add_style(elemento, &estilo_elemento_pulsado, LV_STATE_PRESSED);
-    return elemento;
+    return (uint16_t)(uintptr_t)lv_obj_get_user_data(lista);
+}
+
+void comun_lista_agregar(lv_obj_t *lista, const char *icono, const char *texto, const char *nota, bool apagada)
+{
+    uint16_t fila = comun_lista_filas(lista);
+    if (icono != NULL) {
+        lv_table_set_cell_value_fmt(lista, fila, 0, "%s  %s", icono, texto);
+    } else {
+        lv_table_set_cell_value(lista, fila, 0, texto);
+    }
+    lv_table_set_cell_value(lista, fila, 1, nota != NULL ? nota : "");
+    if (apagada) {
+        lv_table_add_cell_ctrl(lista, fila, 0, FILA_APAGADA);
+    }
+    lv_obj_set_user_data(lista, (void *)(uintptr_t)(fila + 1));
 }
 
 void comun_texto_seguro(const char *origen, char *destino, size_t tam)
@@ -192,16 +252,3 @@ void comun_texto_seguro(const char *origen, char *destino, size_t tam)
     destino[d] = '\0';
 }
 
-lv_obj_t *comun_nota_elemento(lv_obj_t *elemento, const char *texto)
-{
-    lv_obj_t *nota = lv_label_create(elemento);
-    lv_label_set_text(nota, texto);
-    lv_obj_add_style(nota, &estilo_nota, 0);
-    return nota;
-}
-
-void comun_apagar_elemento(lv_obj_t *elemento)
-{
-    lv_obj_add_state(elemento, LV_STATE_DISABLED);
-    lv_obj_add_style(elemento, &estilo_apagado, LV_STATE_DISABLED);
-}

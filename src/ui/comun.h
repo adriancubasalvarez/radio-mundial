@@ -5,6 +5,7 @@
 
 #include <lvgl.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #define ALTO_CABECERA 30
 
@@ -36,16 +37,17 @@ lv_obj_t *comun_cabecera(lv_obj_t *pantalla, const char *texto, bool con_atras, 
 /* Botón pequeño con un símbolo en la esquina derecha de la cabecera */
 lv_obj_t *comun_boton_cabecera(lv_obj_t *cabecera, const char *simbolo, lv_event_cb_t accion);
 
-/* Lista desplazable a pantalla completa bajo la cabecera */
-lv_obj_t *comun_lista(lv_obj_t *pantalla);
+/* Función a la que llama una lista cuando se elige una fila (empieza en 0) */
+typedef void (*AlElegirFila)(uint16_t fila);
 
-/* Elemento de lista grande (para el dedo) con icono opcional y texto.
- * Usa estilos compartidos: cada elemento gasta mucha menos memoria que con
- * estilos propios, importante en listas largas. */
-lv_obj_t *comun_elemento_lista(lv_obj_t *lista, const char *icono, const char *texto);
+/* Lista desplazable a pantalla completa bajo la cabecera. Es una tabla de
+ * LVGL: toda la lista es un solo objeto y gasta muy poca memoria. */
+lv_obj_t *comun_lista(lv_obj_t *pantalla, AlElegirFila accion);
 
-/* Texto pequeño y gris a la derecha de un elemento de lista */
-lv_obj_t *comun_nota_elemento(lv_obj_t *elemento, const char *texto);
+/* Añade una fila grande (para el dedo): icono opcional, texto y una nota
+ * pequeña y gris a la derecha (opcional). Las filas apagadas salen en gris
+ * y no responden. */
+void comun_lista_agregar(lv_obj_t *lista, const char *icono, const char *texto, const char *nota, bool apagada);
 
-/* Deja un elemento de lista apagado (gris y sin responder) */
-void comun_apagar_elemento(lv_obj_t *elemento);
+/* Número de filas añadidas */
+uint16_t comun_lista_filas(lv_obj_t *lista);

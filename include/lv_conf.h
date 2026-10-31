@@ -18,8 +18,12 @@
  * caben en 64 KB. El simulador imprime el uso real al cambiar de pantalla. */
 #ifdef RADIO_ESP32
 /* En la placa la memoria de LVGL se reserva con malloc al arrancar: sin
- * PSRAM, un bloque estático tan grande no cabe en la RAM de datos. */
-#define LV_MEM_SIZE (96U * 1024U)
+ * PSRAM, un bloque estático tan grande no cabe en la RAM de datos. El
+ * tamaño lo fija cada placa en platformio.ini (LV_MEM_KB). */
+#ifndef LV_MEM_KB
+#define LV_MEM_KB 96
+#endif
+#define LV_MEM_SIZE (LV_MEM_KB * 1024U)
 #define LV_MEM_POOL_INCLUDE <stdlib.h>
 #define LV_MEM_POOL_ALLOC malloc
 #else
@@ -30,6 +34,9 @@
 #define LV_DISP_DEF_REFR_PERIOD 16
 #define LV_INDEV_DEF_READ_PERIOD 16
 
+/* Pulsación larga: 2 s (abre el portal WiFi desde la cabecera) */
+#define LV_INDEV_DEF_LONG_PRESS_TIME 2000
+
 /* El reloj de LVGL lo alimenta cada plataforma llamando a lv_tick_inc() */
 #define LV_TICK_CUSTOM 0
 
@@ -37,6 +44,9 @@
 #define LV_USE_LOG 1
 #define LV_LOG_LEVEL LV_LOG_LEVEL_WARN
 #define LV_LOG_PRINTF 1
+
+/* Código QR para unirse a la red del portal WiFi desde el móvil */
+#define LV_USE_QRCODE 1
 
 /* Fuentes: las Montserrat integradas de LVGL solo traen ASCII (sin tildes
  * ni ñ), así que se desactivan y usamos las nuestras (src/fuentes/), con

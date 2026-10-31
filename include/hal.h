@@ -39,6 +39,29 @@ bool hal_hora(int *hora, int *minuto);
 /* Número aleatorio de 32 bits */
 uint32_t hal_aleatorio(void);
 
+/* ---------- Red WiFi ----------
+ * Cada usuario conecta la radio a su WiFi de dos formas:
+ *   - al instalarla desde la web (ESP Web Tools manda la red por USB, Improv);
+ *   - con el portal: la radio crea su propia red, el móvil se conecta a ella
+ *     y en la página que se abre se elige la WiFi de casa. */
+
+typedef enum {
+    RED_CONECTANDO,    /* hay una WiFi guardada y se está conectando */
+    RED_CONECTADA,
+    RED_PORTAL,        /* portal de configuración abierto */
+} EstadoRed;
+
+EstadoRed hal_red_estado(void);
+
+/* Nombre de la red que crea la radio cuando el portal está abierto */
+const char *hal_red_portal(void);
+
+/* Abre el portal para elegir otra WiFi */
+void hal_red_configurar(void);
+
+/* Cierra el portal sin cambiar nada (vuelve a la WiFi guardada) */
+void hal_red_cancelar(void);
+
 /* ---------- Ajustes persistentes ---------- */
 
 /* Lee los ajustes guardados (texto JSON). NULL si no hay. Liberar con free(). */

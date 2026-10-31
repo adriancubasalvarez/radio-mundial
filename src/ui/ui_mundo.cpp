@@ -57,7 +57,11 @@ static void pie_por_defecto(void)
             audio_parar(); /* la emisora se cortó mientras navegábamos */
         }
         nav.hay_sonando = false;
-        poner_pie("Toca una región", COLOR_SECUNDARIO);
+        if (hal_red_estado() == RED_CONECTANDO) {
+            poner_pie(LV_SYMBOL_WIFI "  Conectando a la WiFi...", COLOR_SECUNDARIO);
+        } else {
+            poner_pie("Toca una región", COLOR_SECUNDARIO);
+        }
     }
 }
 
@@ -136,6 +140,12 @@ static void al_pulsar_favoritos(lv_event_t *e)
     nav_ir(PANT_FAVORITOS);
 }
 
+static void al_mantener_cabecera(lv_event_t *e)
+{
+    (void)e;
+    hal_red_configurar();
+}
+
 static void al_pulsar_buscar(lv_event_t *e)
 {
     (void)e;
@@ -170,6 +180,11 @@ lv_obj_t *pantalla_mundo(void)
     lv_obj_align(favoritos, LV_ALIGN_RIGHT_MID, -44, 0);
     lv_obj_t *buscar = comun_boton_cabecera(cabecera, SIMBOLO_BUSCAR, al_pulsar_buscar);
     lv_obj_align(buscar, LV_ALIGN_RIGHT_MID, -88, 0);
+
+    /* Mantener pulsado el logo o el título 2 segundos abre el portal WiFi
+     * para cambiar de red (hasta que haya una pantalla de ajustes) */
+    lv_obj_add_flag(cabecera, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(cabecera, al_mantener_cabecera, LV_EVENT_LONG_PRESSED, NULL);
 
     /* El pie se crea antes que el mapa por si falta el mapa */
     etiqueta_pie = lv_label_create(pantalla);
@@ -223,6 +238,7 @@ void ui_inicio(void)
     }
     printf("Índice cargado: %d regiones\n", nav.indice.num_regiones);
     reposo_iniciar();
+    red_ui_iniciar();
     ui_arranque();
 }
 
