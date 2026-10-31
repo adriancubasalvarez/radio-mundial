@@ -16,7 +16,15 @@
 /* Memoria interna de LVGL para objetos y estilos. La lista de países de
  * África (56 botones) más la pantalla anterior durante la animación no
  * caben en 64 KB. El simulador imprime el uso real al cambiar de pantalla. */
+#ifdef RADIO_ESP32
+/* En la placa la memoria de LVGL se reserva con malloc al arrancar: sin
+ * PSRAM, un bloque estático tan grande no cabe en la RAM de datos. */
+#define LV_MEM_SIZE (96U * 1024U)
+#define LV_MEM_POOL_INCLUDE <stdlib.h>
+#define LV_MEM_POOL_ALLOC malloc
+#else
 #define LV_MEM_SIZE (128U * 1024U)
+#endif
 
 /* Frecuencia de refresco de la pantalla y de lectura del táctil (ms) */
 #define LV_DISP_DEF_REFR_PERIOD 16

@@ -15,5 +15,11 @@ ajustes.json
 # «Tarjeta SD» del simulador (se genera con build_stations.py --destino sd)
 sd/
 
+# Red WiFi para las pruebas en la placa (contiene la contraseña)
+data/wifi.txt
+
+# Copias de la flash de las placas (pueden contener datos personales, p. ej. WiFi)
+copias_placa/
+
 # Previsualizaciones de los mapas y el logo (se regeneran con los scripts)
 tools/preview/

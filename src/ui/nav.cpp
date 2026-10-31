@@ -35,14 +35,12 @@ static void mostrar(Pantalla pantalla, lv_scr_load_anim_t animacion)
     lv_obj_t *nueva = construir(pantalla);
     lv_scr_load_anim(nueva, animacion, DURACION_ANIM, 0, true);
 
-#ifdef RADIO_PC
     /* Uso de memoria de LVGL con las dos pantallas vivas (el peor momento) */
     lv_mem_monitor_t mem;
     lv_mem_monitor(&mem);
     printf("[memoria] pantalla %d: %u de %u bytes usados (%d%%), fragmentación %d%%\n",
            (int)pantalla, (unsigned)(mem.total_size - mem.free_size), (unsigned)mem.total_size,
            mem.used_pct, mem.frag_pct);
-#endif
 }
 
 void nav_ir(Pantalla pantalla)

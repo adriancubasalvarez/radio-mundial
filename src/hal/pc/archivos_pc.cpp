@@ -103,6 +103,11 @@ bool hal_archivo_linea(HalArchivo *archivo, char *linea, size_t tam)
     return true;
 }
 
+bool hal_archivo_leer_en(HalArchivo *archivo, uint32_t pos, void *destino, size_t n)
+{
+    return fseek(archivo->f, (long)pos, SEEK_SET) == 0 && fread(destino, 1, n, archivo->f) == n;
+}
+
 void hal_archivo_cerrar(HalArchivo *archivo)
 {
     if (archivo != NULL) {
