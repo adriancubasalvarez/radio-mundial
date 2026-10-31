@@ -4,6 +4,12 @@ Radio por Internet de escritorio con **mapamundi táctil**: tocas una región, e
 
 > **Estado: en desarrollo.** La versión de PC (simulador) está completa; ahora se está pasando a las placas.
 
+## Instalar
+
+**👉 https://adriancubasalvarez.github.io/radio-mundial/instalar/**
+
+Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar» y, al terminar, conecta la radio a tu WiFi desde la misma página (o después, desde el móvil, con el código QR que muestra la pantalla). Para publicar una versión nueva: `python tools/build_release.py`.
+
 ## Qué hace
 
 - Mapamundi y 9 regiones con zonas táctiles grandes (pensadas para el dedo).
