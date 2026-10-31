@@ -16,9 +16,29 @@
 #include <SD.h>
 #include <SPI.h>
 
+/* Archivo abierto con un búfer propio: leer de LittleFS byte a byte es muy
+ * lento (buscar en buscar.txt tardaba 2 s), por bloques es mucho más rápido */
+#define TAM_BUFER_ARCHIVO 512
+
 struct HalArchivo {
     File f;
+    uint8_t bufer[TAM_BUFER_ARCHIVO];
+    size_t pos;     /* siguiente byte a entregar del búfer */
+    size_t largo;   /* bytes válidos en el búfer */
 };
+
+/* Siguiente byte del archivo, o -1 al final */
+static int siguiente_byte(HalArchivo *a)
+{
+    if (a->pos >= a->largo) {
+        a->largo = a->f.read(a->bufer, sizeof(a->bufer));
+        a->pos = 0;
+        if (a->largo == 0) {
+            return -1;
+        }
+    }
+    return a->bufer[a->pos++];
+}
 
 static bool sd_montada = false;
 static SPIClass bus_sd(VSPI);
@@ -90,29 +110,59 @@ HalArchivo *hal_archivo_abrir(const char *ruta)
     if (!f) {
         return NULL;
     }
-    return new HalArchivo{f};
+    HalArchivo *a = new HalArchivo;
+    a->f = f;
+    a->pos = 0;
+    a->largo = 0;
+    return a;
 }
 
 bool hal_archivo_linea(HalArchivo *archivo, char *linea, size_t tam)
 {
-    if (!archivo->f.available()) {
+    int c = siguiente_byte(archivo);
+    if (c < 0) {
         return false;
     }
-    size_t n = archivo->f.readBytesUntil('\n', linea, tam - 1);
-    linea[n] = '\0';
-    if (n == tam - 1) {
-        /* Línea más larga que el búfer: descartar el resto */
-        while (archivo->f.available() && archivo->f.read() != '\n') {
+    size_t n = 0;
+    while (c >= 0 && c != '\n') {
+        if (n < tam - 1) {
+            linea[n++] = (char)c;  /* si la línea no cabe, se descarta el resto */
         }
+        c = siguiente_byte(archivo);
     }
     while (n > 0 && linea[n - 1] == '\r') {
-        linea[--n] = '\0';
+        n--;
     }
+    linea[n] = '\0';
     return true;
+}
+
+size_t hal_archivo_leer(HalArchivo *archivo, void *destino, size_t n)
+{
+    uint8_t *d = (uint8_t *)destino;
+    size_t leidos = 0;
+    while (leidos < n) {
+        if (archivo->pos >= archivo->largo) {
+            archivo->largo = archivo->f.read(archivo->bufer, sizeof(archivo->bufer));
+            archivo->pos = 0;
+            if (archivo->largo == 0) {
+                break;
+            }
+        }
+        size_t trozo = archivo->largo - archivo->pos;
+        if (trozo > n - leidos) {
+            trozo = n - leidos;
+        }
+        memcpy(d + leidos, archivo->bufer + archivo->pos, trozo);
+        archivo->pos += trozo;
+        leidos += trozo;
+    }
+    return leidos;
 }
 
 bool hal_archivo_leer_en(HalArchivo *archivo, uint32_t pos, void *destino, size_t n)
 {
+    archivo->pos = archivo->largo = 0;  /* el búfer deja de valer al saltar */
     return archivo->f.seek(pos) && archivo->f.read((uint8_t *)destino, n) == n;
 }
 

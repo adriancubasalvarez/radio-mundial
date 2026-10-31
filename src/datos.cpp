@@ -14,15 +14,45 @@ static void copiar(char *destino, size_t tam, JsonVariantConst origen)
     destino[tam - 1] = '\0';
 }
 
+/* Adaptador para que ArduinoJson lea directamente de un archivo de la HAL */
+struct LectorArchivo {
+    HalArchivo *archivo;
+    int read()
+    {
+        uint8_t c;
+        return hal_archivo_leer(archivo, &c, 1) == 1 ? c : -1;
+    }
+    size_t readBytes(char *destino, size_t n)
+    {
+        return hal_archivo_leer(archivo, destino, n);
+    }
+};
+
+/* Analiza un JSON leyéndolo del archivo poco a poco, sin cargarlo entero en
+ * RAM (en la placa, con el audio sonando, no hay 30 KB seguidos libres).
+ * El filtro, si se da, guarda solo los campos que interesan. */
+static bool leer_json(const char *ruta, JsonDocument &doc, JsonDocument *filtro = NULL)
+{
+    HalArchivo *archivo = hal_archivo_abrir(ruta);
+    if (archivo == NULL) {
+        printf("No se encuentra %s\n", ruta);
+        return false;
+    }
+    LectorArchivo lector{archivo};
+    DeserializationError error = filtro != NULL
+                                     ? deserializeJson(doc, lector, DeserializationOption::Filter(*filtro))
+                                     : deserializeJson(doc, lector);
+    hal_archivo_cerrar(archivo);
+    if (error) {
+        printf("%s: %s\n", ruta, error.c_str());
+        return false;
+    }
+    return true;
+}
+
 bool datos_cargar_indice(IndiceMundo *indice)
 {
     memset(indice, 0, sizeof(IndiceMundo));
-
-    size_t tam = 0;
-    uint8_t *texto = hal_leer_archivo("regiones.json", &tam);
-    if (texto == NULL) {
-        return false;
-    }
 
     /* Solo nos interesan los campos de las regiones, no la lista de países */
     JsonDocument filtro;
@@ -35,11 +65,7 @@ bool datos_cargar_indice(IndiceMundo *indice)
     f["zonas"] = true;
 
     JsonDocument doc;
-    DeserializationError error = deserializeJson(doc, (const char *)texto, tam,
-                                                 DeserializationOption::Filter(filtro));
-    free(texto);
-    if (error) {
-        fprintf(stderr, "regiones.json: %s\n", error.c_str());
+    if (!leer_json("regiones.json", doc, &filtro)) {
         return false;
     }
 
@@ -77,11 +103,8 @@ const Region *datos_region_por_indice(const IndiceMundo *indice, uint8_t color)
  * supone que todos tienen alguna para no bloquear la navegación. */
 static void contar_emisoras(ListaPaises *lista)
 {
-    size_t tam = 0;
-    uint8_t *texto = hal_leer_archivo("emisoras/indice.json", &tam);
     JsonDocument doc;
-    bool hay_indice = texto != NULL && !deserializeJson(doc, (const char *)texto, tam);
-    free(texto);
+    bool hay_indice = leer_json("emisoras/indice.json", doc);
 
     for (uint8_t i = 0; i < lista->num; i++) {
         Pais *pais = &lista->paises[i];
@@ -93,42 +116,25 @@ bool datos_cargar_paises(const char *id_region, ListaPaises *lista)
 {
     memset(lista, 0, sizeof(ListaPaises));
 
-    size_t tam = 0;
-    uint8_t *texto = hal_leer_archivo("regiones.json", &tam);
-    if (texto == NULL) {
-        return false;
-    }
-
-    JsonDocument filtro;
-    filtro["regiones"][0]["id"] = true;
-    filtro["regiones"][0]["paises"] = true;
-
+    /* Solo los países de esta región (regiones/<id>.json, 1–3 KB): leer el
+     * índice completo no cabe en la placa con el audio sonando */
+    char ruta[48];
+    snprintf(ruta, sizeof(ruta), "regiones/%s.json", id_region);
     JsonDocument doc;
-    DeserializationError error = deserializeJson(doc, (const char *)texto, tam,
-                                                 DeserializationOption::Filter(filtro));
-    free(texto);
-    if (error) {
-        fprintf(stderr, "regiones.json: %s\n", error.c_str());
+    if (!leer_json(ruta, doc)) {
         return false;
     }
-
-    for (JsonObjectConst r : doc["regiones"].as<JsonArrayConst>()) {
-        if (strcmp(r["id"] | "", id_region) != 0) {
-            continue;
+    for (JsonObjectConst p : doc.as<JsonArrayConst>()) {
+        if (lista->num >= MAX_PAISES) {
+            break;
         }
-        for (JsonObjectConst p : r["paises"].as<JsonArrayConst>()) {
-            if (lista->num >= MAX_PAISES) {
-                break;
-            }
-            Pais *pais = &lista->paises[lista->num++];
-            copiar(pais->codigo, sizeof(pais->codigo), p["codigo"]);
-            copiar(pais->nombre, sizeof(pais->nombre), p["nombre"]);
-            pais->indice = p["indice"] | 0;
-        }
-        contar_emisoras(lista);
-        return true;
+        Pais *pais = &lista->paises[lista->num++];
+        copiar(pais->codigo, sizeof(pais->codigo), p["codigo"]);
+        copiar(pais->nombre, sizeof(pais->nombre), p["nombre"]);
+        pais->indice = p["indice"] | 0;
     }
-    return false;
+    contar_emisoras(lista);
+    return true;
 }
 
 const Pais *datos_pais_por_indice(const ListaPaises *lista, uint8_t color)
@@ -147,17 +153,8 @@ bool datos_cargar_emisoras(const char *codigo, ListaEmisoras *lista)
 
     char ruta[32];
     snprintf(ruta, sizeof(ruta), "emisoras/%s.json", codigo);
-    size_t tam = 0;
-    uint8_t *texto = hal_leer_archivo(ruta, &tam);
-    if (texto == NULL) {
-        return false;
-    }
-
     JsonDocument doc;
-    DeserializationError error = deserializeJson(doc, (const char *)texto, tam);
-    free(texto);
-    if (error) {
-        fprintf(stderr, "%s: %s\n", ruta, error.c_str());
+    if (!leer_json(ruta, doc)) {
         return false;
     }
 
@@ -186,45 +183,34 @@ void datos_liberar_emisoras(ListaEmisoras *lista)
 /* Busca el nombre de un país en regiones.json */
 bool datos_buscar_pais(const char *codigo, Pais *pais)
 {
-    size_t tam = 0;
-    uint8_t *texto = hal_leer_archivo("regiones.json", &tam);
-    if (texto == NULL) {
+    /* paises.txt: «código<TAB>nombre» por línea; se lee línea a línea */
+    HalArchivo *archivo = hal_archivo_abrir("paises.txt");
+    if (archivo == NULL) {
         return false;
     }
-    JsonDocument filtro;
-    filtro["regiones"][0]["paises"][0]["codigo"] = true;
-    filtro["regiones"][0]["paises"][0]["nombre"] = true;
-    JsonDocument doc;
-    DeserializationError error = deserializeJson(doc, (const char *)texto, tam,
-                                                 DeserializationOption::Filter(filtro));
-    free(texto);
-    if (error) {
-        return false;
-    }
-    for (JsonObjectConst r : doc["regiones"].as<JsonArrayConst>()) {
-        for (JsonObjectConst p : r["paises"].as<JsonArrayConst>()) {
-            if (strcmp(p["codigo"] | "", codigo) == 0) {
-                memset(pais, 0, sizeof(Pais));
-                copiar(pais->codigo, sizeof(pais->codigo), p["codigo"]);
-                copiar(pais->nombre, sizeof(pais->nombre), p["nombre"]);
-                return true;
-            }
+    char linea[64];
+    bool encontrado = false;
+    while (!encontrado && hal_archivo_linea(archivo, linea, sizeof(linea))) {
+        char *tab = strchr(linea, '\t');
+        if (tab == NULL) {
+            continue;
+        }
+        *tab = '\0';
+        if (strcmp(linea, codigo) == 0) {
+            memset(pais, 0, sizeof(Pais));
+            strncpy(pais->codigo, linea, sizeof(pais->codigo) - 1);
+            strncpy(pais->nombre, tab + 1, sizeof(pais->nombre) - 1);
+            encontrado = true;
         }
     }
-    return false;
+    hal_archivo_cerrar(archivo);
+    return encontrado;
 }
 
 bool datos_emisora_aleatoria(Emisora *emisora, Pais *pais)
 {
-    size_t tam = 0;
-    uint8_t *texto = hal_leer_archivo("emisoras/indice.json", &tam);
-    if (texto == NULL) {
-        return false;
-    }
     JsonDocument indice;
-    DeserializationError error = deserializeJson(indice, (const char *)texto, tam);
-    free(texto);
-    if (error) {
+    if (!leer_json("emisoras/indice.json", indice)) {
         return false;
     }
 

@@ -7,6 +7,8 @@ A partir de los datos de dominio público de Natural Earth genera:
   data/mapas/<region>.bin         mapa de cada región con sus países
   data/mapas/*_zonas.bin          rejilla de zonas táctiles de cada mapa
   data/regiones.json              índice de regiones y países
+  data/regiones/<region>.json     países de cada región (lo lee el firmware)
+  data/paises.txt                 código y nombre de cada país, uno por línea
   tools/preview/*.png             previsualizaciones para revisar en el PC
 
 Formato de las imágenes: binario nativo de LVGL 8 en color indexado de
@@ -419,10 +421,33 @@ def generar_region(config, region, paises, sin_region):
     }
 
 
+def guardar_indices(indice):
+    """Índices que lee el firmware, pequeños para no agotar la RAM de la
+    placa: el completo (regiones.json, también lo usan las herramientas), un
+    archivo por región con solo sus países (regiones/<id>.json) y la lista
+    de nombres de país en texto, una línea por país (paises.txt)."""
+    compacto = {"ensure_ascii": False, "separators": (",", ":")}
+    (DATA / "regiones.json").write_text(json.dumps(indice, **compacto), encoding="utf-8")
+    carpeta = DATA / "regiones"
+    carpeta.mkdir(parents=True, exist_ok=True)
+    lineas = []
+    for r in indice["regiones"]:
+        (carpeta / f"{r['id']}.json").write_text(json.dumps(r["paises"], **compacto), encoding="utf-8")
+        lineas += [f"{p['codigo']}\t{p['nombre']}" for p in r["paises"]]
+    (DATA / "paises.txt").write_text("\n".join(lineas) + "\n", encoding="utf-8")
+    print(f"Índices guardados: regiones.json, regiones/*.json ({len(indice['regiones'])}), paises.txt")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Genera los mapas de Radio Mundial")
     parser.add_argument("--listar", action="store_true", help="solo muestra los países de cada región")
+    parser.add_argument("--solo-indices", action="store_true",
+                        help="regenera solo los índices a partir del regiones.json existente")
     args = parser.parse_args()
+
+    if args.solo_indices:
+        guardar_indices(json.loads((DATA / "regiones.json").read_text(encoding="utf-8")))
+        return
 
     config = json.loads(CONFIG.read_text(encoding="utf-8"))
     paises_50, sin_region_50 = cargar_paises("50m", config)
@@ -439,9 +464,7 @@ def main():
 
     regiones = [generar_region(config, r, paises_50, sin_region_50) for r in config["regiones"]]
 
-    indice = {"version": 2, "mundo": mundo, "regiones": regiones}
-    (DATA / "regiones.json").write_text(json.dumps(indice, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"Índice guardado en {DATA / 'regiones.json'}")
+    guardar_indices({"version": 2, "mundo": mundo, "regiones": regiones})
 
 
 if __name__ == "__main__":

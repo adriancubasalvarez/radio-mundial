@@ -84,6 +84,8 @@ typedef struct HalArchivo HalArchivo;
 HalArchivo *hal_archivo_abrir(const char *ruta);
 /* Lee la siguiente línea sin el salto final; false al llegar al final */
 bool hal_archivo_linea(HalArchivo *archivo, char *linea, size_t tam);
+/* Lee hasta n bytes a continuación de lo ya leído; devuelve cuántos */
+size_t hal_archivo_leer(HalArchivo *archivo, void *destino, size_t n);
 /* Lee n bytes desde la posición pos (acceso directo, para los mapas) */
 bool hal_archivo_leer_en(HalArchivo *archivo, uint32_t pos, void *destino, size_t n);
 void hal_archivo_cerrar(HalArchivo *archivo);

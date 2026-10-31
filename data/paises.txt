@@ -1,0 +1,232 @@
+BM	Bermudas
+CA	Canadá
+US	Estados Unidos
+GL	Groenlandia
+MX	México
+PM	San Pedro y Miquelón
+AI	Anguila
+AG	Antigua y Barbuda
+AW	Aruba
+BS	Bahamas
+BB	Barbados
+BZ	Belice
+CR	Costa Rica
+CU	Cuba
+CW	Curazao
+DM	Dominica
+SV	El Salvador
+GD	Granada
+GT	Guatemala
+HT	Haití
+HN	Honduras
+KY	Islas Caimán
+TC	Islas Turcas y Caicos
+VG	Islas Vírgenes Británicas
+VI	Islas Vírgenes de los Estados Unidos
+JM	Jamaica
+MS	Montserrat
+NI	Nicaragua
+PA	Panamá
+PR	Puerto Rico
+DO	República Dominicana
+BL	San Bartolomé
+KN	San Cristóbal y Nieves
+MF	San Martín
+VC	San Vicente y las Granadinas
+LC	Santa Lucía
+SX	Sint Maarten
+TT	Trinidad y Tobago
+AR	Argentina
+BO	Bolivia
+BR	Brasil
+CL	Chile
+CO	Colombia
+EC	Ecuador
+GY	Guyana
+FK	Islas Malvinas
+PY	Paraguay
+PE	Perú
+SR	Surinam
+UY	Uruguay
+VE	Venezuela
+AX	Åland
+AL	Albania
+DE	Alemania
+AD	Andorra
+AT	Austria
+BE	Bélgica
+BY	Bielorrusia
+BA	Bosnia y Herzegovina
+BG	Bulgaria
+VA	Ciudad del Vaticano
+HR	Croacia
+DK	Dinamarca
+SK	Eslovaquia
+SI	Eslovenia
+ES	España
+EE	Estonia
+FI	Finlandia
+FR	Francia
+GR	Grecia
+GG	Guernsey
+HU	Hungría
+IE	Irlanda
+IM	Isla de Man
+IS	Islandia
+FO	Islas Feroe
+IT	Italia
+JE	Jersey
+XK	Kosovo
+LV	Letonia
+LI	Liechtenstein
+LT	Lituania
+LU	Luxemburgo
+MK	Macedonia del Norte
+MT	Malta
+MD	Moldavia
+MC	Mónaco
+ME	Montenegro
+NO	Noruega
+NL	Países Bajos
+PL	Polonia
+PT	Portugal
+GB	Reino Unido
+CZ	República Checa
+RO	Rumania
+RU	Rusia
+SM	San Marino
+RS	Serbia
+SE	Suecia
+CH	Suiza
+UA	Ucrania
+AO	Angola
+DZ	Argelia
+BJ	Benín
+BW	Botsuana
+BF	Burkina Faso
+BI	Burundi
+CV	Cabo Verde
+CM	Camerún
+TD	Chad
+KM	Comoras
+CI	Costa de Marfil
+EG	Egipto
+ER	Eritrea
+SZ	Esuatini
+ET	Etiopía
+GA	Gabón
+GM	Gambia
+GH	Ghana
+GN	Guinea
+GQ	Guinea Ecuatorial
+GW	Guinea-Bisáu
+SH	Isla Santa Elena
+KE	Kenia
+LS	Lesoto
+LR	Liberia
+LY	Libia
+MG	Madagascar
+MW	Malaui
+ML	Malí
+MA	Marruecos
+MU	Mauricio
+MR	Mauritania
+MZ	Mozambique
+NA	Namibia
+NE	Níger
+NG	Nigeria
+CF	República Centroafricana
+CG	República del Congo
+CD	República Democrática del Congo
+RW	Ruanda
+EH	Sahara Occidental
+ST	Santo Tomé y Príncipe
+SN	Senegal
+SC	Seychelles
+SL	Sierra Leona
+SO	Somalia
+ZA	Sudáfrica
+SD	Sudán
+SS	Sudán del Sur
+TZ	Tanzania
+TG	Togo
+TN	Túnez
+UG	Uganda
+DJ	Yibuti
+ZM	Zambia
+ZW	Zimbabue
+SA	Arabia Saudita
+AM	Armenia
+AZ	Azerbaiyán
+BH	Baréin
+QA	Catar
+CY	Chipre
+AE	Emiratos Árabes Unidos
+GE	Georgia
+IQ	Irak
+IR	Irán
+IL	Israel
+JO	Jordania
+KW	Kuwait
+LB	Líbano
+OM	Omán
+PS	Palestina
+SY	Siria
+TR	Turquía
+YE	Yemen
+AF	Afganistán
+BD	Bangladés
+BT	Bután
+IN	India
+KZ	Kazajistán
+KG	Kirguistán
+MV	Maldivas
+NP	Nepal
+PK	Pakistán
+LK	Sri Lanka
+TJ	Tayikistán
+TM	Turkmenistán
+UZ	Uzbekistán
+MM	Birmania
+BN	Brunéi
+KH	Camboya
+CN	China
+KP	Corea del Norte
+KR	Corea del Sur
+PH	Filipinas
+HK	Hong Kong
+ID	Indonesia
+JP	Japón
+LA	Laos
+MO	Macao
+MY	Malasia
+MN	Mongolia
+SG	Singapur
+TH	Tailandia
+TW	Taiwán
+TL	Timor Oriental
+VN	Vietnam
+AU	Australia
+FM	Estados Federados de Micronesia
+FJ	Fiyi
+GU	Guam
+NF	Isla Norfolk
+CK	Islas Cook
+MP	Islas Marianas del Norte
+MH	Islas Marshall
+PN	Islas Pitcairn
+SB	Islas Salomón
+KI	Kiribati
+NR	Nauru
+NU	Niue
+NC	Nueva Caledonia
+NZ	Nueva Zelanda
+PW	Palaos
+PG	Papúa Nueva Guinea
+PF	Polinesia Francesa
+WS	Samoa
+AS	Samoa Estadounidense
+TO	Tonga
+TV	Tuvalu
+VU	Vanuatu
+WF	Wallis y Futuna
