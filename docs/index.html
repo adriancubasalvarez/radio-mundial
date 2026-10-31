@@ -1,11 +1,16 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Radio Mundial</title>
-<meta http-equiv="refresh" content="0; url=instalar/">
+<script>
+  // Spanish browsers go to the Spanish page; everyone else to English
+  const es = (navigator.languages || [navigator.language]).some((l) => (l || "").toLowerCase().startsWith("es"));
+  location.replace(es ? "instalar/" : "install/");
+</script>
 </head>
-<body style="background:#0B1D33;color:#fff;font-family:system-ui,sans-serif">
-<p><a href="instalar/" style="color:#FFC845">Instalar Radio Mundial</a></p>
+<body style="background:#0B1D33;color:#fff;font-family:system-ui,sans-serif;padding:24px">
+<p><a href="install/" style="color:#FFC845">Install Radio Mundial</a> · <a href="instalar/" style="color:#FFC845">Instalar Radio Mundial</a></p>
 </body>
 </html>

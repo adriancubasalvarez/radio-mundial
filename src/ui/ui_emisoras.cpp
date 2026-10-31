@@ -6,6 +6,7 @@
 #include "comun.h"
 #include "ajustes.h"
 #include "hal.h"
+#include "idioma.h"
 
 #include <lvgl.h>
 #include <string.h>
@@ -33,7 +34,7 @@ lv_obj_t *pantalla_emisoras(void)
 
     if (!datos_cargar_emisoras(nav.pais.codigo, &emisoras) || emisoras.num == 0) {
         lv_obj_t *aviso = lv_label_create(pantalla);
-        lv_label_set_text(aviso, "Todavía no hay emisoras\nde este país");
+        lv_label_set_text(aviso, TR("No stations for\nthis country yet", "Todavía no hay emisoras\nde este país"));
         lv_obj_set_style_text_font(aviso, &radio_20, 0);
         lv_obj_set_style_text_color(aviso, lv_color_hex(COLOR_SECUNDARIO), 0);
         lv_obj_set_style_text_align(aviso, LV_TEXT_ALIGN_CENTER, 0);

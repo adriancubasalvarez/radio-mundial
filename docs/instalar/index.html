@@ -28,6 +28,7 @@
   main { max-width: 760px; margin: 0 auto; padding: 32px 16px 48px; }
   header { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
   header svg { flex: none; }
+  .idioma { margin-left: auto; padding: 6px 12px; border: 1px solid var(--linea); border-radius: 8px; text-decoration: none; }
   h1 { margin: 0; font-size: 2rem; color: var(--acento); letter-spacing: .01em; }
   .lema { margin: 4px 0 28px; color: var(--suave); }
   h2 { font-size: 1.15rem; margin: 32px 0 12px; }
@@ -73,6 +74,7 @@
     <div>
       <h1>Radio Mundial</h1>
     </div>
+    <a class="idioma" href="../install/" hreflang="en" lang="en">English</a>
   </header>
   <p class="lema">Radio por Internet con mapamundi táctil. Instálala en tu placa desde aquí: sin programas, solo con el navegador y un cable USB.</p>
 
@@ -97,18 +99,19 @@
       <li>Pulsa <strong>Instalar</strong>, elige el puerto de la placa en la ventana del navegador y confirma.</li>
       <li>Espera a que termine (1–2 minutos). No desconectes la placa.</li>
     </ol>
-    <esp-web-install-button id="instalador" manifest="manifest-cyd.json">
+    <esp-web-install-button id="instalador" manifest="../firmware/manifest-cyd.json">
       <button slot="activate">Instalar Radio Mundial</button>
       <span slot="unsupported" class="aviso">Tu navegador no puede instalar: usa <strong>Chrome</strong> o <strong>Edge</strong> en un ordenador (no en el móvil).</span>
       <span slot="not-allowed" class="aviso">La instalación necesita una página segura (https).</span>
     </esp-web-install-button>
   </div>
 
-  <h2><span class="paso">3</span>Conéctala a tu WiFi</h2>
+  <h2><span class="paso">3</span>Idioma y WiFi</h2>
   <ul>
+    <li><strong>La primera vez que se enciende</strong>, la radio te pregunta el idioma: toca <strong>Español</strong>.</li>
     <li><strong>Al terminar la instalación</strong>, la misma ventana te ofrecerá conectar la radio a tu WiFi: elige tu red y escribe la contraseña.</li>
     <li><strong>O desde el móvil</strong>: si la radio no tiene WiFi, en su pantalla verás «Conecta la radio a tu WiFi» y un código QR. Únete con el móvil a la red <code>RadioMundial-XXXX</code>, se abrirá una página para elegir tu WiFi.</li>
-    <li>Para cambiar de WiFi más adelante: mantén pulsado <strong>2 segundos</strong> el título «Radio Mundial» en la pantalla.</li>
+    <li>Para cambiar de WiFi o de idioma más adelante: mantén pulsado <strong>2 segundos</strong> el título «Radio Mundial» en la pantalla.</li>
   </ul>
   <p>La WiFi debe ser de <strong>2,4 GHz</strong> (las placas ESP32 no usan 5 GHz).</p>
 
@@ -133,7 +136,7 @@
     boton.addEventListener("click", () => {
       if (boton.disabled) return;
       document.querySelectorAll(".placa").forEach((b) => b.setAttribute("aria-pressed", b === boton));
-      instalador.setAttribute("manifest", `manifest-${boton.dataset.placa}.json`);
+      instalador.setAttribute("manifest", `../firmware/manifest-${boton.dataset.placa}.json`);
     });
   });
 </script>

@@ -5,12 +5,17 @@
     "subregiones: subregiones de Natural Earth (campo SUBREGION) que pertenecen a la región.",
     "incluir: códigos ISO de países que van a esta región aunque su subregión diga otra cosa.",
     "color: color base de la región (formato #RRGGBB).",
-    "nombres: corrige el nombre en español que trae Natural Earth para algunos códigos ISO."
+    "nombre_en: nombre de la región en inglés.",
+    "nombres: corrige el nombre en español que trae Natural Earth para algunos códigos ISO.",
+    "nombres_en: lo mismo para los nombres en inglés."
   ],
   "nombres": {
     "SX": "Sint Maarten",
     "SZ": "Esuatini",
     "TW": "Taiwán"
+  },
+  "nombres_en": {
+    "US": "United States"
   },
   "colores": {
     "oceano": "#0B1D33",
@@ -31,6 +36,7 @@
     {
       "id": "norteamerica",
       "nombre": "Norteamérica",
+      "nombre_en": "North America",
       "color": "#E07A5F",
       "encuadre": [-170, 14, -50, 72],
       "subregiones": ["Northern America"],
@@ -39,6 +45,7 @@
     {
       "id": "centroamerica",
       "nombre": "Centroamérica y Caribe",
+      "nombre_en": "Central America & Caribbean",
       "color": "#F2CC8F",
       "encuadre": [-95, 6, -59, 27],
       "subregiones": ["Central America", "Caribbean"],
@@ -47,6 +54,7 @@
     {
       "id": "sudamerica",
       "nombre": "Sudamérica",
+      "nombre_en": "South America",
       "color": "#81B29A",
       "encuadre": [-84, -56, -33, 13],
       "subregiones": ["South America"],
@@ -55,6 +63,7 @@
     {
       "id": "europa",
       "nombre": "Europa",
+      "nombre_en": "Europe",
       "color": "#6C8EBF",
       "encuadre": [-25, 34, 45, 71],
       "subregiones": ["Northern Europe", "Western Europe", "Southern Europe", "Eastern Europe"],
@@ -63,6 +72,7 @@
     {
       "id": "africa",
       "nombre": "África",
+      "nombre_en": "Africa",
       "color": "#E9A23B",
       "encuadre": [-20, -36, 55, 38],
       "subregiones": ["Northern Africa", "Western Africa", "Middle Africa", "Eastern Africa", "Southern Africa"],
@@ -71,6 +81,7 @@
     {
       "id": "oriente_medio",
       "nombre": "Oriente Medio",
+      "nombre_en": "Middle East",
       "color": "#D4A373",
       "encuadre": [25, 12, 64, 43],
       "subregiones": ["Western Asia"],
@@ -79,6 +90,7 @@
     {
       "id": "asia_sur",
       "nombre": "Asia central y del sur",
+      "nombre_en": "Central & South Asia",
       "color": "#B5838D",
       "encuadre": [45, -1, 98, 56],
       "subregiones": ["Central Asia", "Southern Asia"],
@@ -87,6 +99,7 @@
     {
       "id": "asia_este",
       "nombre": "Asia oriental y sudeste asiático",
+      "nombre_en": "East & Southeast Asia",
       "color": "#59A5D8",
       "encuadre": [73, -11, 150, 54],
       "subregiones": ["Eastern Asia", "South-Eastern Asia"],
@@ -95,6 +108,7 @@
     {
       "id": "oceania",
       "nombre": "Oceanía",
+      "nombre_en": "Oceania",
       "color": "#9C89B8",
       "encuadre": [110, -50, 190, 15],
       "subregiones": ["Australia and New Zealand", "Melanesia", "Micronesia", "Polynesia"],

@@ -84,7 +84,8 @@ bool datos_buscar_pais(const char *codigo, Pais *pais);
 
 typedef struct {
     char letra;          /* la misma letra que GENEROS en build_stations.py */
-    const char *nombre;
+    const char *nombre_en;
+    const char *nombre;  /* en español */
 } Genero;
 
 extern const Genero GENEROS[];

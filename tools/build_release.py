@@ -8,8 +8,8 @@ Para cada placa:
   3. escribe el manifest que lee ESP Web Tools.
 
 Salida (la publica GitHub Pages desde la carpeta docs/):
-  docs/instalar/firmware/radio-mundial-<placa>.bin
-  docs/instalar/manifest-<placa>.json
+  docs/firmware/radio-mundial-<placa>.bin
+  docs/firmware/manifest-<placa>.json
 
 Requisitos: PlatformIO (pio) y esptool (python -m pip install esptool).
 
@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "docs" / "instalar"
+SALIDA = RAIZ / "docs" / "firmware"  # la usan /install/ (inglés) e /instalar/ (español)
 BOOT_APP0 = Path.home() / ".platformio" / "packages" / "framework-arduinoespressif32" / \
     "tools" / "partitions" / "boot_app0.bin"
 
@@ -78,8 +78,7 @@ def preparar(placa, cfg, ver):
     pos_otadata = tabla["otadata"][0]
 
     SALIDA.mkdir(parents=True, exist_ok=True)
-    (SALIDA / "firmware").mkdir(exist_ok=True)
-    binario = SALIDA / "firmware" / f"radio-mundial-{placa}.bin"
+    binario = SALIDA / f"radio-mundial-{placa}.bin"
     ejecutar([sys.executable, "-m", "esptool", "--chip", cfg["chip"], "merge-bin",
               "-o", binario,
               "--flash-mode", cfg["modo_flash"], "--flash-freq", cfg["frec_flash"],
@@ -99,7 +98,7 @@ def preparar(placa, cfg, ver):
         "new_install_improv_wait_time": 15,
         "builds": [{
             "chipFamily": cfg["familia"],
-            "parts": [{"path": f"firmware/{binario.name}", "offset": 0}],
+            "parts": [{"path": binario.name, "offset": 0}],
         }],
     }
     (SALIDA / f"manifest-{placa}.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False),

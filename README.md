@@ -1,51 +1,56 @@
 # Radio Mundial
 
-Radio por Internet de escritorio con **mapamundi táctil**: tocas una región, eliges un país, una emisora… y suena. Pensada para la comunidad maker: placa barata, sin servidores propios ni claves de API, y fácil de instalar.
+**English** · [Español](README.es.md)
 
-> **Estado: en desarrollo.** La versión de PC (simulador) está completa; ahora se está pasando a las placas.
+Desktop internet radio with a **touch world map**: tap a region, pick a country, a station… and it plays. Built for the maker community: a cheap board, no servers of its own, no API keys, and easy to install. Interface in English and Spanish.
 
-## Instalar
+> **Status: in development.** The PC version (simulator) is complete; it is now being brought to the boards.
 
-**👉 https://adriancubasalvarez.github.io/radio-mundial/instalar/**
+## Install
 
-Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar» y, al terminar, conecta la radio a tu WiFi desde la misma página (o después, desde el móvil, con el código QR que muestra la pantalla). Para publicar una versión nueva: `python tools/build_release.py`.
+**👉 https://adriancubasalvarez.github.io/radio-mundial/install/**
 
-## Qué hace
+From Chrome or Edge on a computer: plug the board in over USB, click "Install" and, when it finishes, connect the radio to your Wi-Fi from the same page (or later, from your phone, with the QR code shown on the screen). To publish a new version: `python tools/build_release.py`.
 
-- Mapamundi y 9 regiones con zonas táctiles grandes (pensadas para el dedo).
-- Unas **3.600 emisoras comprobadas** de 209 países (hasta 8.000 con tarjeta microSD).
-- **Buscador** con teclado en pantalla y **13 géneros** (pop, rock, noticias, jazz, clásica…).
-- **Favoritos**, **emisora aleatoria del mundo** y título de la canción que suena.
-- Recuerda la última emisora y el volumen; pantalla de reposo con reloj.
-- Tarjeta microSD opcional: base de emisoras más grande, emisoras propias (`mis_emisoras.csv`) y copia de los favoritos.
+## Features
 
-## Placas
+- World map and 9 regions with large touch zones (made for fingers).
+- About **3,600 tested stations** from 209 countries (up to 8,000 with a microSD card).
+- **Search** with an on-screen keyboard and **13 genres** (pop, rock, news, jazz, classical…).
+- **Favorites**, **random station from anywhere in the world** and the title of the song playing.
+- Remembers the last station and the volume; sleep screen with a clock.
+- Optional microSD card: bigger station database, your own stations (`mis_emisoras.csv`) and a backup of your favorites.
+- English or Spanish: chosen the first time it starts.
 
-| Placa | Estado |
+## Boards
+
+| Board | Status |
 |---|---|
-| **Freenove FNK0104** (ESP32-S3, 2,8" táctil capacitivo, audio ES8311) | Placa principal — pendiente |
-| **CYD Freenove FNK0114F** (ESP32, 2,8" táctil resistivo) | En pruebas |
-| **Simulador en el PC** (Windows, LVGL + SDL2) | Completo |
+| **Freenove FNK0104** (ESP32-S3, 2.8" capacitive touch, ES8311 audio) | Main board — pending |
+| **CYD Freenove FNK0114F** (ESP32, 2.8" resistive touch) | Testing |
+| **PC simulator** (Windows, LVGL + SDL2) | Complete |
 
-## Estructura
+## Layout
 
 ```
-src/          firmware (interfaz LVGL común + capa HAL por placa)
-include/      configuración (lv_conf.h, HAL, marca)
-data/         mapas, emisoras e índice de búsqueda (se suben a la placa)
-tools/        scripts de Python que generan los datos
-docs/         documentación
+src/          firmware (shared LVGL interface + one HAL layer per board)
+include/      configuration (lv_conf.h, HAL, branding)
+data/         maps, stations and search index (uploaded to the board)
+tools/        Python scripts that build the data and the published firmware
+docs/         install page (GitHub Pages) and documentation
 ```
 
-## Simulador en el PC
+The source code comments are in Spanish.
 
-Requisitos: PlatformIO, MSYS2 con gcc y SDL2, y FFmpeg (`ffplay`) para el sonido.
+## PC simulator
+
+Requirements: PlatformIO, MSYS2 with gcc and SDL2, and FFmpeg (`ffplay`) for sound.
 
 ```
 pio run -e pc -t exec
 ```
 
-## Regenerar los datos
+## Rebuilding the data
 
 ```
 python -m pip install -r tools/requirements.txt
@@ -53,32 +58,37 @@ python tools/build_maps.py
 python tools/build_stations.py --probar
 ```
 
-## Licencias
+## Licenses
 
-- **Código** (firmware, herramientas): **GPL-3.0** — ver [`LICENSE`](LICENSE).
-- **Contenido** (manuales, carcasa 3D, logotipo, imágenes): **CC BY-NC-SA 4.0** — ver [`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md).
+- **Code** (firmware, tools, install page): **GPL-3.0** — see [`LICENSE`](LICENSE).
+- **Content** (manuals, 3D case, logo, images): **CC BY-NC-SA 4.0** — see [`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md).
 
-## Créditos
+## Credits
 
-**Datos**
-- Mapas: [Natural Earth](https://www.naturalearthdata.com/) (dominio público).
-- Emisoras: [radio-browser.info](https://www.radio-browser.info/), base de datos comunitaria y gratuita.
+**Data**
+- Maps: [Natural Earth](https://www.naturalearthdata.com/) (public domain).
+- Stations: [radio-browser.info](https://www.radio-browser.info/), a free community database.
 
-**Fuentes**
+**Fonts**
 - [Montserrat](https://github.com/JulietaUla/Montserrat) — SIL Open Font License 1.1.
-- Símbolos de [Font Awesome Free](https://fontawesome.com/) 5 (vía LVGL) — fuentes SIL OFL 1.1, iconos CC BY 4.0.
+- [Font Awesome Free](https://fontawesome.com/) 5 symbols (via LVGL) — fonts SIL OFL 1.1, icons CC BY 4.0.
 
-**Librerías del firmware**
+**Firmware libraries**
 - [LVGL](https://lvgl.io/) — MIT.
 - [LovyanGFX](https://github.com/lovyan03/LovyanGFX) — FreeBSD.
 - [ArduinoJson](https://arduinojson.org/) — MIT.
 - [ESP32-audioI2S](https://github.com/schreibfaul1/ESP32-audioI2S) — GPL-3.0.
+- [WiFiManager](https://github.com/tzapu/WiFiManager) — MIT.
+- [Improv SDK](https://github.com/improv-wifi/sdk-cpp) — Apache-2.0.
 
-**Herramientas**
-- [Shapely](https://github.com/shapely/shapely) (BSD), [Pillow](https://python-pillow.org/) (HPND), [NumPy](https://numpy.org/) (BSD), [anyascii](https://github.com/anyascii/anyascii) (ISC), [lv_font_conv](https://github.com/lvgl/lv_font_conv) (MIT), [SDL2](https://www.libsdl.org/) (zlib).
+**Web installer**
+- [ESP Web Tools](https://esphome.github.io/esp-web-tools/) — Apache-2.0.
 
-Inspirado en la idea de explorar la radio del mundo en un mapa; nombre, diseño y código son propios.
+**Tools**
+- [Shapely](https://github.com/shapely/shapely) (BSD), [Pillow](https://python-pillow.org/) (HPND), [NumPy](https://numpy.org/) (BSD), [anyascii](https://github.com/anyascii/anyascii) (ISC), [lv_font_conv](https://github.com/lvgl/lv_font_conv) (MIT), [SDL2](https://www.libsdl.org/) (zlib), [esptool](https://github.com/espressif/esptool) (GPL-2.0).
+
+Inspired by the idea of exploring the world's radio on a map; name, design and code are original.
 
 ---
 
-Un proyecto de **@Adriancubas1980** · [YouTube](https://www.youtube.com/@Adriancubas1980)
+A project by **@Adriancubas1980** · [YouTube](https://www.youtube.com/@Adriancubas1980)

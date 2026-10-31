@@ -14,3 +14,6 @@ void reposo_iniciar(void);
 
 /* Muestra la pantalla del portal WiFi cuando está abierto */
 void red_ui_iniciar(void);
+
+/* Abre el menú de ajustes (idioma y WiFi) */
+void ui_ajustes_abrir(void);

@@ -8,6 +8,7 @@
 #include "comun.h"
 #include "mapa.h"
 #include "hal.h"
+#include "idioma.h"
 
 #include <lvgl.h>
 
@@ -43,7 +44,7 @@ static void al_tocar_mapa(lv_event_t *e)
         } else if (pais->emisoras == 0) {
             /* País apagado: se dice por qué no se puede entrar */
             mapa_resaltar(&mapa_region, 0, img_region);
-            lv_label_set_text_fmt(titulo, "%s: sin emisoras", pais->nombre);
+            lv_label_set_text_fmt(titulo, TR("%s: no stations", "%s: sin emisoras"), pais->nombre);
         } else {
             mapa_resaltar(&mapa_region, pais->indice, img_region);
             lv_label_set_text(titulo, pais->nombre);
@@ -85,7 +86,7 @@ lv_obj_t *pantalla_region(void)
     if (!datos_cargar_paises(nav.region.id, &paises) ||
         !mapa_cargar(&mapa_region, nav.region.imagen, nav.region.zonas)) {
         lv_obj_t *error = lv_label_create(pantalla);
-        lv_label_set_text(error, "Falta el mapa de esta región");
+        lv_label_set_text(error, TR("This region's map is missing", "Falta el mapa de esta región"));
         lv_obj_center(error);
         return pantalla;
     }

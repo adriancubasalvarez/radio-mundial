@@ -1,5 +1,6 @@
 #include "datos.h"
 #include "hal.h"
+#include "idioma.h"
 
 #include <ArduinoJson.h>
 #include <stdio.h>
@@ -60,6 +61,7 @@ bool datos_cargar_indice(IndiceMundo *indice)
     JsonObject f = filtro["regiones"][0].to<JsonObject>();
     f["id"] = true;
     f["nombre"] = true;
+    f["nombre_en"] = true;
     f["indice"] = true;
     f["imagen"] = true;
     f["zonas"] = true;
@@ -81,7 +83,7 @@ bool datos_cargar_indice(IndiceMundo *indice)
         }
         Region *region = &indice->regiones[indice->num_regiones++];
         copiar(region->id, sizeof(region->id), r["id"]);
-        copiar(region->nombre, sizeof(region->nombre), r["nombre"]);
+        copiar(region->nombre, sizeof(region->nombre), idioma_es ? r["nombre"] : r["nombre_en"]);
         copiar(region->imagen, sizeof(region->imagen), r["imagen"]);
         copiar(region->zonas, sizeof(region->zonas), r["zonas"]);
         region->indice = r["indice"] | 0;
@@ -141,6 +143,46 @@ static void contar_emisoras(ListaPaises *lista)
     }
 }
 
+/* Letra base de un carácter para ordenar sin tildes: los acentuados de
+ * Latin-1 en UTF-8 (0xC3 0x80..0xBF) se reducen a su letra sin tilde */
+static char letra_base(const unsigned char **p)
+{
+    unsigned char c = **p;
+    (*p)++;
+    if (c == 0xC3 && **p >= 0x80 && **p <= 0xBF) {
+        static const char tabla[] = "AAAAAAACEEEEIIIIDNOOOOOxOUUUUYTsaaaaaaaceeeeiiiidnooooo/ouuuuyty";
+        c = (unsigned char)tabla[**p - 0x80];
+        (*p)++;
+    }
+    return (char)((c >= 'a' && c <= 'z') ? c - 'a' + 'A' : c);
+}
+
+static int comparar_nombres(const char *a, const char *b)
+{
+    const unsigned char *pa = (const unsigned char *)a, *pb = (const unsigned char *)b;
+    while (*pa && *pb) {
+        char ca = letra_base(&pa), cb = letra_base(&pb);
+        if (ca != cb) {
+            return ca - cb;
+        }
+    }
+    return *pa - *pb;
+}
+
+/* Orden alfabético (inserción: son pocos países por región) */
+static void ordenar_paises(ListaPaises *lista)
+{
+    for (uint8_t i = 1; i < lista->num; i++) {
+        Pais clave = lista->paises[i];
+        int j = i - 1;
+        while (j >= 0 && comparar_nombres(lista->paises[j].nombre, clave.nombre) > 0) {
+            lista->paises[j + 1] = lista->paises[j];
+            j--;
+        }
+        lista->paises[j + 1] = clave;
+    }
+}
+
 bool datos_cargar_paises(const char *id_region, ListaPaises *lista)
 {
     memset(lista, 0, sizeof(ListaPaises));
@@ -159,8 +201,12 @@ bool datos_cargar_paises(const char *id_region, ListaPaises *lista)
         }
         Pais *pais = &lista->paises[lista->num++];
         copiar(pais->codigo, sizeof(pais->codigo), p["codigo"]);
-        copiar(pais->nombre, sizeof(pais->nombre), p["nombre"]);
+        copiar(pais->nombre, sizeof(pais->nombre), idioma_es ? p["nombre"] : p["en"]);
         pais->indice = p["indice"] | 0;
+    }
+    /* Los archivos vienen en orden alfabético español; en inglés se reordena */
+    if (!idioma_es) {
+        ordenar_paises(lista);
     }
     contar_emisoras(lista);
     return true;
@@ -212,12 +258,12 @@ void datos_liberar_emisoras(ListaEmisoras *lista)
 /* Busca el nombre de un país en regiones.json */
 bool datos_buscar_pais(const char *codigo, Pais *pais)
 {
-    /* paises.txt: «código<TAB>nombre» por línea; se lee línea a línea */
+    /* paises.txt: «código<TAB>español<TAB>inglés» por línea; se lee línea a línea */
     HalArchivo *archivo = hal_archivo_abrir("paises.txt");
     if (archivo == NULL) {
         return false;
     }
-    char linea[64];
+    char linea[120];
     bool encontrado = false;
     while (!encontrado && hal_archivo_linea(archivo, linea, sizeof(linea))) {
         char *tab = strchr(linea, '\t');
@@ -226,9 +272,17 @@ bool datos_buscar_pais(const char *codigo, Pais *pais)
         }
         *tab = '\0';
         if (strcmp(linea, codigo) == 0) {
+            char *nombre = tab + 1;
+            char *tab_en = strchr(nombre, '\t');
+            if (tab_en != NULL) {
+                *tab_en = '\0';
+                if (!idioma_es) {
+                    nombre = tab_en + 1;
+                }
+            }
             memset(pais, 0, sizeof(Pais));
             strncpy(pais->codigo, linea, sizeof(pais->codigo) - 1);
-            strncpy(pais->nombre, tab + 1, sizeof(pais->nombre) - 1);
+            strncpy(pais->nombre, nombre, sizeof(pais->nombre) - 1);
             encontrado = true;
         }
     }
@@ -293,19 +347,19 @@ bool datos_emisora_aleatoria(Emisora *emisora, Pais *pais)
 
 /* Misma tabla de letras que GENEROS en tools/build_stations.py */
 const Genero GENEROS[] = {
-    {'p', "Pop y éxitos"},
-    {'r', "Rock"},
-    {'n', "Noticias y tertulia"},
-    {'d', "Deportes"},
-    {'j', "Jazz, blues y soul"},
-    {'c', "Clásica"},
-    {'e', "Electrónica y dance"},
-    {'l', "Latina"},
-    {'h', "Hip-hop y R&B"},
-    {'o', "Éxitos de siempre"},
-    {'f', "Religiosa"},
-    {'t', "Folk, country y tradicional"},
-    {'a', "Chill y lounge"},
+    {'p', "Pop & hits", "Pop y éxitos"},
+    {'r', "Rock", "Rock"},
+    {'n', "News & talk", "Noticias y tertulia"},
+    {'d', "Sports", "Deportes"},
+    {'j', "Jazz, blues & soul", "Jazz, blues y soul"},
+    {'c', "Classical", "Clásica"},
+    {'e', "Electronic & dance", "Electrónica y dance"},
+    {'l', "Latin", "Latina"},
+    {'h', "Hip-hop & R&B", "Hip-hop y R&B"},
+    {'o', "Oldies & classics", "Éxitos de siempre"},
+    {'f', "Religious", "Religiosa"},
+    {'t', "Folk, country & traditional", "Folk, country y tradicional"},
+    {'a', "Chill & lounge", "Chill y lounge"},
 };
 const int NUM_GENEROS = sizeof(GENEROS) / sizeof(GENEROS[0]);
 

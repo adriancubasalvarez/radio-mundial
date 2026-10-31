@@ -11,6 +11,7 @@
 #include "nav.h"
 #include "comun.h"
 #include "hal.h"
+#include "idioma.h"
 
 #include <lvgl.h>
 #include <stdio.h>
@@ -120,10 +121,10 @@ static void mostrar_inicio(void)
     mostrando_inicio = true;
     hay_mis_emisoras = datos_hay_mis_emisoras();
     if (hay_mis_emisoras) {
-        comun_lista_agregar(lista_buscar, LV_SYMBOL_SD_CARD, "Mis emisoras (SD)", NULL, false);
+        comun_lista_agregar(lista_buscar, LV_SYMBOL_SD_CARD, TR("My stations (SD)", "Mis emisoras (SD)"), NULL, false);
     }
     for (int i = 0; i < NUM_GENEROS; i++) {
-        comun_lista_agregar(lista_buscar, LV_SYMBOL_LIST, GENEROS[i].nombre, NULL, false);
+        comun_lista_agregar(lista_buscar, LV_SYMBOL_LIST, TR(GENEROS[i].nombre_en, GENEROS[i].nombre), NULL, false);
     }
 }
 
@@ -151,7 +152,7 @@ static void buscar_ahora(lv_timer_t *t)
     nueva_lista();
     mostrando_inicio = false;
     if (num_resultados == 0) {
-        comun_lista_agregar(lista_buscar, NULL, "Sin resultados", NULL, true);
+        comun_lista_agregar(lista_buscar, NULL, TR("No results", "Sin resultados"), NULL, true);
         return;
     }
     llenar_resultados(lista_buscar, resultados_buscar, num_resultados);
@@ -221,7 +222,7 @@ lv_obj_t *pantalla_buscar(void)
     campo = lv_textarea_create(cabecera);
     lv_textarea_set_one_line(campo, true);
     lv_textarea_set_max_length(campo, sizeof(consulta) - 1);
-    lv_textarea_set_placeholder_text(campo, SIMBOLO_BUSCAR "  Buscar emisora");
+    lv_textarea_set_placeholder_text(campo, TR(SIMBOLO_BUSCAR "  Search stations", SIMBOLO_BUSCAR "  Buscar emisora"));
     lv_obj_set_size(campo, PANTALLA_ANCHO - 48 - 8, ALTO_CABECERA - 4);
     lv_obj_align(campo, LV_ALIGN_LEFT_MID, 48, 0);
     lv_obj_set_style_text_font(campo, &radio_14, 0);
@@ -273,7 +274,7 @@ lv_obj_t *pantalla_genero(void)
 {
     lv_obj_t *pantalla = comun_pantalla();
     const Genero *g = &GENEROS[nav.genero];
-    comun_cabecera(pantalla, g->nombre, true, NULL);
+    comun_cabecera(pantalla, TR(g->nombre_en, g->nombre), true, NULL);
     lv_obj_t *lista = comun_lista(pantalla, al_elegir_genero);
     num_genero = datos_buscar("", g->letra, resultados_genero, MAX_RESULTADOS);
     llenar_resultados(lista, resultados_genero, num_genero);
@@ -289,7 +290,7 @@ static void al_elegir_mia(uint16_t fila)
     nav.emisora = mis_emisoras.emisoras[fila];
     memset(&nav.pais, 0, sizeof(nav.pais));
     strcpy(nav.pais.codigo, "SD");
-    strcpy(nav.pais.nombre, "Mis emisoras");
+    strcpy(nav.pais.nombre, TR("My stations", "Mis emisoras"));
     nav.aleatoria = false;
     nav_ir(PANT_SONANDO);
 }
@@ -304,11 +305,12 @@ lv_obj_t *pantalla_mis_emisoras(void)
 {
     lv_obj_t *pantalla = comun_pantalla();
     lv_obj_add_event_cb(pantalla, al_borrar_mias, LV_EVENT_DELETE, NULL);
-    comun_cabecera(pantalla, "Mis emisoras", true, NULL);
+    comun_cabecera(pantalla, TR("My stations", "Mis emisoras"), true, NULL);
 
     if (!datos_cargar_mis_emisoras(&mis_emisoras) || mis_emisoras.num == 0) {
         lv_obj_t *aviso = lv_label_create(pantalla);
-        lv_label_set_text(aviso, "No hay emisoras en\n" ARCHIVO_MIS_EMISORAS "\n\nUna por línea:  nombre;url");
+        lv_label_set_text(aviso, TR("No stations in\n" ARCHIVO_MIS_EMISORAS "\n\nOne per line:  name;url",
+                                     "No hay emisoras en\n" ARCHIVO_MIS_EMISORAS "\n\nUna por línea:  nombre;url"));
         lv_obj_set_style_text_color(aviso, lv_color_hex(COLOR_SECUNDARIO), 0);
         lv_obj_set_style_text_align(aviso, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_align(aviso, LV_ALIGN_CENTER, 0, ALTO_CABECERA / 2);

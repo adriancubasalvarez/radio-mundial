@@ -22,6 +22,8 @@ typedef struct {
     uint8_t volumen;          /* 0..100 */
     uint16_t reposo_s;        /* segundos sin tocar hasta el reposo (0 = nunca) */
     bool reanudar;            /* al arrancar, volver a poner la última emisora */
+    bool idioma_elegido;      /* false: el primer arranque pregunta el idioma */
+    bool espanol;             /* idioma: true español, false inglés */
     bool hay_ultima;
     EmisoraGuardada ultima;
     EmisoraGuardada favoritos[MAX_FAVORITOS];
@@ -35,6 +37,9 @@ void ajustes_cargar(void);
 
 /* Guarda los ajustes */
 void ajustes_guardar(void);
+
+/* Cambia el idioma de la interfaz y guarda */
+void ajustes_poner_idioma(bool espanol);
 
 /* Recuerda la emisora que está sonando y guarda */
 void ajustes_recordar_ultima(const Emisora *emisora, const Pais *pais);

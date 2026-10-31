@@ -8,6 +8,7 @@
 #include "imagen.h"
 #include "marca.h"
 #include "ajustes.h"
+#include "idioma.h"
 
 #include <lvgl.h>
 #include <string.h>
@@ -31,13 +32,65 @@ static void reanudar(void)
     nav_reproducir();
 }
 
+/* Después del logo: el mapamundi y, si había una emisora, que vuelva a sonar */
+static void empezar(void)
+{
+    nav_ir(PANT_MUNDO);
+    reanudar();
+}
+
+/* ---------- Primer arranque: elegir idioma ---------- */
+
+static void al_elegir_idioma(lv_event_t *e)
+{
+    bool espanol = (bool)(uintptr_t)lv_event_get_user_data(e);
+    ajustes_poner_idioma(espanol);
+    datos_cargar_indice(&nav.indice);  /* nombres de regiones en el idioma elegido */
+    empezar();
+}
+
+static lv_obj_t *boton_idioma(lv_obj_t *pantalla, const char *texto, bool espanol, int y)
+{
+    lv_obj_t *boton = lv_btn_create(pantalla);
+    lv_obj_set_size(boton, 220, 56);
+    lv_obj_align(boton, LV_ALIGN_TOP_MID, 0, y);
+    lv_obj_set_style_radius(boton, 12, 0);
+    lv_obj_set_style_bg_color(boton, lv_color_hex(COLOR_CABECERA), 0);
+    lv_obj_set_style_border_color(boton, lv_color_hex(COLOR_ACENTO), 0);
+    lv_obj_set_style_border_width(boton, 2, 0);
+    lv_obj_add_event_cb(boton, al_elegir_idioma, LV_EVENT_CLICKED, (void *)(uintptr_t)espanol);
+    lv_obj_t *etiqueta = lv_label_create(boton);
+    lv_label_set_text(etiqueta, texto);
+    lv_obj_set_style_text_font(etiqueta, &radio_28, 0);
+    lv_obj_center(etiqueta);
+    return boton;
+}
+
+/* Pantalla con dos botones grandes; el inglés, primero */
+static void elegir_idioma(void)
+{
+    lv_obj_t *pantalla = comun_pantalla();
+    lv_obj_t *titulo = lv_label_create(pantalla);
+    lv_label_set_text(titulo, "Choose your language\nElige tu idioma");
+    lv_obj_set_style_text_font(titulo, &radio_20, 0);
+    lv_obj_set_style_text_color(titulo, lv_color_hex(COLOR_ACENTO), 0);
+    lv_obj_set_style_text_align(titulo, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_align(titulo, LV_ALIGN_TOP_MID, 0, 18);
+    boton_idioma(pantalla, "English", false, 86);
+    boton_idioma(pantalla, "Español", true, 156);
+    lv_scr_load_anim(pantalla, LV_SCR_LOAD_ANIM_FADE_ON, 300, 0, true);
+}
+
 static void seguir(void)
 {
     if (temporizador != NULL) {
         lv_timer_del(temporizador);
         temporizador = NULL;
-        nav_ir(PANT_MUNDO);
-        reanudar();
+        if (ajustes.idioma_elegido) {
+            empezar();
+        } else {
+            elegir_idioma();
+        }
     }
 }
 
@@ -84,7 +137,7 @@ void ui_arranque(void)
     lv_obj_fade_in(nombre, TIEMPO_FUNDIDO, TIEMPO_FUNDIDO / 2);
 
     lv_obj_t *firma = lv_label_create(pantalla);
-    lv_label_set_text(firma, MARCA_FIRMA);
+    lv_label_set_text(firma, TR("by " MARCA_AUTOR, "por " MARCA_AUTOR));
     lv_obj_set_style_text_font(firma, &radio_20, 0);
     lv_obj_set_style_text_color(firma, lv_color_hex(COLOR_TEXTO), 0);
     lv_obj_align(firma, LV_ALIGN_TOP_MID, 0, y + 38);

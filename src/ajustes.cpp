@@ -1,5 +1,6 @@
 #include "ajustes.h"
 #include "hal.h"
+#include "idioma.h"
 
 #include <ArduinoJson.h>
 #include <stdio.h>
@@ -7,6 +8,9 @@
 #include <string.h>
 
 Ajustes ajustes;
+
+/* Idioma de la interfaz (ver idioma.h); inglés por defecto */
+bool idioma_es = false;
 
 /* Copia de seguridad en la raíz de la tarjeta SD (si hay tarjeta). Sirve
  * para no perder favoritos al reflashear la placa o para pasarlos a otra
@@ -78,6 +82,11 @@ void ajustes_cargar(void)
     ajustes.volumen = doc["volumen"] | ajustes.volumen;
     ajustes.reposo_s = doc["reposo"] | ajustes.reposo_s;
     ajustes.reanudar = doc["reanudar"] | ajustes.reanudar;
+    /* Idioma: "en" o "es"; si no está, el primer arranque lo pregunta */
+    const char *idioma = doc["idioma"] | "";
+    ajustes.idioma_elegido = idioma[0] != '\0';
+    ajustes.espanol = strcmp(idioma, "es") == 0;
+    idioma_es = ajustes.espanol;
     if (doc["ultima"].is<JsonObjectConst>()) {
         de_json(doc["ultima"], &ajustes.ultima);
         ajustes.hay_ultima = ajustes.ultima.emisora.url[0] != '\0';
@@ -101,6 +110,9 @@ void ajustes_guardar(void)
     doc["volumen"] = ajustes.volumen;
     doc["reposo"] = ajustes.reposo_s;
     doc["reanudar"] = ajustes.reanudar;
+    if (ajustes.idioma_elegido) {
+        doc["idioma"] = ajustes.espanol ? "es" : "en";
+    }
     if (ajustes.hay_ultima) {
         a_json(doc["ultima"].to<JsonObject>(), &ajustes.ultima);
     }
@@ -120,6 +132,14 @@ void ajustes_guardar(void)
     }
     hal_sd_escribir(COPIA_SD, texto); /* copia en la SD; si no hay tarjeta no hace nada */
     free(texto);
+}
+
+void ajustes_poner_idioma(bool espanol)
+{
+    ajustes.espanol = espanol;
+    ajustes.idioma_elegido = true;
+    idioma_es = espanol;
+    ajustes_guardar();
 }
 
 void ajustes_recordar_ultima(const Emisora *emisora, const Pais *pais)

@@ -45,6 +45,9 @@ void nav_ir(Pantalla pantalla);
 /* Vuelve a la pantalla anterior */
 void nav_atras(void);
 
+/* Olvida el recorrido y vuelve a crear el mapamundi (p. ej. al cambiar de idioma) */
+void nav_reiniciar(void);
+
 /* Constructores de cada pantalla (devuelven un objeto pantalla de LVGL) */
 lv_obj_t *pantalla_mundo(void);
 lv_obj_t *pantalla_region(void);

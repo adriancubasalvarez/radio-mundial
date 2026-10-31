@@ -7,6 +7,7 @@
 #include "ui.h"
 #include "comun.h"
 #include "hal.h"
+#include "idioma.h"
 
 #include <lvgl.h>
 #include <stdio.h>
@@ -33,7 +34,7 @@ static void crear_capa(void)
     lv_obj_add_flag(capa, LV_OBJ_FLAG_CLICKABLE);  /* que no pasen toques debajo */
 
     lv_obj_t *titulo = lv_label_create(capa);
-    lv_label_set_text(titulo, LV_SYMBOL_WIFI "  Conecta la radio a tu WiFi");
+    lv_label_set_text(titulo, TR(LV_SYMBOL_WIFI "  Connect the radio to Wi-Fi", LV_SYMBOL_WIFI "  Conecta la radio a tu WiFi"));
     lv_obj_set_style_text_font(titulo, &radio_20, 0);
     lv_obj_set_style_text_color(titulo, lv_color_hex(COLOR_ACENTO), 0);
     lv_obj_align(titulo, LV_ALIGN_TOP_MID, 0, 8);
@@ -49,8 +50,10 @@ static void crear_capa(void)
 
     char pasos[200];
     snprintf(pasos, sizeof(pasos),
-             "1. Con el móvil, únete\n    a la red:\n    #FFC845 %s#\n"
-             "    (o escanea el QR)\n2. Se abrirá una página:\n    elige tu WiFi y\n    escribe la contraseña.",
+             TR("1. On your phone, join\n    the network:\n    #FFC845 %s#\n"
+                "    (or scan the QR)\n2. A page will open:\n    choose your Wi-Fi\n    and type the password.",
+                "1. Con el móvil, únete\n    a la red:\n    #FFC845 %s#\n"
+                "    (o escanea el QR)\n2. Se abrirá una página:\n    elige tu WiFi y\n    escribe la contraseña."),
              hal_red_portal());
     lv_obj_t *texto = lv_label_create(capa);
     lv_label_set_recolor(texto, true);
@@ -60,7 +63,7 @@ static void crear_capa(void)
     lv_obj_align(texto, LV_ALIGN_LEFT_MID, 14 + TAM_QR + 14, 8);
 
     lv_obj_t *nota = lv_label_create(capa);
-    lv_label_set_text(nota, "Si no se abre: 192.168.4.1");
+    lv_label_set_text(nota, TR("If it doesn't open: 192.168.4.1", "Si no se abre: 192.168.4.1"));
     lv_obj_set_style_text_color(nota, lv_color_hex(COLOR_SECUNDARIO), 0);
     lv_obj_align(nota, LV_ALIGN_BOTTOM_LEFT, 14, -10);
 
@@ -70,7 +73,7 @@ static void crear_capa(void)
     lv_obj_set_style_bg_color(cancelar, lv_color_hex(COLOR_LINEA), 0);
     lv_obj_add_event_cb(cancelar, al_cancelar, LV_EVENT_CLICKED, NULL);
     lv_obj_t *etiqueta = lv_label_create(cancelar);
-    lv_label_set_text(etiqueta, "Cancelar");
+    lv_label_set_text(etiqueta, TR("Cancel", "Cancelar"));
     lv_obj_center(etiqueta);
 }
 

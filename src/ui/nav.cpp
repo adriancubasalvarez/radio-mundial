@@ -62,6 +62,18 @@ void nav_reproducir(void)
     printf("Reproduciendo: %s (%s)\n  %s\n", nav.emisora.nombre, nav.pais.codigo, nav.emisora.url);
 }
 
+void nav_reiniciar(void)
+{
+    /* La pantalla actual puede ser otro mapamundi, que comparte el mapa en
+     * memoria con el nuevo: hay que borrarla ANTES de crear el nuevo. Para
+     * eso se pasa por una pantalla vacía, sin animación (se borra al momento). */
+    lv_obj_t *vacia = lv_obj_create(NULL);
+    lv_obj_set_style_bg_color(vacia, lv_color_hex(0x0B1D33), 0);
+    lv_scr_load_anim(vacia, LV_SCR_LOAD_ANIM_NONE, 0, 0, true);
+    tope = -1;
+    nav_ir(PANT_MUNDO);
+}
+
 void nav_atras(void)
 {
     if (tope <= 0) {

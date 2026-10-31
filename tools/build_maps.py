@@ -158,7 +158,8 @@ def cargar_paises(escala, config):
             paises[codigo]["geom"] = unary_union([paises[codigo]["geom"], geom])
         else:
             nombre = config["nombres"].get(codigo) or (p.get("NAME_ES") or p["NAME"]).strip()
-            paises[codigo] = {"nombre": nombre, "region": region, "geom": geom}
+            nombre_en = config.get("nombres_en", {}).get(codigo) or (p.get("NAME_EN") or p["NAME"]).strip()
+            paises[codigo] = {"nombre": nombre, "nombre_en": nombre_en, "region": region, "geom": geom}
     return paises, sin_region
 
 
@@ -392,7 +393,7 @@ def generar_region(config, region, paises, sin_region):
     for n, ((codigo, p), g, tono) in enumerate(zip(propios, geoms_px, tonos)):
         indice = IDX_PRIMERO + n
         paleta.append(tonos_rgb[tono])
-        lista.append({"codigo": codigo, "nombre": p["nombre"], "indice": indice})
+        lista.append({"codigo": codigo, "nombre": p["nombre"], "en": p["nombre_en"], "indice": indice})
         objetivos.append((g, indice))
 
     # Grandes primero, para que los enclaves (Lesoto, San Marino...) queden encima
@@ -414,6 +415,7 @@ def generar_region(config, region, paises, sin_region):
     return {
         "id": rid,
         "nombre": region["nombre"],
+        "nombre_en": region["nombre_en"],
         "indice": region["indice"],
         "imagen": f"mapas/{rid}.bin",
         "zonas": f"mapas/{rid}_zonas.bin",
@@ -425,7 +427,7 @@ def guardar_indices(indice):
     """Índices que lee el firmware, pequeños para no agotar la RAM de la
     placa: el completo (regiones.json, también lo usan las herramientas), un
     archivo por región con solo sus países (regiones/<id>.json) y la lista
-    de nombres de país en texto, una línea por país (paises.txt)."""
+    de nombres de país en texto, una línea por país con el código, el nombre en español y en inglés (paises.txt)."""
     compacto = {"ensure_ascii": False, "separators": (",", ":")}
     (DATA / "regiones.json").write_text(json.dumps(indice, **compacto), encoding="utf-8")
     carpeta = DATA / "regiones"
@@ -433,7 +435,7 @@ def guardar_indices(indice):
     lineas = []
     for r in indice["regiones"]:
         (carpeta / f"{r['id']}.json").write_text(json.dumps(r["paises"], **compacto), encoding="utf-8")
-        lineas += [f"{p['codigo']}\t{p['nombre']}" for p in r["paises"]]
+        lineas += [f"{p['codigo']}\t{p['nombre']}\t{p['en']}" for p in r["paises"]]
     (DATA / "paises.txt").write_text("\n".join(lineas) + "\n", encoding="utf-8")
     print(f"Índices guardados: regiones.json, regiones/*.json ({len(indice['regiones'])}), paises.txt")
 

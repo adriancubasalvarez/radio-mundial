@@ -15,6 +15,7 @@
 #include "mapa.h"
 #include "ajustes.h"
 #include "hal.h"
+#include "idioma.h"
 
 #include <lvgl.h>
 #include <stdio.h>
@@ -58,9 +59,9 @@ static void pie_por_defecto(void)
         }
         nav.hay_sonando = false;
         if (hal_red_estado() == RED_CONECTANDO) {
-            poner_pie(LV_SYMBOL_WIFI "  Conectando a la WiFi...", COLOR_SECUNDARIO);
+            poner_pie(TR(LV_SYMBOL_WIFI "  Connecting to Wi-Fi...", LV_SYMBOL_WIFI "  Conectando a la WiFi..."), COLOR_SECUNDARIO);
         } else {
-            poner_pie("Toca una región", COLOR_SECUNDARIO);
+            poner_pie(TR("Tap a region", "Toca una región"), COLOR_SECUNDARIO);
         }
     }
 }
@@ -143,7 +144,7 @@ static void al_pulsar_favoritos(lv_event_t *e)
 static void al_mantener_cabecera(lv_event_t *e)
 {
     (void)e;
-    hal_red_configurar();
+    ui_ajustes_abrir();
 }
 
 static void al_pulsar_buscar(lv_event_t *e)
@@ -181,8 +182,8 @@ lv_obj_t *pantalla_mundo(void)
     lv_obj_t *buscar = comun_boton_cabecera(cabecera, SIMBOLO_BUSCAR, al_pulsar_buscar);
     lv_obj_align(buscar, LV_ALIGN_RIGHT_MID, -88, 0);
 
-    /* Mantener pulsado el logo o el título 2 segundos abre el portal WiFi
-     * para cambiar de red (hasta que haya una pantalla de ajustes) */
+    /* Mantener pulsado el logo o el título 2 segundos abre los ajustes
+     * (idioma y red WiFi) */
     lv_obj_add_flag(cabecera, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(cabecera, al_mantener_cabecera, LV_EVENT_LONG_PRESSED, NULL);
 
@@ -193,7 +194,7 @@ lv_obj_t *pantalla_mundo(void)
     temporizador_pie = lv_timer_create(al_refrescar_pie, PERIODO_PIE, NULL);
 
     if (!mapa_cargar(&mapa_mundo, nav.indice.imagen, nav.indice.zonas)) {
-        lv_label_set_text(etiqueta_pie, "Faltan los mapas en data/\nEjecuta tools/build_maps.py");
+        lv_label_set_text(etiqueta_pie, "Maps missing in data/\nRun tools/build_maps.py");
         lv_obj_center(etiqueta_pie);
         return pantalla;
     }
@@ -232,7 +233,7 @@ void ui_inicio(void)
 
     if (!datos_cargar_indice(&nav.indice)) {
         lv_obj_t *error = lv_label_create(lv_scr_act());
-        lv_label_set_text(error, "No se encuentra data/regiones.json\nEjecuta tools/build_maps.py");
+        lv_label_set_text(error, "data/regiones.json not found\nRun tools/build_maps.py");
         lv_obj_center(error);
         return;
     }

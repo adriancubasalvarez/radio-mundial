@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install Radio Mundial</title>
+<meta name="description" content="Install Radio Mundial on your ESP32 board from your browser, no software needed.">
+<!-- ESP Web Tools (Apache-2.0): installs the firmware over USB from the browser -->
+<script type="module" src="https://unpkg.com/esp-web-tools@10.4.0/dist/web/install-button.js?module"></script>
+<style>
+  :root {
+    --fondo: #0B1D33;
+    --tarjeta: #12304F;
+    --linea: #1E3A5C;
+    --acento: #FFC845;
+    --texto: #FFFFFF;
+    --suave: #9FB3C8;
+    --error: #FF7A6B;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 48px; }
+  header { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+  header svg { flex: none; }
+  .idioma { margin-left: auto; padding: 6px 12px; border: 1px solid var(--linea); border-radius: 8px; text-decoration: none; }
+  h1 { margin: 0; font-size: 2rem; color: var(--acento); letter-spacing: .01em; }
+  .lema { margin: 4px 0 28px; color: var(--suave); }
+  h2 { font-size: 1.15rem; margin: 32px 0 12px; }
+  .paso { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+          border-radius: 50%; background: var(--acento); color: var(--fondo); font-weight: 700; margin-right: 8px; }
+  .placas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .placa { background: var(--tarjeta); border: 2px solid var(--linea); border-radius: 12px; padding: 16px;
+           cursor: pointer; text-align: left; color: inherit; font: inherit; }
+  .placa:hover:not(:disabled) { border-color: var(--suave); }
+  .placa[aria-pressed="true"] { border-color: var(--acento); }
+  .placa:disabled { opacity: .5; cursor: not-allowed; }
+  .placa strong { display: block; font-size: 1.05rem; }
+  .placa span { color: var(--suave); font-size: .9rem; }
+  .etiqueta { display: inline-block; margin-top: 8px; padding: 2px 8px; border-radius: 6px; font-size: .8rem;
+              background: var(--linea); color: var(--suave); }
+  .instalar { background: var(--tarjeta); border-radius: 12px; padding: 20px; margin-top: 12px; }
+  esp-web-install-button button[slot="activate"] {
+    background: var(--acento); color: var(--fondo); border: 0; border-radius: 10px;
+    padding: 14px 28px; font: 700 1.05rem system-ui, sans-serif; cursor: pointer;
+  }
+  esp-web-install-button button[slot="activate"]:hover { filter: brightness(1.08); }
+  .aviso { color: var(--error); }
+  ol, ul { padding-left: 1.3em; }
+  li { margin: 6px 0; }
+  a { color: var(--acento); }
+  code { background: var(--linea); padding: 1px 6px; border-radius: 4px; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--linea); color: var(--suave); font-size: .9rem; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <!-- Logo: globe with radio waves -->
+    <svg width="56" height="56" viewBox="0 0 64 64" aria-hidden="true">
+      <g fill="none" stroke="#FFC845" stroke-width="2.5" stroke-linecap="round">
+        <path d="M10 22a26 26 0 0 0 0 20M5 17a33 33 0 0 0 0 30M54 22a26 26 0 0 1 0 20M59 17a33 33 0 0 1 0 30"/>
+      </g>
+      <circle cx="32" cy="32" r="18" fill="#2F6FA8" stroke="#FFC845" stroke-width="2.5"/>
+      <g fill="none" stroke="#FFC845" stroke-width="1.6">
+        <ellipse cx="32" cy="32" rx="8" ry="18"/><path d="M32 14v36M14 32h36M17 23h30M17 41h30"/>
+      </g>
+    </svg>
+    <div>
+      <h1>Radio Mundial</h1>
+    </div>
+    <a class="idioma" href="../instalar/" hreflang="es" lang="es">Español</a>
+  </header>
+  <p class="lema">Internet radio with a touch world map. Install it on your board right here: no software, just your browser and a USB cable.</p>
+
+  <h2><span class="paso">1</span>Choose your board</h2>
+  <div class="placas" role="group" aria-label="Board">
+    <button class="placa" data-placa="cyd" aria-pressed="true">
+      <strong>CYD 2.8" Freenove FNK0114F</strong>
+      <span>ESP32, resistive touch screen</span><br>
+      <span class="etiqueta">Testing</span>
+    </button>
+    <button class="placa" data-placa="fnk0104" disabled>
+      <strong>Freenove FNK0104</strong>
+      <span>ESP32-S3, capacitive touch and audio</span><br>
+      <span class="etiqueta">Coming soon</span>
+    </button>
+  </div>
+
+  <h2><span class="paso">2</span>Connect and install</h2>
+  <div class="instalar">
+    <ol>
+      <li>Connect the board to your computer with a <strong>USB data cable</strong> (some cables only charge).</li>
+      <li>Click <strong>Install</strong>, pick the board's port in the browser window and confirm.</li>
+      <li>Wait until it finishes (1–2 minutes). Don't unplug the board.</li>
+    </ol>
+    <esp-web-install-button id="instalador" manifest="../firmware/manifest-cyd.json">
+      <button slot="activate">Install Radio Mundial</button>
+      <span slot="unsupported" class="aviso">Your browser can't install: use <strong>Chrome</strong> or <strong>Edge</strong> on a computer (not on a phone).</span>
+      <span slot="not-allowed" class="aviso">Installing requires a secure page (https).</span>
+    </esp-web-install-button>
+  </div>
+
+  <h2><span class="paso">3</span>Language and Wi-Fi</h2>
+  <ul>
+    <li><strong>The first time it starts</strong>, the radio asks for your language: tap <strong>English</strong>.</li>
+    <li><strong>When the installation finishes</strong>, the same window offers to connect the radio to your Wi-Fi: pick your network and type the password.</li>
+    <li><strong>Or from your phone</strong>: if the radio has no Wi-Fi, its screen shows "Connect the radio to your Wi-Fi" and a QR code. Join the <code>RadioMundial-XXXX</code> network with your phone and a page opens to choose your Wi-Fi.</li>
+    <li>To change the Wi-Fi or the language later: press and hold the "Radio Mundial" title on the screen for <strong>2 seconds</strong>.</li>
+  </ul>
+  <p>The Wi-Fi must be <strong>2.4 GHz</strong> (ESP32 boards don't use 5 GHz).</p>
+
+  <h2>The board doesn't show up in the list?</h2>
+  <ul>
+    <li>Try another USB cable or another port on your computer.</li>
+    <li>The CYD uses the <strong>CH340</strong> USB chip: on Windows and macOS you may need its <a href="https://www.wch-ic.com/downloads/CH341SER_EXE.html" rel="noopener">official driver</a>.</li>
+    <li>Still not there? Hold the board's <strong>BOOT</strong> button while you plug it in.</li>
+  </ul>
+
+  <footer>
+    A project by <strong>@Adriancubas1980</strong> ·
+    <a href="https://www.youtube.com/@Adriancubas1980" rel="noopener">YouTube</a> ·
+    <a href="https://github.com/adriancubasalvarez/radio-mundial" rel="noopener">Source code on GitHub</a><br>
+    Code GPL-3.0 · Content CC BY-NC-SA 4.0 · Stations from <a href="https://www.radio-browser.info/" rel="noopener">radio-browser.info</a> · Maps from Natural Earth
+  </footer>
+</main>
+<script>
+  // Changing board: each one has its own manifest (manifest-<board>.json)
+  const instalador = document.getElementById("instalador");
+  document.querySelectorAll(".placa").forEach((boton) => {
+    boton.addEventListener("click", () => {
+      if (boton.disabled) return;
+      document.querySelectorAll(".placa").forEach((b) => b.setAttribute("aria-pressed", b === boton));
+      instalador.setAttribute("manifest", `../firmware/manifest-${boton.dataset.placa}.json`);
+    });
+  });
+</script>
+</body>
+</html>

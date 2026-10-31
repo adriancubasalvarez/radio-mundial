@@ -10,6 +10,7 @@
 #include "comun.h"
 #include "ajustes.h"
 #include "hal.h"
+#include "idioma.h"
 
 #include <lvgl.h>
 #include <stdio.h>
@@ -65,7 +66,7 @@ static void empezar(void)
     nav_reproducir();
     llego_a_sonar = false;
     lv_label_set_text(icono_boton, LV_SYMBOL_STOP);
-    mostrar_estado("Conectando...", COLOR_SECUNDARIO);
+    mostrar_estado(TR("Connecting...", "Conectando..."), COLOR_SECUNDARIO);
 }
 
 static void parar(void)
@@ -73,7 +74,7 @@ static void parar(void)
     audio_parar();
     nav.hay_sonando = false;
     lv_label_set_text(icono_boton, LV_SYMBOL_PLAY);
-    mostrar_estado("Parado", COLOR_SECUNDARIO);
+    mostrar_estado(TR("Stopped", "Parado"), COLOR_SECUNDARIO);
 }
 
 static void siguiente_aleatoria(void)
@@ -111,12 +112,12 @@ static void vigilar(lv_timer_t *t)
             snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s", titulo);
             mostrar_estado(texto, COLOR_ACENTO);
         } else {
-            mostrar_estado("Sonando", COLOR_ACENTO);
+            mostrar_estado(TR("Playing", "Sonando"), COLOR_ACENTO);
         }
         break;
     }
     case AUDIO_CONECTANDO:
-        mostrar_estado("Conectando...", COLOR_SECUNDARIO);
+        mostrar_estado(TR("Connecting...", "Conectando..."), COLOR_SECUNDARIO);
         break;
     case AUDIO_ERROR:
     case AUDIO_PARADO:
@@ -125,9 +126,10 @@ static void vigilar(lv_timer_t *t)
         nav.hay_sonando = false;
         lv_label_set_text(icono_boton, LV_SYMBOL_PLAY);
         if (nav.aleatoria) {
-            mostrar_estado("No responde: buscando otra...", COLOR_ERROR);
+            mostrar_estado(TR("Not responding: finding another...", "No responde: buscando otra..."), COLOR_ERROR);
         } else {
-            mostrar_estado(llego_a_sonar ? "Se ha cortado la emisora" : "No se pudo reproducir esta emisora",
+            mostrar_estado(llego_a_sonar ? TR("The station dropped", "Se ha cortado la emisora")
+                                         : TR("This station could not be played", "No se pudo reproducir esta emisora"),
                            COLOR_ERROR);
         }
         printf("Fallo: %s\n", nav.emisora.nombre);
@@ -163,7 +165,7 @@ static void al_pulsar_favorito(lv_event_t *e)
     bool ahora = ajustes_alternar_favorito(&nav.emisora, &nav.pais);
     pintar_favorito();
     if (!ahora && ajustes.num_favoritos >= MAX_FAVORITOS && !ajustes_es_favorito(nav.emisora.url)) {
-        mostrar_estado("Ya tienes 20 favoritos: quita alguno", COLOR_ERROR);
+        mostrar_estado(TR("You already have 20 favorites: remove one", "Ya tienes 20 favoritos: quita alguno"), COLOR_ERROR);
     }
 }
 
@@ -275,7 +277,7 @@ lv_obj_t *pantalla_sonando(void)
     if (misma && (estado == AUDIO_SONANDO || estado == AUDIO_CONECTANDO)) {
         lv_label_set_text(icono_boton, LV_SYMBOL_STOP);
         llego_a_sonar = (estado == AUDIO_SONANDO);
-        mostrar_estado(llego_a_sonar ? "Sonando" : "Conectando...",
+        mostrar_estado(llego_a_sonar ? TR("Playing", "Sonando") : TR("Connecting...", "Conectando..."),
                        llego_a_sonar ? COLOR_ACENTO : COLOR_SECUNDARIO);
     } else {
         empezar();
