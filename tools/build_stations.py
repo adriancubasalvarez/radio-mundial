@@ -336,6 +336,10 @@ def guardar(por_pais, maximo, destino):
             buscar.append((c["puntos"], f"{codigo}\t{i}\t{c['g']}\t{clave_busqueda(c['n'])}\t{c['n']}"))
 
     (salida / "indice.json").write_text(json.dumps(conteo, separators=(",", ":")), encoding="utf-8")
+    # La misma información en texto, una línea por país («ES<TAB>30»): el
+    # firmware la lee línea a línea casi sin gastar RAM
+    (salida / "indice.txt").write_text("".join(f"{c}\t{n}\n" for c, n in sorted(conteo.items())),
+                                       encoding="utf-8")
 
     # Índice de búsqueda, de la más popular del mundo a la menos: así los
     # primeros resultados que encuentra el firmware son los más conocidos.

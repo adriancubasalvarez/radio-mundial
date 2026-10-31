@@ -99,16 +99,45 @@ const Region *datos_region_por_indice(const IndiceMundo *indice, uint8_t color)
     return NULL;
 }
 
+/* Recorre emisoras/indice.txt («código<TAB>número» por línea) llamando a
+ * visitar(código, número, dato) en cada país. Se lee línea a línea: apenas
+ * gasta RAM. Devuelve false si no existe el índice. */
+static bool recorrer_indice(void (*visitar)(const char *, int, void *), void *dato)
+{
+    HalArchivo *archivo = hal_archivo_abrir("emisoras/indice.txt");
+    if (archivo == NULL) {
+        return false;
+    }
+    char linea[24];
+    while (hal_archivo_linea(archivo, linea, sizeof(linea))) {
+        char *tab = strchr(linea, '\t');
+        if (tab != NULL) {
+            *tab = '\0';
+            visitar(linea, atoi(tab + 1), dato);
+        }
+    }
+    hal_archivo_cerrar(archivo);
+    return true;
+}
+
+static void anotar_cuenta(const char *codigo, int numero, void *dato)
+{
+    ListaPaises *lista = (ListaPaises *)dato;
+    for (uint8_t i = 0; i < lista->num; i++) {
+        if (strcmp(lista->paises[i].codigo, codigo) == 0) {
+            lista->paises[i].emisoras = (uint8_t)(numero > 255 ? 255 : numero);
+        }
+    }
+}
+
 /* Rellena cuántas emisoras tiene cada país. Si no existe el índice, se
  * supone que todos tienen alguna para no bloquear la navegación. */
 static void contar_emisoras(ListaPaises *lista)
 {
-    JsonDocument doc;
-    bool hay_indice = leer_json("emisoras/indice.json", doc);
-
-    for (uint8_t i = 0; i < lista->num; i++) {
-        Pais *pais = &lista->paises[i];
-        pais->emisoras = hay_indice ? (doc[pais->codigo] | 0) : 1;
+    if (!recorrer_indice(anotar_cuenta, lista)) {
+        for (uint8_t i = 0; i < lista->num; i++) {
+            lista->paises[i].emisoras = 1;
+        }
     }
 }
 
@@ -207,32 +236,45 @@ bool datos_buscar_pais(const char *codigo, Pais *pais)
     return encontrado;
 }
 
+/* Para elegir país al azar: primero se cuentan los que tienen emisoras y
+ * luego se recorre el índice otra vez hasta llegar al elegido */
+typedef struct {
+    size_t contador;      /* países con emisoras vistos hasta ahora */
+    size_t elegido;       /* posición elegida (en la segunda pasada) */
+    char codigo[3];       /* resultado */
+} Sorteo;
+
+static void contar_con_emisoras(const char *codigo, int numero, void *dato)
+{
+    (void)codigo;
+    ((Sorteo *)dato)->contador += (numero > 0);
+}
+
+static void buscar_elegido(const char *codigo, int numero, void *dato)
+{
+    Sorteo *s = (Sorteo *)dato;
+    if (numero > 0 && s->contador++ == s->elegido) {
+        strncpy(s->codigo, codigo, sizeof(s->codigo) - 1);
+    }
+}
+
 bool datos_emisora_aleatoria(Emisora *emisora, Pais *pais)
 {
-    JsonDocument indice;
-    if (!leer_json("emisoras/indice.json", indice)) {
+    Sorteo sorteo;
+    memset(&sorteo, 0, sizeof(sorteo));
+    if (!recorrer_indice(contar_con_emisoras, &sorteo) || sorteo.contador == 0) {
         return false;
     }
-
-    /* Países con alguna emisora */
-    JsonObjectConst paises = indice.as<JsonObjectConst>();
-    size_t con_emisoras = 0;
-    for (JsonPairConst p : paises) {
-        con_emisoras += (p.value().as<int>() > 0);
-    }
+    size_t con_emisoras = sorteo.contador;
 
     /* Se intenta unas cuantas veces por si algún archivo falla */
-    for (int intento = 0; intento < 5 && con_emisoras > 0; intento++) {
-        size_t elegido = hal_aleatorio() % con_emisoras;
-        const char *codigo = NULL;
-        for (JsonPairConst p : paises) {
-            if (p.value().as<int>() > 0 && elegido-- == 0) {
-                codigo = p.key().c_str();
-                break;
-            }
-        }
+    for (int intento = 0; intento < 5; intento++) {
+        memset(&sorteo, 0, sizeof(sorteo));
+        sorteo.elegido = hal_aleatorio() % con_emisoras;
+        recorrer_indice(buscar_elegido, &sorteo);
+        const char *codigo = sorteo.codigo;
         ListaEmisoras lista;
-        if (codigo == NULL || !datos_cargar_emisoras(codigo, &lista) || lista.num == 0) {
+        if (codigo[0] == '\0' || !datos_cargar_emisoras(codigo, &lista) || lista.num == 0) {
             continue;
         }
         *emisora = lista.emisoras[hal_aleatorio() % lista.num];
