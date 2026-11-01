@@ -34,6 +34,9 @@ grosor_frente = 2.5;
 grosor_tapa = 2.5;
 chaflan = 1.2;      // chaflán del borde del frontal y de la tapa
 holgura = 0.25;     // holgura de encaje entre piezas
+guia_grosor = 2;    // pestaña de la tapa que entra en las paredes
+guia_alto = 4;
+guia_chaflan = 0.6;
 
 /* [Inclinación] */
 // Grados hacia atrás (0 = sin patas)
@@ -241,22 +244,25 @@ module tapa() {
         union() {
             // placa con chaflán en la cara exterior
             translate([0, 0, z0]) mirror([0, 0, 1]) bloque_chaflan(grosor_tapa);
-            // pestaña que encaja dentro de las paredes
-            translate([0, 0, z0 + grosor_tapa - 0.01]) linear_extrude(2)
-                difference() {
-                    contorno(-pared - holgura);
-                    contorno(-pared - holgura - 1.2);
-                    for (e = esquinas) translate(e) circle(d = 9);
+            // pestaña que encaja dentro de las paredes, con chaflán en la punta
+            translate([0, 0, z0 + grosor_tapa - 0.01]) difference() {
+                hull() {
+                    linear_extrude(guia_alto - guia_chaflan) contorno(-pared - holgura);
+                    linear_extrude(guia_alto) contorno(-pared - holgura - guia_chaflan);
                 }
+                translate([0, 0, -1]) linear_extrude(guia_alto + 2) contorno(-pared - holgura - guia_grosor);
+                for (e = esquinas) translate([e[0], e[1], -1]) cylinder(d = 9, h = guia_alto + 2);
+            }
         }
         // tornillos M3 avellanados
         for (e = esquinas) translate([e[0], e[1], z0 - 0.01]) {
             cylinder(d = 3.4, h = grosor_tapa + 1);
             cylinder(d1 = 6.4, d2 = 3.4, h = 1.6);
         }
-        // ventilación: ranuras horizontales detrás de la placa
-        translate([placa_x + 12, placa_y + 10, z0 - 1]) linear_extrude(grosor_tapa + 2)
-            for (i = [0 : 5]) translate([0, i * 5.5]) rect_redondo([56, 2.4], 1.1);
+        // ventilación: ranuras horizontales centradas detrás de la placa
+        // (rect_redondo dibuja centrado; lejos de la pestaña)
+        translate([placa_x + pcb[0] / 2, placa_y + pcb[1] / 2, z0 - 1]) linear_extrude(grosor_tapa + 2)
+            for (i = [-3 : 3]) translate([0, i * 5]) rect_redondo([64, 2.4], 1.1);
         // textos grabados (se leen mirando la tapa por detrás)
         translate([0, 0, z0 - 1]) linear_extrude(grabado + 1) mirror([1, 0, 0]) {
             translate([-(ancho - 38), altavoz_cy + 4]) text(texto_tapa_1, size = 4.5, font = fuente, halign = "center", spacing = 1.08);
