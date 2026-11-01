@@ -200,10 +200,12 @@ module grabados_frente() {
 }
 
 module hueco_usb() {
-    // en la pared izquierda, delante del conector de la placa
-    translate([-1, placa_y + pcb[1] / 2, placa_z + usb_z])
+    // en la pared izquierda, delante del conector de la placa;
+    // 2 mm más alto hacia atrás para que quepa el cable aunque la placa
+    // real quede algo más al fondo que en el modelo
+    translate([-1, placa_y + pcb[1] / 2, placa_z + usb_z - 1])
         rotate([0, 90, 0]) linear_extrude(pared + 2)
-            rect_redondo([8, 13], 2.5);   // [z, y] tras el giro
+            rect_redondo([10, 13], 2.5);   // [z, y] tras el giro
 }
 
 module frente() {
