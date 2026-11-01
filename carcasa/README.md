@@ -22,9 +22,9 @@ The body is printed with the front on the bed, so the grille, the bevelled windo
 
 ## Hardware
 
-- 4 × M3 × 6 self-tapping screws (board to the front posts).
+- 4 × M3 self-tapping screws for the board: **M3 × 6** (FNK0104) or **M3 × 5** (CYD), so they do not reach the front face.
 - 4 × M3 × 10 countersunk self-tapping screws (back cover).
-- 3 × M2.5 × 6 self-tapping screws (speaker ring).
+- 3 × M2.5 × 5 self-tapping screws (speaker ring).
 - 1 × 40 mm round speaker, 4–8 Ω, 1–3 W.
   The FNK0104 accepts up to 2 W at 4 Ω or 1.5 W at 8 Ω, through a 1.25 mm connector.
 - Optional: a thin foam ring between the speaker and the front, for a better seal.
@@ -70,9 +70,9 @@ Ajustes recomendados: PLA, capas de 0,2 mm, 3 perímetros y relleno del 15–20 
 
 ### Tornillería
 
-- 4 tornillos M3 × 6 rosca chapa (placa a los postes).
+- 4 tornillos M3 rosca chapa para la placa: **M3 × 6** (FNK0104) o **M3 × 5** (CYD), para que no lleguen a la cara frontal.
 - 4 tornillos M3 × 10 avellanados rosca chapa (tapa).
-- 3 tornillos M2,5 × 6 rosca chapa (aro del altavoz).
+- 3 tornillos M2,5 × 5 rosca chapa (aro del altavoz).
 - 1 altavoz redondo de 40 mm, de 4–8 Ω y 1–3 W.
   La FNK0104 admite hasta 2 W a 4 Ω o 1,5 W a 8 Ω, con un conector de 1,25 mm.
 

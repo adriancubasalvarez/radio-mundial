@@ -33,6 +33,7 @@ pared = 2.5;        // paredes laterales
 grosor_frente = 2.5;
 grosor_tapa = 2.5;
 chaflan = 1.2;      // chaflán del borde del frontal y de la tapa
+piel_frente = 1.2;  // plástico mínimo entre un agujero guía y la cara frontal
 holgura = 0.25;     // holgura de encaje entre piezas
 guia_grosor = 2;    // pestaña de la tapa que entra en las paredes
 guia_alto = 4;
@@ -50,6 +51,8 @@ rejilla_d = 34;          // zona abierta de la rejilla
 altavoz_cx = 120;        // centro de la rejilla
 altavoz_cy = 35;
 aro_tornillos_r = 25.5;  // radio de los 3 tornillos del aro
+// ángulos de los tornillos del aro: ninguno bajo el texto del frontal
+aro_angulos = [30, 150, 270];
 
 /* [Textos (grabados, en inglés)] */
 texto_frente = "RADIO MUNDIAL";
@@ -150,7 +153,7 @@ module soporte_altavoz() {
             translate([0, 0, -1]) cylinder(r = altavoz_d / 2 + 0.4, h = altavoz_brida + 2);
         }
         // 3 torretas para los tornillos del aro
-        for (ang = [90, 210, 330])
+        for (ang = aro_angulos)
             rotate(ang) translate([aro_tornillos_r, 0, 0]) cylinder(d = 6, h = altavoz_brida + 0.01);
     }
 }
@@ -222,16 +225,16 @@ module frente() {
         rejilla();
         grabados_frente();
         hueco_usb();
-        // agujeros guía M3 de la placa (tornillo M3 × 6 rosca chapa)
+        // agujeros guía M3 de la placa (M3 × 6 en la FNK0104, M3 × 5 en la CYD)
         for (a = agujeros)
-            translate([placa_x + a[0], placa_y + a[1], placa_z - 1]) cylinder(d = 2.5, h = pila + 1 + grosor_frente - 0.8);
+            translate([placa_x + a[0], placa_y + a[1], placa_z - 1]) cylinder(d = 2.5, h = pila + 1 + grosor_frente - piel_frente);
         // agujeros guía M3 de la tapa (tornillo M3 × 10)
         for (e = esquinas)
             translate([e[0], e[1], -fondo_cuerpo - 1]) cylinder(d = 2.6, h = 13);
-        // agujeros guía M2,5 del aro del altavoz
+        // agujeros guía M2,5 del aro del altavoz (M2,5 × 5)
         translate([altavoz_cx, altavoz_cy, -grosor_frente - altavoz_brida - 1])
-            for (ang = [90, 210, 330])
-                rotate(ang) translate([aro_tornillos_r, 0, 0]) cylinder(d = 2.1, h = altavoz_brida + 1 + grosor_frente - 0.8);
+            for (ang = aro_angulos)
+                rotate(ang) translate([aro_tornillos_r, 0, 0]) cylinder(d = 2.1, h = altavoz_brida + 1 + grosor_frente - piel_frente);
     }
 }
 
@@ -275,13 +278,17 @@ module tapa() {
 //  Aro del altavoz
 // ---------------------------------------------------------------------
 module aro() {
-    translate([altavoz_cx, altavoz_cy, -grosor_frente - altavoz_brida - 2])
-        difference() {
-            cylinder(r = aro_tornillos_r + 3.5, h = 2);
-            translate([0, 0, -1]) cylinder(d = altavoz_d - 4, h = 4);
-            for (ang = [90, 210, 330])
-                rotate(ang) translate([aro_tornillos_r, 0, -1]) cylinder(d = 2.9, h = 4);
-        }
+    // recortado para que no toque las paredes
+    intersection() {
+        translate([0, 0, -fondo]) linear_extrude(fondo) contorno(-pared - 0.5);
+        translate([altavoz_cx, altavoz_cy, -grosor_frente - altavoz_brida - 2])
+            difference() {
+                cylinder(r = aro_tornillos_r + 3.5, h = 2);
+                translate([0, 0, -1]) cylinder(d = altavoz_d - 4, h = 4);
+                for (ang = aro_angulos)
+                    rotate(ang) translate([aro_tornillos_r, 0, -1]) cylinder(d = 2.9, h = 4);
+            }
+    }
 }
 
 // ---------------------------------------------------------------------
