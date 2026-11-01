@@ -23,3 +23,7 @@ copias_placa/
 
 # Previsualizaciones de los mapas y el logo (se regeneran con los scripts)
 tools/preview/
+
+# Carcasa: modelo de la placa (de Freenove) y STEP generados, muy pesados
+carcasa/referencia/
+carcasa/stl/*.step
