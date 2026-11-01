@@ -74,10 +74,12 @@ agujeros = [[4, 4], [82, 4], [4, 46], [82, 46]];
 
 // [pila delante del PCB, x del área activa, ancho área, alto área,
 //  fondo de componentes detrás del PCB, z del centro del USB-C]
-// CYD: medido en el STEP de Freenove (3D MODELS/).
+// CYD: medido en el STEP de Freenove (3D MODELS/), salvo la pila: en la
+//      placa real la pantalla es más gruesa (2,83 en el STEP) y con 4,30
+//      apoya en los postes y el USB-C entra (probado impreso).
 // FNK0104: de la especificación ES3C28P (10,6 mm total, 4,7 detrás).
 //          POR VERIFICAR con la placa en la mano (llega el 2026-11-03).
-datos_cyd     = [2.83, 17.10, 57.6, 43.2, 6.33, -2.69];
+datos_cyd     = [4.30, 17.10, 57.6, 43.2, 6.33, -2.69];
 datos_fnk0104 = [4.30, 11.12, 57.6, 43.2, 6.30, -2.69];
 d = placa == "cyd" ? datos_cyd : datos_fnk0104;
 pila    = d[0];

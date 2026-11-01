@@ -22,7 +22,7 @@ The body is printed with the front on the bed, so the grille, the bevelled windo
 
 ## Hardware
 
-- 4 × M3 self-tapping screws for the board: **M3 × 6** (FNK0104) or **M3 × 5** (CYD), so they do not reach the front face.
+- 4 × M3 × 6 self-tapping screws for the board (both boards), so they do not reach the front face.
 - 4 × M3 × 10 countersunk self-tapping screws (back cover).
 - 3 × M2.5 × 5 self-tapping screws (speaker ring).
 - 1 × 40 mm round speaker, 4–8 Ω, 1–3 W.
@@ -46,7 +46,7 @@ Change `placa` (`"fnk0104"` or `"cyd"`), the sizes, the tilt or the engraved tex
 - `stl_a_step.py` converts the STL files to STEP for SolidWorks or other CAD software (`pip install cadquery-ocp`). The STEP files are faceted and large, so they are not kept in the repository.
 
 > **FNK0104 measurements are from its spec sheet and still need checking on the real board.**
-> The CYD fit was checked against Freenove's 3D model: no collisions.
+> The CYD measurements were checked with test prints on the real board.
 
 License: CC BY-NC-SA 4.0 — @Adriancubas1980
 
@@ -70,7 +70,7 @@ Ajustes recomendados: PLA, capas de 0,2 mm, 3 perímetros y relleno del 15–20 
 
 ### Tornillería
 
-- 4 tornillos M3 rosca chapa para la placa: **M3 × 6** (FNK0104) o **M3 × 5** (CYD), para que no lleguen a la cara frontal.
+- 4 tornillos M3 × 6 rosca chapa para la placa (las dos placas), para que no lleguen a la cara frontal.
 - 4 tornillos M3 × 10 avellanados rosca chapa (tapa).
 - 3 tornillos M2,5 × 5 rosca chapa (aro del altavoz).
 - 1 altavoz redondo de 40 mm, de 4–8 Ω y 1–3 W.
@@ -91,4 +91,4 @@ Cambia `placa` (`"fnk0104"` o `"cyd"`), las medidas, la inclinación o los texto
 `stl_a_step.py` genera los STEP para SolidWorks.
 
 > **Las medidas de la FNK0104 salen de su hoja de especificaciones y hay que comprobarlas con la placa real.**
-> Con la CYD se comprobó el encaje contra el modelo 3D de Freenove: sin choques.
+> Las medidas de la CYD se comprobaron con impresiones de prueba sobre la placa real.
