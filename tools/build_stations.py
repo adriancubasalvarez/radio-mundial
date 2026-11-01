@@ -26,6 +26,10 @@ Uso:
   python tools/build_stations.py --destino sd --max 100 --probar
                                               base grande para la tarjeta SD
                                               (se guarda en sd/radio/)
+  python tools/build_stations.py --destino cyd --paises US,CU,ES,FR --solo-http
+                                              base reducida para la CYD
+                                              (data_cyd/; mejor con build_cyd.py,
+                                              que copia también los mapas)
 """
 
 import argparse
@@ -49,8 +53,9 @@ from anyascii import anyascii
 RAIZ = Path(__file__).resolve().parent.parent
 CACHE = RAIZ / "tools" / "cache"
 DATA = RAIZ / "data"
-# Destinos posibles: memoria interna (data/) o tarjeta SD (sd/radio/)
-DESTINOS = {"data": DATA, "sd": RAIZ / "sd" / "radio"}
+# Destinos posibles: memoria interna (data/), tarjeta SD (sd/radio/) o la
+# base reducida de la CYD (data_cyd/)
+DESTINOS = {"data": DATA, "sd": RAIZ / "sd" / "radio", "cyd": RAIZ / "data_cyd"}
 
 ARCHIVO_BASE = CACHE / "radio-browser.json"
 ARCHIVO_PRUEBAS = CACHE / "pruebas_emisoras.json"
@@ -367,13 +372,22 @@ def main():
     parser.add_argument("--max", type=int, default=MAX_POR_PAIS, help="máximo de emisoras por país")
     parser.add_argument("--descargar", action="store_true", help="descargar la base aunque haya caché")
     parser.add_argument("--destino", choices=DESTINOS, default="data",
-                        help="data = memoria interna (por defecto); sd = tarjeta SD (sd/radio/)")
+                        help="data = memoria interna (por defecto); sd = tarjeta SD (sd/radio/); "
+                             "cyd = base reducida (data_cyd/)")
+    parser.add_argument("--paises", help="solo estos países, separados por comas (p. ej. US,CU,ES,FR)")
+    parser.add_argument("--solo-http", action="store_true",
+                        help="sin emisoras https (la CYD no tiene RAM para el cifrado)")
     args = parser.parse_args()
 
     emisoras = descargar_base(args.descargar)
     print(f"Emisoras en radio-browser: {len(emisoras)}")
 
     por_pais = agrupar_por_pais(emisoras)
+    if args.paises:
+        elegidos = {c.strip().upper() for c in args.paises.split(",")}
+        por_pais = {c: l for c, l in por_pais.items() if c in elegidos}
+    if args.solo_http:
+        por_pais = {c: [e for e in l if e["u"].startswith("http://")] for c, l in por_pais.items()}
     print(f"Pasan los filtros: {sum(len(l) for l in por_pais.values())} en {len(por_pais)} países")
 
     if args.probar:

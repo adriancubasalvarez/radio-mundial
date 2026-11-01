@@ -25,6 +25,12 @@ static void reanudar(void)
     if (!ajustes.reanudar || !ajustes.hay_ultima) {
         return;
     }
+#ifdef SIN_HTTPS
+    /* Placa sin RAM para el cifrado: una https guardada de antes no sonaría */
+    if (strncmp(ajustes.ultima.emisora.url, "https:", 6) == 0) {
+        return;
+    }
+#endif
     nav.emisora = ajustes.ultima.emisora;
     memset(&nav.pais, 0, sizeof(nav.pais));
     strncpy(nav.pais.codigo, ajustes.ultima.pais, sizeof(nav.pais.codigo) - 1);

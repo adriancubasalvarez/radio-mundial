@@ -1,0 +1,94 @@
+FR	0		france info	France Info
+US	0	ja	101 smooth jazz	101 SMOOTH JAZZ
+FR	1	j	jazz radio blues	Jazz Radio Blues
+FR	2		france inter	France Inter
+US	1	h	181 fm old school hiphop rnb	181.FM - Old School HipHop/RnB
+FR	3	h	skyrock	Skyrock
+US	2	ca	your classical relax	Your Classical - Relax
+US	3	t	977 country	977 Country
+FR	4	n	france culture	France Culture
+US	4	o	977 80s	977 80s
+US	5	p	977 hitz	977 Hitz
+US	6	e	frisky	Frisky
+FR	5	j	jazz radio	Jazz Radio
+US	7	r	rockabilly radio net	Rockabilly-radio.net
+ES	0		cadena 100	Cadena 100
+US	8	po	977 the mix	977 The Mix
+FR	6	n	fip	FIP
+US	9	ro	big r radio 80s metal fm	Big R Radio - 80s Metal FM
+FR	7	o	100 radio 80	100% Radio 80
+US	10	ro	hard rock heaven	Hard Rock Heaven
+US	11	h	181 fm the beat hiphop r b	181.FM - The Beat (HipHop/R&B)
+ES	1	nd	cadena ser espana	Cadena SER España
+ES	2	pelh	chocolate fm	Chocolate FM
+US	12	n	npr 24 hour program stream	NPR 24 Hour Program Stream
+FR	8	prt	radio nova	Radio Nova
+FR	9		la grosse radio reggae	La Grosse Radio Reggae
+FR	10	e	radio meuh	Radio Meuh
+US	13	oa	love radio only love songs 70s80s90s www love radio	LOVE RADIO Only Love Songs 70s80s90s - www.love.radio
+US	14	a	cryosleep	Cryosleep
+FR	11	jc	jazz radio classic jazz	Jazz Radio Classic Jazz
+US	15	n	infowars	Infowars
+ES	3	eo	1000 hits 80s	1000 HITS 80s
+FR	12		chante france	Chante France
+US	16	o	the big 80s station	The Big 80s Station
+ES	4		rock fm	Rock FM
+US	17	e	bassdrive	Bassdrive
+FR	13	njc	france musique	France Musique
+FR	14	l	latina salsa	Latina Salsa
+US	18	ja	977 smooth jazz	977 Smooth Jazz
+FR	15		100 radio hit	100% Radio Hit
+ES	5	e	ibiza global radio	Ibiza Global Radio
+FR	16		jazz radio funk	Jazz Radio Funk
+FR	17	o	chante france 80 s	Chante France 80's
+ES	6	n	esradio	esRadio
+ES	7	e	los 40 dance	Los 40 Dance
+US	19	o	977 oldies	977 Oldies
+FR	18		generations r b	Generations R&B
+FR	19	r	la grosse radio metal	La Grosse Radio Métal
+ES	8		cadena dial	Cadena Dial
+ES	9	pelh	chocolate fm calidad movil low bandwidth	Chocolate FM [calidad móvil-low bandwidth]
+US	20	h	2000 fm rnb hip hop	2000 FM - RnB & Hip-Hop
+FR	20	l	latina reggaeton	Latina Reggaeton
+US	21	n	nbc news radio	NBC News Radio
+US	22	ot	181 fm 80 s country	181.FM - 80's Country
+US	23	r	soft classic rock radio	Soft Classic Rock Radio
+FR	21	nj	fip jazz	FIP Jazz
+US	24	r	weow fm 92 7	WEOW FM 92.7
+US	25	a	chilltrax	Chilltrax
+FR	22	j	jazz radio only women	Jazz Radio Only Women
+US	26	ja	101 smooth jazz mellow mix	101 SMOOTH JAZZ MELLOW MIX
+ES	10	n	cadena ser radio madrid	Cadena SER Radio MADRID
+US	27	ja	the jazz groove east	The Jazz Groove - East
+US	28	prjota	nostalgie new york	Nostalgie New York
+US	29	prt	181 fm kickin country	181.FM - Kickin' Country
+ES	11	a	costa del mar chillout aac 96kbps	Costa Del Mar - Chillout (AAC 96kbps)
+ES	12		absolute chillout	Absolute Chillout
+ES	13	nd	radio marca barcelona	Radio Marca Barcelona
+ES	14	p	megastarfm	MegaStarFM
+FR	23		yoga chill	Yoga Chill
+FR	24		generations rap u s	Generations Rap U.S
+CU	0	pl	cuban flow radio	Cuban Flow Radio
+FR	25	c	france musique classique easy	France Musique | Classique Easy
+FR	26	nc	france musique la baroque	France Musique La Baroque
+FR	27		generations rap fr gold	Generations Rap FR Gold
+FR	28	je	jazz radio electro swing	Jazz Radio Electro Swing
+ES	15		loca fm deep techno	Loca FM Deep Techno
+ES	16	el	electrodanceworld radio	ElectroDanceWorld Radio
+FR	29	pr	europe 2	Europe 2
+ES	17		radiole	Radiolé
+ES	18		cope sevilla	Cope Sevilla
+ES	19		loca fm live	Loca FM live
+ES	20	n	esradio madrid	esRadio Madrid
+ES	21	plh	loca fm urban	Loca FM Urban
+ES	22		rockfm 101 7	RockFM 101.7
+ES	23	pn	hit radio	Hit radio
+ES	24	nf	radio maria espana	RADIO MARÍA ESPAÑA
+ES	25		cafe mambo ibiza radio	Cafe Mambo Ibiza Radio
+ES	26	e	loca fm twchno	Loca FM Twchno
+ES	27	n	esradio aac	esRadio_AAC
+ES	28		vaughan	Vaughan
+ES	29	f	radio maria spain espana	Radio Maria Spain Espana
+CU	1		afn 360 guantanamo bay	AFN 360 Guantanamo Bay
+CU	2		romance106	ROMANCE106
+CU	3	l	neonradioxl	Neonradioxl
