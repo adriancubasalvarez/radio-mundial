@@ -54,8 +54,8 @@ grande = altavoz == "52mm";
 altavoz_d = grande ? 52 : 40;            // diámetro exterior del altavoz
 altavoz_fondo = grande ? 32 : 16.5;      // de la brida al final del imán
 altavoz_cy = grande ? alto / 2 : 35;
-rejilla_d = grande ? 40 : 34;            // zona abierta, delante del cono
-rejilla_deco_d = grande ? 50 : rejilla_d; // hasta aquí, ranuras solo grabadas
+rejilla_d = grande ? 46 : 34;            // zona abierta, delante del cono (y su suspensión)
+rejilla_deco_d = grande ? 52 : rejilla_d; // hasta aquí, ranuras solo grabadas
 placa_nombre = [46, 9.4];                // franja maciza con el nombre (52 mm)
 // Tornillos del aro: radio y ángulos elegidos para no tocar la pared, la
 // placa ni los grabados del frontal (ninguno bajo el texto ni los filetes)

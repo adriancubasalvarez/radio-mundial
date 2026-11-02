@@ -20,7 +20,7 @@ It is about **150 × 74 × 45 mm**.
 
 ![Case for a 52 mm speaker](img/conjunto_52.png)
 
-In the 52 mm version only the centre of the grille (40 mm) is open; the outer ring of slots is engraved and decorative, so the speaker stays sealed against the front.
+In the 52 mm version only the centre of the grille (46 mm, the cone and its surround) is open; the outer ring of slots is engraved and decorative, so the speaker stays sealed against the front.
 
 Suggested settings: PLA, 0.2 mm layers, 3 walls, 15–20 % infill.
 The body is printed with the front on the bed, so the grille, the bevelled window and the engraved details need no supports. The USB-C hole is small enough to bridge.
@@ -72,7 +72,7 @@ Mide unos **150 × 74 × 45 mm**.
 | `speaker_ring.stl` | Aro que sujeta el altavoz | Plano |
 | `front_fnk0104_52.stl`, `front_cyd_52.stl`, `speaker_ring_52.stl` | Las mismas piezas para un **altavoz de 52 mm**: rejilla más grande con una placa con el nombre | Igual que arriba |
 
-En la versión de 52 mm solo está abierto el centro de la rejilla (40 mm); el anillo exterior de ranuras va grabado y es decorativo, así el altavoz queda cerrado contra el frente.
+En la versión de 52 mm solo está abierto el centro de la rejilla (46 mm, el cono y su suspensión); el anillo exterior de ranuras va grabado y es decorativo, así el altavoz queda cerrado contra el frente.
 
 Ajustes recomendados: PLA, capas de 0,2 mm, 3 perímetros y relleno del 15–20 %.
 
