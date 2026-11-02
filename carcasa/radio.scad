@@ -6,7 +6,7 @@
 //    frente  -> cuerpo con frontal, paredes, postes de la placa y del
 //               altavoz. Se imprime boca abajo (el frontal sobre la cama).
 //    tapa    -> tapa trasera con 4 tornillos M3 y ranuras de ventilación.
-//    aro     -> aro que sujeta el altavoz de 40 mm (3 tornillos M2,5).
+//    aro     -> aro que sujeta el altavoz de 40 o 52 mm (3 tornillos M2,5).
 //
 //  Coordenadas: X a la derecha, Y hacia arriba, Z hacia quien mira.
 //  El frontal está en z = 0 y la caja crece hacia z negativo.
@@ -45,14 +45,22 @@ inclinacion = 8;
 ancho_pata = 22;
 
 /* [Altavoz] */
-altavoz_d = 40;          // diámetro exterior del altavoz
+// 40mm (altavoz pequeño) o 52mm (rejilla grande con placa del nombre)
+altavoz = "40mm";
 altavoz_brida = 2.5;     // grosor del borde del altavoz
-rejilla_d = 34;          // zona abierta de la rejilla
 altavoz_cx = 120;        // centro de la rejilla
-altavoz_cy = 35;
-aro_tornillos_r = 25.5;  // radio de los 3 tornillos del aro
-// ángulos de los tornillos del aro: ninguno bajo el texto del frontal
-aro_angulos = [30, 150, 270];
+
+grande = altavoz == "52mm";
+altavoz_d = grande ? 52 : 40;            // diámetro exterior del altavoz
+altavoz_fondo = grande ? 32 : 16.5;      // de la brida al final del imán
+altavoz_cy = grande ? alto / 2 : 35;
+rejilla_d = grande ? 40 : 34;            // zona abierta, delante del cono
+rejilla_deco_d = grande ? 50 : rejilla_d; // hasta aquí, ranuras solo grabadas
+placa_nombre = [46, 9.4];                // franja maciza con el nombre (52 mm)
+// Tornillos del aro: radio y ángulos elegidos para no tocar la pared, la
+// placa ni los grabados del frontal (ninguno bajo el texto ni los filetes)
+aro_tornillos_r = grande ? 31 : 25.5;
+aro_angulos = grande ? [60, 145, 285] : [30, 150, 270];
 
 /* [Textos (grabados, en inglés)] */
 texto_frente = "RADIO MUNDIAL";
@@ -160,14 +168,27 @@ module soporte_altavoz() {
     }
 }
 
+// Ranuras horizontales recortadas en círculo, como las radios de baquelita
+// (centradas: una ranura pasa por el centro)
+module ranuras(d) {
+    intersection() {
+        circle(d = d);
+        for (i = [-ceil(d / 6.4) : ceil(d / 6.4)])
+            translate([-d / 2, i * 3.2 - 0.9]) square([d, 1.8]);
+    }
+}
+
+// Franja maciza que cruza la rejilla grande por el centro
+module franja_nombre() {
+    translate([-rejilla_deco_d / 2, -placa_nombre[1] / 2]) square([rejilla_deco_d, placa_nombre[1]]);
+}
+
 module rejilla() {
-    // ranuras horizontales recortadas en círculo, como las radios de baquelita
     translate([altavoz_cx, altavoz_cy, -grosor_frente - 1])
         linear_extrude(grosor_frente + 2)
-            intersection() {
-                circle(d = rejilla_d);
-                for (y = [-rejilla_d / 2 : 3.2 : rejilla_d / 2])
-                    translate([-rejilla_d / 2, y - 0.9]) square([rejilla_d, 1.8]);
+            difference() {
+                ranuras(rejilla_d);
+                if (grande) franja_nombre();
             }
 }
 
@@ -188,16 +209,36 @@ module grabados_frente() {
             rect_redondo(ventana + [9, 9], 4);
             rect_redondo(ventana + [7.4, 7.4], 3.2);
         }
-        // aro alrededor de la rejilla
-        translate([altavoz_cx, altavoz_cy]) difference() {
-            circle(d = rejilla_d + 6.4);
-            circle(d = rejilla_d + 4.8);
-        }
         // dos filetes "cromados" de lado a lado
         for (y = [5, alto - 5]) translate([radio_esquina + 2, y - 0.4]) square([ancho - 2 * radio_esquina - 4, 0.8]);
-        // nombre
-        translate([altavoz_cx, altavoz_cy + rejilla_d / 2 + 5.5])
-            text(texto_frente, size = 3.8, font = fuente, halign = "center", spacing = 1.08);
+        if (grande) translate([altavoz_cx, altavoz_cy]) {
+            // anillo exterior de la rejilla: mismas ranuras, solo grabadas
+            difference() {
+                ranuras(rejilla_deco_d);
+                circle(d = rejilla_d);
+                franja_nombre();
+            }
+            // aro fino alrededor
+            difference() {
+                circle(d = rejilla_deco_d + 2.4);
+                circle(d = rejilla_deco_d + 0.8);
+            }
+            // placa con el nombre: marco y letras grabados sobre la franja
+            difference() {
+                rect_redondo(placa_nombre, 2);
+                rect_redondo(placa_nombre - [1.6, 1.6], 1.2);
+            }
+            text(texto_frente, size = 3.4, font = fuente, halign = "center", valign = "center", spacing = 1.05);
+        } else {
+            // aro alrededor de la rejilla
+            translate([altavoz_cx, altavoz_cy]) difference() {
+                circle(d = rejilla_d + 6.4);
+                circle(d = rejilla_d + 4.8);
+            }
+            // nombre
+            translate([altavoz_cx, altavoz_cy + rejilla_d / 2 + 5.5])
+                text(texto_frente, size = 3.8, font = fuente, halign = "center", spacing = 1.08);
+        }
     }
 }
 
@@ -282,9 +323,14 @@ module tapa() {
 //  Aro del altavoz
 // ---------------------------------------------------------------------
 module aro() {
-    // recortado para que no toque las paredes
+    // recortado para que no toque las paredes, las torretas de las esquinas
+    // ni el borde de la placa
     intersection() {
-        translate([0, 0, -fondo]) linear_extrude(fondo) contorno(-pared - 0.5);
+        translate([0, 0, -fondo]) linear_extrude(fondo) difference() {
+            contorno(-pared - 0.5);
+            square([placa_x + pcb[0] + 0.5, alto]);
+            for (e = esquinas) translate(e) circle(d = 8);
+        }
         translate([altavoz_cx, altavoz_cy, -grosor_frente - altavoz_brida - 2])
             difference() {
                 cylinder(r = aro_tornillos_r + 3.5, h = 2);
@@ -319,7 +365,8 @@ module placa_referencia() {
 module altavoz_referencia() {
     color("#555") translate([altavoz_cx, altavoz_cy, -grosor_frente - altavoz_brida]) {
         cylinder(d = altavoz_d, h = altavoz_brida);
-        translate([0, 0, -14]) cylinder(d = 24, h = 14);
+        iman = altavoz_fondo - altavoz_brida;
+        translate([0, 0, -iman]) cylinder(d = altavoz_d * 0.6, h = iman);
     }
 }
 

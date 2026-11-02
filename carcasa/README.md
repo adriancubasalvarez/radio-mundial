@@ -16,6 +16,11 @@ It is about **150 × 74 × 45 mm**.
 | `front_cyd.stl` | Body for the **CYD FNK0114F** (ESP32) | Face down, no supports |
 | `back_cover.stl` | Back cover with vents | Outer face down |
 | `speaker_ring.stl` | Ring that clamps the speaker | Flat |
+| `front_fnk0104_52.stl`, `front_cyd_52.stl`, `speaker_ring_52.stl` | Same parts for a **52 mm speaker**: larger grille with a name plate across it | As above |
+
+![Case for a 52 mm speaker](img/conjunto_52.png)
+
+In the 52 mm version only the centre of the grille (40 mm) is open; the outer ring of slots is engraved and decorative, so the speaker stays sealed against the front.
 
 Suggested settings: PLA, 0.2 mm layers, 3 walls, 15–20 % infill.
 The body is printed with the front on the bed, so the grille, the bevelled window and the engraved details need no supports. The USB-C hole is small enough to bridge.
@@ -25,7 +30,7 @@ The body is printed with the front on the bed, so the grille, the bevelled windo
 - 4 × M3 × 6 self-tapping screws for the board (both boards), so they do not reach the front face.
 - 4 × M3 × 10 countersunk self-tapping screws (back cover).
 - 3 × M2.5 × 5 self-tapping screws (speaker ring).
-- 1 × 40 mm round speaker, 4–8 Ω, 1–3 W.
+- 1 × 40 mm round speaker, 4–8 Ω, 1–3 W (or a 52 mm one, up to 32 mm deep, with the `_52` parts).
   The FNK0104 accepts up to 2 W at 4 Ω or 1.5 W at 8 Ω, through a 1.25 mm connector.
 - Optional: a thin foam ring between the speaker and the front, for a better seal.
 
@@ -40,7 +45,7 @@ The microSD slot and the BOOT/RESET buttons stay inside. Remove the back cover t
 ## Editing
 
 `radio.scad` is parametric (OpenSCAD 2021.01 or newer).
-Change `placa` (`"fnk0104"` or `"cyd"`), the sizes, the tilt or the engraved text, then export each part with `pieza = "frente" | "tapa" | "aro"`.
+Change `placa` (`"fnk0104"` or `"cyd"`), `altavoz` (`"40mm"` or `"52mm"`), the sizes, the tilt or the engraved text, then export each part with `pieza = "frente" | "tapa" | "aro"`.
 
 - `comprobar_choque.scad` intersects the body with a board model to look for collisions.
 - `stl_a_step.py` converts the STL files to STEP for SolidWorks or other CAD software (`pip install cadquery-ocp`). The STEP files are faceted and large, so they are not kept in the repository.
@@ -65,6 +70,9 @@ Mide unos **150 × 74 × 45 mm**.
 | `front_cyd.stl` | Cuerpo para la **CYD FNK0114F** (ESP32) | Boca abajo, sin soportes |
 | `back_cover.stl` | Tapa trasera con ventilación | Cara exterior sobre la cama |
 | `speaker_ring.stl` | Aro que sujeta el altavoz | Plano |
+| `front_fnk0104_52.stl`, `front_cyd_52.stl`, `speaker_ring_52.stl` | Las mismas piezas para un **altavoz de 52 mm**: rejilla más grande con una placa con el nombre | Igual que arriba |
+
+En la versión de 52 mm solo está abierto el centro de la rejilla (40 mm); el anillo exterior de ranuras va grabado y es decorativo, así el altavoz queda cerrado contra el frente.
 
 Ajustes recomendados: PLA, capas de 0,2 mm, 3 perímetros y relleno del 15–20 %.
 
@@ -73,7 +81,7 @@ Ajustes recomendados: PLA, capas de 0,2 mm, 3 perímetros y relleno del 15–20 
 - 4 tornillos M3 × 6 rosca chapa para la placa (las dos placas), para que no lleguen a la cara frontal.
 - 4 tornillos M3 × 10 avellanados rosca chapa (tapa).
 - 3 tornillos M2,5 × 5 rosca chapa (aro del altavoz).
-- 1 altavoz redondo de 40 mm, de 4–8 Ω y 1–3 W.
+- 1 altavoz redondo de 40 mm, de 4–8 Ω y 1–3 W (o uno de 52 mm y hasta 32 mm de fondo, con las piezas `_52`).
   La FNK0104 admite hasta 2 W a 4 Ω o 1,5 W a 8 Ω, con un conector de 1,25 mm.
 
 ### Montaje
@@ -87,7 +95,7 @@ La ranura microSD y los botones BOOT/RESET quedan dentro: para usarlos se quita 
 ### Editar
 
 `radio.scad` es paramétrico (OpenSCAD 2021.01 o posterior).
-Cambia `placa` (`"fnk0104"` o `"cyd"`), las medidas, la inclinación o los textos, y exporta cada pieza con `pieza = "frente" | "tapa" | "aro"`.
+Cambia `placa` (`"fnk0104"` o `"cyd"`), `altavoz` (`"40mm"` o `"52mm"`), las medidas, la inclinación o los textos, y exporta cada pieza con `pieza = "frente" | "tapa" | "aro"`.
 `stl_a_step.py` genera los STEP para SolidWorks.
 
 > **Las medidas de la FNK0104 salen de su hoja de especificaciones y hay que comprobarlas con la placa real.**
