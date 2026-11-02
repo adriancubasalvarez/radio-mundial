@@ -39,6 +39,11 @@ bool hal_hora(int *hora, int *minuto);
 /* Número aleatorio de 32 bits */
 uint32_t hal_aleatorio(void);
 
+/* Apaga la radio: pantalla y audio fuera y a dormir hasta que se toque la
+ * pantalla. En la placa no vuelve: al despertar arranca de nuevo y suena la
+ * última emisora. En el simulador cierra la ventana. */
+void hal_apagar(void);
+
 /* ---------- Red WiFi ----------
  * Cada usuario conecta la radio a su WiFi de dos formas:
  *   - al instalarla desde la web (ESP Web Tools manda la red por USB, Improv);

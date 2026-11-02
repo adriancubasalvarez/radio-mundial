@@ -7,6 +7,7 @@
  *   espera 1000          esperar 1000 ms
  *   toca 160 120         tocar en (160, 120) de la pantalla de 320x240
  *   mantener 60 15 2500  mantener pulsado (60, 15) durante 2500 ms
+ *   arrastra 40 100 280 100 600   arrastrar el dedo de (40,100) a (280,100) en 600 ms
  *   captura mundo.bmp    guardar la pantalla en un BMP
  *   salir                cerrar el simulador
  *

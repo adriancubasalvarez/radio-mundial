@@ -22,6 +22,9 @@
 #define PIN_TOUCH_MOSI 32
 #define PIN_TOUCH_MISO 39
 #define PIN_TOUCH_CS   33
+/* Aviso de toque del XPT2046 (PENIRQ, a nivel bajo al tocar; resistencia de
+ * 10K a 3,3 V en la placa). Es un pin RTC: puede despertar al ESP32. */
+#define PIN_TOUCH_IRQ  36
 
 /* Calibración del táctil de una FNK0114F: valores en bruto en los bordes
  * del panel en vertical (240x320); el eje Y va invertido */

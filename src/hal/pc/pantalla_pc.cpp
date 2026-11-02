@@ -153,8 +153,20 @@ static void guardar_bmp(const char *ruta)
     fclose(f);
 }
 
+/* En el simulador, apagar es cerrar la ventana */
+static bool apagada;
+
+void hal_apagar(void)
+{
+    printf("Apagada (simulador): se cierra la ventana\n");
+    apagada = true;
+}
+
 bool hal_atender(void)
 {
+    if (apagada) {
+        return false;
+    }
     SDL_Event evento;
     while (SDL_PollEvent(&evento)) {
         switch (evento.type) {

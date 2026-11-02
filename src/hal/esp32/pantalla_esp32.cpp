@@ -10,6 +10,8 @@
 #include <Arduino.h>
 #include <LovyanGFX.hpp>
 #include <algorithm>
+#include <driver/gpio.h>
+#include <esp_sleep.h>
 #include <lvgl.h>
 
 class Pantalla : public lgfx::LGFX_Device {
@@ -154,6 +156,14 @@ static void leer_tactil(lv_indev_drv_t *drv, lv_indev_data_t *datos)
 
 void hal_pantalla_init(void)
 {
+    /* Si venimos de hal_apagar(), soltar los pines que se quedaron fijos */
+    gpio_hold_dis((gpio_num_t)PIN_TFT_BL);
+    gpio_hold_dis((gpio_num_t)PIN_AUDIO_EN);
+    gpio_hold_dis((gpio_num_t)PIN_TOUCH_CS);
+    gpio_hold_dis((gpio_num_t)PIN_TOUCH_SCLK);
+    gpio_hold_dis((gpio_num_t)PIN_TOUCH_MOSI);
+    gpio_deep_sleep_hold_dis();
+
     lcd.init();
     lcd.setRotation(1);  // horizontal, con el USB a la izquierda
     lcd.setBrightness(255);
@@ -210,4 +220,41 @@ void hal_brillo(uint8_t porcentaje)
         porcentaje = 100;
     }
     lcd.setBrightness(porcentaje * 255 / 100);
+}
+
+void hal_apagar(void)
+{
+    /* Amplificador y retroiluminación apagados, y que sigan así mientras el
+     * ESP32 duerme (si no, los pines quedan sueltos) */
+    pinMode(PIN_AUDIO_EN, OUTPUT);
+    digitalWrite(PIN_AUDIO_EN, HIGH);  // activo a nivel bajo
+    lcd.setBrightness(0);
+    lcd.sleep();
+    pinMode(PIN_TFT_BL, OUTPUT);
+    digitalWrite(PIN_TFT_BL, LOW);
+    gpio_hold_en((gpio_num_t)PIN_AUDIO_EN);
+    gpio_hold_en((gpio_num_t)PIN_TFT_BL);
+    /* El táctil también: con CS suelto el XPT2046 podría tomar ruido por
+     * órdenes y dejar de avisar de los toques */
+    digitalWrite(PIN_TOUCH_CS, HIGH);
+    digitalWrite(PIN_TOUCH_SCLK, LOW);
+    digitalWrite(PIN_TOUCH_MOSI, LOW);
+    gpio_hold_en((gpio_num_t)PIN_TOUCH_CS);
+    gpio_hold_en((gpio_num_t)PIN_TOUCH_SCLK);
+    gpio_hold_en((gpio_num_t)PIN_TOUCH_MOSI);
+    gpio_deep_sleep_hold_en();
+
+    /* Esperar a que se levante el dedo del deslizador: si no, despertaría
+     * nada más dormirse. Cada lectura del táctil deja el XPT2046 en reposo
+     * con el aviso de toque activado (orden 0x80). */
+    pinMode(PIN_TOUCH_IRQ, INPUT);
+    while (digitalRead(PIN_TOUCH_IRQ) == LOW) {
+        delay(20);
+    }
+    delay(300);
+
+    Serial.println("Apagada: toca la pantalla para encenderla");
+    Serial.flush();
+    esp_sleep_enable_ext0_wakeup((gpio_num_t)PIN_TOUCH_IRQ, 0);
+    esp_deep_sleep_start();
 }

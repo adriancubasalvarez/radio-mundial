@@ -11,6 +11,11 @@ static FILE *archivo;
 static uint32_t espera_hasta;   /* no leer más órdenes hasta este instante */
 static uint32_t toque_hasta;    /* el dedo está pulsado hasta este instante */
 static int toque_x, toque_y;
+/* Arrastre: el dedo va de (toque_x, toque_y) a (fin_x, fin_y) entre
+ * toque_desde y toque_hasta */
+static uint32_t toque_desde;
+static int fin_x, fin_y;
+static bool arrastrando;
 static char captura[256];
 
 void guion_iniciar(void)
@@ -35,8 +40,18 @@ bool guion_atender(uint32_t ahora, int *x, int *y, bool *pulsado, bool *salir)
     if (ahora < toque_hasta) {
         *x = toque_x;
         *y = toque_y;
+        if (arrastrando) {
+            float f = (float)(ahora - toque_desde) / (float)(toque_hasta - toque_desde);
+            *x = toque_x + (int)((fin_x - toque_x) * f);
+            *y = toque_y + (int)((fin_y - toque_y) * f);
+        }
         *pulsado = true;
         return true;
+    }
+    if (arrastrando) {  /* el dedo se levanta donde acabó el arrastre */
+        arrastrando = false;
+        toque_x = fin_x;
+        toque_y = fin_y;
     }
 
     if (ahora >= espera_hasta && captura[0] == '\0') {
@@ -46,9 +61,19 @@ bool guion_atender(uint32_t ahora, int *x, int *y, bool *pulsado, bool *salir)
             archivo = NULL;
             return false;
         }
-        int a, b, c;
+        int a, b, c, d, e;
         char nombre[256];
-        if (sscanf(linea, "mantener %d %d %d", &a, &b, &c) == 3) {
+        if (sscanf(linea, "arrastra %d %d %d %d %d", &a, &b, &c, &d, &e) == 5) {
+            toque_x = a;
+            toque_y = b;
+            fin_x = c;
+            fin_y = d;
+            toque_desde = ahora;
+            toque_hasta = ahora + e;
+            arrastrando = true;
+            espera_hasta = toque_hasta + 50;
+            printf("[guion] arrastra %d %d -> %d %d en %d ms\n", a, b, c, d, e);
+        } else if (sscanf(linea, "mantener %d %d %d", &a, &b, &c) == 3) {
             toque_x = a;
             toque_y = b;
             toque_hasta = ahora + c;
