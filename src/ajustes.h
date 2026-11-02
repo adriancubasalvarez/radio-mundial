@@ -24,6 +24,7 @@ typedef struct {
     bool reanudar;            /* al arrancar, volver a poner la última emisora */
     bool idioma_elegido;      /* false: el primer arranque pregunta el idioma */
     bool espanol;             /* idioma: true español, false inglés */
+    uint8_t luz;              /* ModoLuz (luz.h): apagada, estado o al ritmo */
     bool hay_ultima;
     EmisoraGuardada ultima;
     EmisoraGuardada favoritos[MAX_FAVORITOS];

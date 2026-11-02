@@ -14,6 +14,7 @@
 #include "icy_pc.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
 
 #ifdef _WIN32
@@ -125,6 +126,16 @@ EstadoAudio audio_estado(void)
         return AUDIO_ERROR;
     }
     return hal_millis() - inicio_ms < TIEMPO_CONEXION_MS ? AUDIO_CONECTANDO : AUDIO_SONANDO;
+}
+
+/* ffplay no dice el nivel de lo que suena: en el simulador se inventa uno
+ * que sube y baja, solo para ver la luz «al ritmo» */
+uint8_t audio_nivel(void)
+{
+    if (audio_estado() != AUDIO_SONANDO) {
+        return 0;
+    }
+    return (uint8_t)(40 + rand() % 200);
 }
 
 void audio_volumen(uint8_t volumen)

@@ -57,6 +57,14 @@ static void volcar_pantalla(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_
     lv_disp_flush_ready(drv);
 }
 
+/* El simulador no tiene LED */
+void hal_led(uint8_t r, uint8_t g, uint8_t b)
+{
+    (void)r;
+    (void)g;
+    (void)b;
+}
+
 void hal_brillo(uint8_t porcentaje)
 {
     /* Se simula oscureciendo la imagen; en la placa será la retroiluminación */

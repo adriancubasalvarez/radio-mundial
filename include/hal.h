@@ -44,6 +44,9 @@ uint32_t hal_aleatorio(void);
  * última emisora. En el simulador cierra la ventana. */
 void hal_apagar(void);
 
+/* LED RGB de la placa, 0..255 por color (en placas sin LED no hace nada) */
+void hal_led(uint8_t r, uint8_t g, uint8_t b);
+
 /* ---------- Red WiFi ----------
  * Cada usuario conecta la radio a su WiFi de dos formas:
  *   - al instalarla desde la web (ESP Web Tools manda la red por USB, Improv);
@@ -127,6 +130,9 @@ EstadoAudio audio_estado(void);
 
 /* Volumen de 0 a 100 */
 void audio_volumen(uint8_t volumen);
+
+/* Nivel de la música desde la última llamada (pico), de 0 a 255 */
+uint8_t audio_nivel(void);
 
 /* Título de lo que suena (metadatos ICY), en UTF-8; "" si la emisora no
  * lo envía o aún no ha llegado */

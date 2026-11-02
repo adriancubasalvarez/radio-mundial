@@ -1,5 +1,6 @@
 #include "ajustes.h"
 #include "hal.h"
+#include "luz.h"
 #include "idioma.h"
 
 #include <ArduinoJson.h>
@@ -60,6 +61,7 @@ void ajustes_cargar(void)
     ajustes.volumen = 70;
     ajustes.reposo_s = 120;
     ajustes.reanudar = true;
+    ajustes.luz = LUZ_RITMO;
 
     char *texto = hal_ajustes_leer();
     bool de_la_sd = false;
@@ -82,6 +84,10 @@ void ajustes_cargar(void)
     ajustes.volumen = doc["volumen"] | ajustes.volumen;
     ajustes.reposo_s = doc["reposo"] | ajustes.reposo_s;
     ajustes.reanudar = doc["reanudar"] | ajustes.reanudar;
+    ajustes.luz = doc["luz"] | ajustes.luz;
+    if (ajustes.luz >= NUM_MODOS_LUZ) {
+        ajustes.luz = LUZ_RITMO;
+    }
     /* Idioma: "en" o "es"; si no está, el primer arranque lo pregunta */
     const char *idioma = doc["idioma"] | "";
     ajustes.idioma_elegido = idioma[0] != '\0';
@@ -110,6 +116,7 @@ void ajustes_guardar(void)
     doc["volumen"] = ajustes.volumen;
     doc["reposo"] = ajustes.reposo_s;
     doc["reanudar"] = ajustes.reanudar;
+    doc["luz"] = ajustes.luz;
     if (ajustes.idioma_elegido) {
         doc["idioma"] = ajustes.espanol ? "es" : "en";
     }

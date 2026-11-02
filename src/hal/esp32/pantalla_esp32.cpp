@@ -162,6 +162,9 @@ void hal_pantalla_init(void)
     gpio_hold_dis((gpio_num_t)PIN_TOUCH_CS);
     gpio_hold_dis((gpio_num_t)PIN_TOUCH_SCLK);
     gpio_hold_dis((gpio_num_t)PIN_TOUCH_MOSI);
+    for (uint8_t pin : {PIN_LED_R, PIN_LED_G, PIN_LED_B}) {
+        gpio_hold_dis((gpio_num_t)pin);
+    }
     gpio_deep_sleep_hold_dis();
 
     lcd.init();
@@ -242,6 +245,13 @@ void hal_apagar(void)
     gpio_hold_en((gpio_num_t)PIN_TOUCH_CS);
     gpio_hold_en((gpio_num_t)PIN_TOUCH_SCLK);
     gpio_hold_en((gpio_num_t)PIN_TOUCH_MOSI);
+    /* LED apagado (ánodo común: a nivel alto) */
+    for (uint8_t pin : {PIN_LED_R, PIN_LED_G, PIN_LED_B}) {
+        ledcDetachPin(pin);
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, HIGH);
+        gpio_hold_en((gpio_num_t)pin);
+    }
     gpio_deep_sleep_hold_en();
 
     /* Esperar a que se levante el dedo del deslizador: si no, despertaría

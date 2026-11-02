@@ -1,6 +1,7 @@
 /**
  * Menú de ajustes rápido: se abre manteniendo pulsado el título del
- * mapamundi. Permite cambiar el idioma y la red WiFi, y apagar la radio.
+ * mapamundi. Permite cambiar el idioma, la red WiFi y la luz, y apagar la
+ * radio.
  * Se dibuja en la capa superior de LVGL, encima del mapamundi.
  */
 #include "ui.h"
@@ -9,6 +10,7 @@
 #include "ajustes.h"
 #include "hal.h"
 #include "idioma.h"
+#include "luz.h"
 
 #include <lvgl.h>
 
@@ -44,6 +46,24 @@ static void al_wifi(lv_event_t *e)
     (void)e;
     cerrar();
     hal_red_configurar();
+}
+
+/* Texto del botón de la luz según el modo elegido */
+static const char *texto_luz(void)
+{
+    switch (ajustes.luz) {
+    case LUZ_APAGADA: return TR("Light: off", "Luz: no");
+    case LUZ_ESTADO: return TR("Light: on", "Luz: fija");
+    default: return TR("Light: beat", "Luz: ritmo");
+    }
+}
+
+/* Cada toque pasa al siguiente modo: ritmo -> apagada -> fija -> ritmo */
+static void al_luz(lv_event_t *e)
+{
+    ajustes.luz = (uint8_t)((ajustes.luz + 1) % NUM_MODOS_LUZ);
+    ajustes_guardar();
+    lv_label_set_text(lv_obj_get_child(lv_event_get_target(e), 0), texto_luz());
 }
 
 /* Al soltar el deslizador: si llegó al final se apaga; si no, vuelve atrás */
@@ -129,7 +149,14 @@ void ui_ajustes_abrir(void)
     boton(fila, "English", !ajustes.espanol, al_elegir_idioma, (void *)(uintptr_t)false, 126);
     boton(fila, "Español", ajustes.espanol, al_elegir_idioma, (void *)(uintptr_t)true, 126);
 
-    boton(capa, TR(LV_SYMBOL_WIFI "  Wi-Fi network", LV_SYMBOL_WIFI "  Red WiFi"), false, al_wifi, NULL);
+    /* Red WiFi y luz, en otra fila */
+    fila = lv_obj_create(capa);
+    lv_obj_remove_style_all(fila);
+    lv_obj_set_size(fila, 260, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(fila, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(fila, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    boton(fila, TR(LV_SYMBOL_WIFI " Wi-Fi", LV_SYMBOL_WIFI " Red WiFi"), false, al_wifi, NULL, 126);
+    boton(fila, texto_luz(), false, al_luz, NULL, 126);
     deslizador_apagar(capa);
     boton(capa, TR("Close", "Cerrar"), false, al_cerrar, NULL);
 }

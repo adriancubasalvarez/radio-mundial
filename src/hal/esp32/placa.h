@@ -44,6 +44,17 @@
 #define PIN_AUDIO_DAC 26
 #define PIN_AUDIO_EN  4
 
+/* LED RGB de ánodo común (luce con el pin a nivel bajo), en la cara de atrás
+ * de la placa. Pines del esquema oficial, probados en el contador de YouTube. */
+#define PIN_LED_R 22
+#define PIN_LED_G 16
+#define PIN_LED_B 17
+/* Balance de blancos de este LED (el azul luce mucho más que el resto),
+ * medido con una webcam en el contador de YouTube */
+#define LED_BALANCE_R 192
+#define LED_BALANCE_G 255
+#define LED_BALANCE_B 82
+
 #else
 #error "Placa no definida: compila con -D PLACA_CYD (ver platformio.ini)"
 #endif

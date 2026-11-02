@@ -92,6 +92,28 @@ void audio_eof_stream(const char *info)
     fin_de_stream = true;
 }
 
+/* Cada muestra pasa por aquí justo antes de salir al DAC: se guarda el pico
+ * para la luz «al ritmo». Dos canales de 16 bits en un uint32_t. */
+static volatile uint16_t pico;
+
+void audio_process_i2s(uint32_t *muestra, bool *seguir)
+{
+    *seguir = true;
+    int16_t izq = (int16_t)(*muestra & 0xFFFF);
+    int16_t der = (int16_t)(*muestra >> 16);
+    uint16_t m = (uint16_t)max(abs(izq), abs(der));
+    if (m > pico) {
+        pico = m;
+    }
+}
+
+uint8_t audio_nivel(void)
+{
+    uint16_t p = pico;
+    pico = 0;
+    return estado == AUDIO_SONANDO ? (uint8_t)(p >> 7) : 0;
+}
+
 /* ---------- Tarea de audio (núcleo 0) ---------- */
 
 static uint8_t volumen_actual = 70;

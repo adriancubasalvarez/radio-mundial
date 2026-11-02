@@ -1,6 +1,7 @@
 #include "nav.h"
 #include "ajustes.h"
 #include "hal.h"
+#include "luz.h"
 
 #include <stdio.h>
 
@@ -59,6 +60,7 @@ void nav_reproducir(void)
     nav.sonando = nav.emisora;
     nav.hay_sonando = true;
     ajustes_recordar_ultima(&nav.emisora, &nav.pais);
+    luz_emisora(nav.pais.codigo);
     printf("Reproduciendo: %s (%s)\n  %s\n", nav.emisora.nombre, nav.pais.codigo, nav.emisora.url);
 }
 

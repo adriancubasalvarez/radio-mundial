@@ -3,6 +3,7 @@
  */
 #include "app.h"
 #include "hal.h"
+#include "luz.h"
 #include "ui/ui.h"
 
 #include <lvgl.h>
@@ -21,6 +22,7 @@ bool app_bucle(void)
     }
     /* LVGL redibuja, lee el táctil y ejecuta sus temporizadores */
     uint32_t espera = lv_timer_handler();
+    luz_atender();
     hal_esperar(espera < 5 ? espera : 5);
     return true;
 }
