@@ -17,7 +17,8 @@
 /* [Qué dibujar] */
 // conjunto, explosion, frente, tapa, aro o todo_impresion
 pieza = "conjunto";
-// fnk0104 (ESP32-S3, la placa principal) o cyd (Freenove FNK0114F)
+// fnk0104 (ESP32-S3) o cyd (FNK0114F): el frontal es el mismo para las dos;
+// solo cambia el modelo de la placa que se ve en el conjunto
 placa = "fnk0104";
 // Mostrar la placa dentro del conjunto (la CYD con su modelo real)
 ver_placa = true;
@@ -85,10 +86,11 @@ agujeros = [[4, 4], [82, 4], [4, 46], [82, 46]];
 // CYD: medido en el STEP de Freenove (3D MODELS/), salvo la pila: en la
 //      placa real la pantalla es más gruesa (2,83 en el STEP) y con 4,30
 //      apoya en los postes y el USB-C entra (probado impreso).
-// FNK0104: de la especificación ES3C28P (10,6 mm total, 4,7 detrás).
-//          POR VERIFICAR con la placa en la mano (llega el 2026-11-03).
+// FNK0104: las mismas. Comprobado el 2026-11-03 montándola en el frontal
+//          impreso para la CYD: imagen centrada, apoya en los postes y el
+//          USB-C entra. Un solo frontal sirve para las dos placas.
 datos_cyd     = [4.30, 17.10, 57.6, 43.2, 6.33, -2.69];
-datos_fnk0104 = [4.30, 11.12, 57.6, 43.2, 6.30, -2.69];
+datos_fnk0104 = datos_cyd;
 d = placa == "cyd" ? datos_cyd : datos_fnk0104;
 pila    = d[0];
 area_x  = d[1];
