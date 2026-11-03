@@ -5,7 +5,8 @@
  *   2. el tiempo: ahora y los 3 días siguientes;
  *   3. la calidad del aire y la salida y puesta del sol.
  * Las páginas 2 y 3 solo salen si ya han llegado los datos (tiempo.cpp).
- * Todo se desliza despacio unos píxeles para que no se marque la pantalla.
+ * Cada página aparece unos píxeles más a un lado o a otro (se cambia mientras
+ * está fundida a negro, así no se ve moverse), para no marcar la pantalla.
  * Al tocar, desaparece y se vuelve a donde se estaba.
  *
  * Se dibuja en la capa superior de LVGL (lv_layer_top), por encima de
@@ -27,8 +28,7 @@
 #define BRILLO_REPOSO  25     /* % de brillo en reposo */
 #define BRILLO_NORMAL  100
 #define SEGUNDOS_PAGINA 10    /* cada cuánto cambia de página */
-#define SEGUNDOS_DERIVA 20    /* cada cuánto se desliza el contenido */
-#define DERIVA_X 10           /* hasta cuántos píxeles se desliza */
+#define DERIVA_X 10           /* hasta cuántos píxeles se mueve cada página */
 #define DERIVA_Y 8
 #define FUNDIDO_MS 500
 
@@ -43,7 +43,7 @@
 enum { PAG_RELOJ, PAG_TIEMPO, PAG_AIRE, NUM_PAGINAS };
 
 static lv_obj_t *capa;
-static lv_obj_t *lienzo;                 /* lo que se desliza */
+static lv_obj_t *lienzo;                 /* contiene las páginas */
 static lv_obj_t *pagina[NUM_PAGINAS];
 static int visible;
 static uint32_t segundos;                /* desde que se durmió */
@@ -297,31 +297,12 @@ static void pasar_pagina(void)
     if (siguiente == visible) {
         return;
     }
+    /* La siguiente aún es transparente: moverla ahora no se ve */
+    lv_obj_set_pos(pagina[siguiente], (int)(hal_aleatorio() % (2 * DERIVA_X + 1)) - DERIVA_X,
+                   (int)(hal_aleatorio() % (2 * DERIVA_Y + 1)) - DERIVA_Y);
     lv_obj_fade_out(pagina[visible], FUNDIDO_MS, 0);
     lv_obj_fade_in(pagina[siguiente], FUNDIDO_MS, FUNDIDO_MS);
     visible = siguiente;
-}
-
-static void mover_x(void *obj, int32_t v) { lv_obj_set_x((lv_obj_t *)obj, v); }
-static void mover_y(void *obj, int32_t v) { lv_obj_set_y((lv_obj_t *)obj, v); }
-
-/* Desliza todo despacio hasta otro punto cercano */
-static void derivar(void)
-{
-    int destino[2] = {(int)(hal_aleatorio() % (2 * DERIVA_X + 1)) - DERIVA_X,
-                      (int)(hal_aleatorio() % (2 * DERIVA_Y + 1)) - DERIVA_Y};
-    lv_anim_exec_xcb_t mover[2] = {mover_x, mover_y};
-    lv_coord_t desde[2] = {lv_obj_get_x(lienzo), lv_obj_get_y(lienzo)};
-    for (int i = 0; i < 2; i++) {
-        lv_anim_t a;
-        lv_anim_init(&a);
-        lv_anim_set_var(&a, lienzo);
-        lv_anim_set_exec_cb(&a, mover[i]);
-        lv_anim_set_values(&a, desde[i], destino[i]);
-        lv_anim_set_time(&a, 4000);
-        lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
-        lv_anim_start(&a);
-    }
 }
 
 /* ---------- Dormir y despertar ---------- */
@@ -330,7 +311,6 @@ static void despertar(lv_event_t *e)
 {
     (void)e;
     if (capa != NULL) {
-        lv_anim_del(lienzo, NULL);
         lv_obj_del_async(capa);
         capa = NULL;
         hal_brillo(BRILLO_NORMAL);
@@ -380,9 +360,6 @@ static void vigilar(lv_timer_t *t)
         actualizar_aire();
         if (segundos % SEGUNDOS_PAGINA == 0) {
             pasar_pagina();
-        }
-        if (segundos % SEGUNDOS_DERIVA == 0) {
-            derivar();
         }
     } else if (ajustes.reposo_s > 0 && lv_disp_get_inactive_time(NULL) > ajustes.reposo_s * 1000UL) {
         dormir();
