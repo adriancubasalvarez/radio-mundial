@@ -87,6 +87,16 @@
 #define PIN_TOUCH_RST  18
 #define PIN_TOUCH_IRQ  17
 
+/* Audio: I2S hacia el códec ES8311 (I2C 0x18, mismo bus que el táctil). Los
+ * datos al códec salen por el GPIO8 (su pin DSDIN en el esquema; el GPIO6
+ * es el micrófono). El amplificador se habilita con AUDIO_EN a nivel bajo,
+ * como en el ejemplo Sketch_07.1_Music de Freenove. */
+#define PIN_I2S_MCK  4
+#define PIN_I2S_BCK  5
+#define PIN_I2S_WS   7
+#define PIN_I2S_DOUT 8
+#define PIN_AUDIO_EN 1
+
 #else
 #error "Placa no definida: compila con -D PLACA_CYD o -D PLACA_FNK0104 (ver platformio.ini)"
 #endif

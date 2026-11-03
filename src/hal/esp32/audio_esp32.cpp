@@ -6,6 +6,10 @@
  * el amplificador de la placa, que se habilita con AUDIO_EN (GPIO4) a nivel
  * bajo. El DAC es de 8 bits: la calidad es modesta, sirve para probar.
  *
+ * FNK0104: sale por I2S hacia el códec ES8311 (24 bits), configurado por
+ * I2C, y de ahí al amplificador (AUDIO_EN = GPIO1, a nivel bajo). El volumen
+ * lo baja el códec, no la librería: así no se pierde calidad al bajarlo.
+ *
  * La librería necesita que se llame a audio.loop() muy a menudo, así que
  * vive en una tarea propia en el núcleo 0 (el de la WiFi); la interfaz
  * corre en el núcleo 1. Las órdenes de la interfaz se pasan a la tarea con
@@ -15,11 +19,12 @@
 #include "placa.h"
 
 #include <Arduino.h>
-
-#ifdef PLACA_CYD
-
 #include <Audio.h>
 #include <WiFi.h>
+
+#ifdef PLACA_FNK0104
+#include "es8311.h"
+#endif
 
 /* Si no empieza a sonar en este tiempo, se da por fallida */
 #define TIEMPO_MAX_CONEXION 12000
@@ -58,11 +63,90 @@ static void preparar_cerrojo(void)
     }
 }
 
-/* Volumen 0..100 de la interfaz -> 0..21 de la librería */
-static uint8_t a_volumen_libreria(uint8_t v)
+/* ---------- Salida de audio de cada placa ---------- */
+
+#ifdef PLACA_FNK0104
+
+static es8311_handle_t codec;
+static uint32_t frecuencia_codec;  /* frecuencia de muestreo configurada */
+
+/* El códec en esclavo: recibe del ESP32 el reloj maestro (MCLK, 256 veces la
+ * frecuencia de muestreo) y los datos por I2S. El bus I2C ya lo ha abierto
+ * el táctil (Wire, puerto 0). */
+static void preparar_salida(void)
 {
-    return (uint8_t)((v > 100 ? 100 : v) * 21 / 100);
+    codec = es8311_create(I2C_NUM_0, ES8311_ADDRESS_0);
+    const es8311_clock_config_t reloj = {
+        .mclk_inverted = false,
+        .sclk_inverted = false,
+        .mclk_from_mclk_pin = true,
+        .mclk_frequency = 44100 * 256,
+        .sample_frequency = 44100,
+    };
+    if (codec == NULL || es8311_init(codec, &reloj, ES8311_RESOLUTION_16, ES8311_RESOLUTION_16) != ESP_OK) {
+        Serial.println("[audio] el códec ES8311 no responde");
+        return;
+    }
+    frecuencia_codec = 44100;
+    Serial.println("[audio] códec ES8311 listo");
 }
+
+/* Cada emisora puede venir a otra frecuencia (22,05, 44,1, 48 kHz...): los
+ * divisores del códec se ajustan a la que está usando la librería */
+static void seguir_frecuencia(Audio *a)
+{
+    uint32_t fs = a->getSampleRate();
+    if (codec != NULL && fs >= 8000 && fs != frecuencia_codec) {
+        if (es8311_sample_frequency_config(codec, fs * 256, fs) == ESP_OK) {
+            Serial.printf("[audio] códec a %u Hz\n", (unsigned)fs);
+        }
+        frecuencia_codec = fs;
+    }
+}
+
+static Audio *nueva_libreria(void)
+{
+    Audio *a = new Audio(false);  // I2S hacia un DAC externo
+    a->setPinout(PIN_I2S_BCK, PIN_I2S_WS, PIN_I2S_DOUT, I2S_PIN_NO_CHANGE, PIN_I2S_MCK);
+    a->setVolume(21);  // la librería al máximo: el volumen lo pone el códec
+    return a;
+}
+
+/* Volumen 0..100 de la interfaz al códec: de -44,5 dB a 0 dB en pasos de
+ * medio decibelio (el oído percibe el volumen en decibelios); 0 = silencio.
+ * En el controlador, 75 son 0 dB (por encima satura). */
+static void poner_volumen(Audio *a, uint8_t v)
+{
+    (void)a;
+    if (codec != NULL) {
+        es8311_voice_volume_set(codec, v == 0 ? 0 : 40 + v * 35 / 100, NULL);
+    }
+}
+
+#else
+
+static void preparar_salida(void)
+{
+}
+
+static void seguir_frecuencia(Audio *a)
+{
+    (void)a;
+}
+
+static Audio *nueva_libreria(void)
+{
+    /* true: DAC interno; I2S_DAC_CHANNEL_LEFT_EN: solo el GPIO26 */
+    return new Audio(true, I2S_DAC_CHANNEL_LEFT_EN);
+}
+
+/* Volumen 0..100 de la interfaz -> 0..21 de la librería */
+static void poner_volumen(Audio *a, uint8_t v)
+{
+    a->setVolume((uint8_t)((v > 100 ? 100 : v) * 21 / 100));
+}
+
+#endif
 
 static void amplificador(bool encendido)
 {
@@ -137,9 +221,8 @@ static bool crear_libreria(void)
                       (unsigned)dma_libre, (unsigned)MEMORIA_MINIMA_AUDIO);
         return false;
     }
-    /* true: DAC interno; I2S_DAC_CHANNEL_LEFT_EN: solo el GPIO26 */
-    audio = new Audio(true, I2S_DAC_CHANNEL_LEFT_EN);
-    audio->setVolume(a_volumen_libreria(volumen_actual));
+    audio = nueva_libreria();
+    poner_volumen(audio, volumen_actual);
     audio->setConnectionTimeout(5000, 8000);
     Serial.printf("[audio] librería creada; memoria DMA libre %u\n",
                   (unsigned)heap_caps_get_free_size(MALLOC_CAP_DMA));
@@ -168,7 +251,7 @@ static void tarea_audio(void *parametro)
         if (volumen >= 0) {
             volumen_actual = volumen;
             if (audio != NULL) {
-                audio->setVolume(a_volumen_libreria(volumen));
+                poner_volumen(audio, volumen);
             }
         }
         if (parar && audio != NULL) {
@@ -220,6 +303,7 @@ static void tarea_audio(void *parametro)
 
         if (estado == AUDIO_CONECTANDO || estado == AUDIO_SONANDO) {
             audio->loop();
+            seguir_frecuencia(audio);
             if (fin_de_stream || (!audio->isRunning() && millis() - inicio_conexion > 2000)) {
                 estado = AUDIO_ERROR;  // se cortó o no llegó a arrancar
                 amplificador(false);
@@ -242,6 +326,7 @@ void audio_iniciar(void)
 {
     pinMode(PIN_AUDIO_EN, OUTPUT);
     amplificador(false);
+    preparar_salida();
     preparar_cerrojo();
     xTaskCreatePinnedToCore(tarea_audio, "audio", 8192, NULL, 2, NULL, 0);
 }
@@ -294,45 +379,3 @@ const char *audio_titulo(void)
     return copia;
 }
 
-#else
-
-/* FNK0104: el audio (códec ES8311) llega en la Fase 2. Mientras, la radio
- * hace como que suena para poder probar la navegación. */
-static EstadoAudio estado = AUDIO_PARADO;
-
-void audio_iniciar(void)
-{
-}
-
-void audio_reproducir(const char *url)
-{
-    Serial.printf("[audio] sin audio todavía en esta placa (Fase 2): %s\n", url);
-    estado = AUDIO_SONANDO;
-}
-
-void audio_parar(void)
-{
-    estado = AUDIO_PARADO;
-}
-
-EstadoAudio audio_estado(void)
-{
-    return estado;
-}
-
-void audio_volumen(uint8_t volumen)
-{
-    (void)volumen;
-}
-
-uint8_t audio_nivel(void)
-{
-    return 0;
-}
-
-const char *audio_titulo(void)
-{
-    return "";
-}
-
-#endif
