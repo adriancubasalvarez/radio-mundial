@@ -1,11 +1,6 @@
 /**
  * Audio en la placa con la librería ESP32-audioI2S (schreibfaul1).
  *
- * CYD Freenove FNK0114F: sale por el DAC interno del ESP32 en el GPIO26
- * (canal «izquierdo» del DAC; el GPIO25, el otro canal, es del táctil) hacia
- * el amplificador de la placa, que se habilita con AUDIO_EN (GPIO4) a nivel
- * bajo. El DAC es de 8 bits: la calidad es modesta, sirve para probar.
- *
  * FNK0104: sale por I2S hacia el códec ES8311 (24 bits), configurado por
  * I2C, y de ahí al amplificador (AUDIO_EN = GPIO1, a nivel bajo). El volumen
  * lo baja el códec, no la librería: así no se pierde calidad al bajarlo.
@@ -22,9 +17,7 @@
 #include <Audio.h>
 #include <WiFi.h>
 
-#ifdef PLACA_FNK0104
 #include "es8311.h"
-#endif
 
 /* Si no empieza a sonar en este tiempo, se da por fallida */
 #define TIEMPO_MAX_CONEXION 12000
@@ -65,7 +58,6 @@ static void preparar_cerrojo(void)
 
 /* ---------- Salida de audio de cada placa ---------- */
 
-#ifdef PLACA_FNK0104
 
 static es8311_handle_t codec;
 static uint32_t frecuencia_codec;  /* frecuencia de muestreo configurada */
@@ -123,30 +115,6 @@ static void poner_volumen(Audio *a, uint8_t v)
     }
 }
 
-#else
-
-static void preparar_salida(void)
-{
-}
-
-static void seguir_frecuencia(Audio *a)
-{
-    (void)a;
-}
-
-static Audio *nueva_libreria(void)
-{
-    /* true: DAC interno; I2S_DAC_CHANNEL_LEFT_EN: solo el GPIO26 */
-    return new Audio(true, I2S_DAC_CHANNEL_LEFT_EN);
-}
-
-/* Volumen 0..100 de la interfaz -> 0..21 de la librería */
-static void poner_volumen(Audio *a, uint8_t v)
-{
-    a->setVolume((uint8_t)((v > 100 ? 100 : v) * 21 / 100));
-}
-
-#endif
 
 static void amplificador(bool encendido)
 {

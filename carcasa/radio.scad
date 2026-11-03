@@ -17,10 +17,7 @@
 /* [Qué dibujar] */
 // conjunto, explosion, frente, tapa, aro o todo_impresion
 pieza = "conjunto";
-// fnk0104 (ESP32-S3) o cyd (FNK0114F): el frontal es el mismo para las dos;
-// solo cambia el modelo de la placa que se ve en el conjunto
-placa = "fnk0104";
-// Mostrar la placa dentro del conjunto (la CYD con su modelo real)
+// Mostrar la placa (FNK0104, aproximada) dentro del conjunto
 ver_placa = true;
 // Corte por la mitad para ver el interior (solo en conjunto)
 corte = false;
@@ -83,15 +80,9 @@ agujeros = [[4, 4], [82, 4], [4, 46], [82, 46]];
 
 // [pila delante del PCB, x del área activa, ancho área, alto área,
 //  fondo de componentes detrás del PCB, z del centro del USB-C]
-// CYD: medido en el STEP de Freenove (3D MODELS/), salvo la pila: en la
-//      placa real la pantalla es más gruesa (2,83 en el STEP) y con 4,30
-//      apoya en los postes y el USB-C entra (probado impreso).
-// FNK0104: las mismas. Comprobado el 2026-11-03 montándola en el frontal
-//          impreso para la CYD: imagen centrada, apoya en los postes y el
-//          USB-C entra. Un solo frontal sirve para las dos placas.
-datos_cyd     = [4.30, 17.10, 57.6, 43.2, 6.33, -2.69];
-datos_fnk0104 = datos_cyd;
-d = placa == "cyd" ? datos_cyd : datos_fnk0104;
+// Medidas de la FNK0104 comprobadas con frontales impresos: imagen centrada,
+// la placa apoya en los postes y el USB-C entra.
+d = [4.30, 17.10, 57.6, 43.2, 6.33, -2.69];
 pila    = d[0];
 area_x  = d[1];
 area_w  = d[2];
@@ -272,7 +263,7 @@ module frente() {
         rejilla();
         grabados_frente();
         hueco_usb();
-        // agujeros guía M3 de la placa (M3 × 6 en la FNK0104, M3 × 5 en la CYD)
+        // agujeros guía M3 de la placa (tornillo M3 × 6)
         for (a = agujeros)
             translate([placa_x + a[0], placa_y + a[1], placa_z - 1]) cylinder(d = 2.5, h = pila + 1 + grosor_frente - piel_frente);
         // agujeros guía M3 de la tapa (tornillo M3 × 10)
@@ -347,21 +338,16 @@ module aro() {
 //  Placa y altavoz de referencia (solo para ver el montaje)
 // ---------------------------------------------------------------------
 module placa_referencia() {
-    translate([placa_x, placa_y, placa_z])
-        if (placa == "cyd") {
-            // STEP de Freenove convertido a STL; en el STEP el USB está a la derecha
-            color("#2E7D4F") translate([1.79, 77.68, 0]) rotate(180)
-                import("referencia/cyd_fnk0114f.stl");
-        } else {
-            // FNK0104 aproximada: PCB, pantalla y zona de componentes
-            color("#1B5E3A") translate([0, 0, -pcb[2]]) difference() {
-                cube(pcb);
-                for (a = agujeros) translate([a[0], a[1], -1]) cylinder(d = 3.2, h = 4);
-            }
-            color("#111") translate([area_x - 6, (pcb[1] - area_h) / 2 - 3, 0]) cube([area_w + 12, area_h + 6, pila]);
-            color("#3A3A3A") translate([10, 6, -trasera]) cube([70, 38, trasera - pcb[2]]);
-            color("#C0C0C0") translate([-0.4, pcb[1] / 2 - 4.5, usb_z - 1.6]) cube([7.5, 9, 3.2]);
+    // FNK0104 aproximada: PCB, pantalla, zona de componentes y USB-C
+    translate([placa_x, placa_y, placa_z]) {
+        color("#1B5E3A") translate([0, 0, -pcb[2]]) difference() {
+            cube(pcb);
+            for (a = agujeros) translate([a[0], a[1], -1]) cylinder(d = 3.2, h = 4);
         }
+        color("#111") translate([area_x - 6, (pcb[1] - area_h) / 2 - 3, 0]) cube([area_w + 12, area_h + 6, pila]);
+        color("#3A3A3A") translate([10, 6, -trasera]) cube([70, 38, trasera - pcb[2]]);
+        color("#C0C0C0") translate([-0.4, pcb[1] / 2 - 4.5, usb_z - 1.6]) cube([7.5, 9, 3.2]);
+    }
 }
 
 module altavoz_referencia() {

@@ -26,8 +26,7 @@ Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar�
 
 | Placa | Estado |
 |---|---|
-| **Freenove FNK0104** (ESP32-S3, 2,8" táctil capacitivo, audio ES8311) | Placa principal — pendiente |
-| **CYD Freenove FNK0114F** (ESP32, 2,8" táctil resistivo) | En pruebas |
+| **Freenove FNK0104** (ESP32-S3, 2,8" táctil capacitivo, audio ES8311) | Funciona: pantalla, táctil, sonido, LED, reposo e instalador web. Falta la microSD |
 | **Simulador en el PC** (Windows, LVGL + SDL2) | Completo |
 
 ## Estructura

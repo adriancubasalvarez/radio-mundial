@@ -26,8 +26,7 @@ From Chrome or Edge on a computer: plug the board in over USB, click "Install" a
 
 | Board | Status |
 |---|---|
-| **Freenove FNK0104** (ESP32-S3, 2.8" capacitive touch, ES8311 audio) | Main board — pending |
-| **CYD Freenove FNK0114F** (ESP32, 2.8" resistive touch) | Testing |
+| **Freenove FNK0104** (ESP32-S3, 2.8" capacitive touch, ES8311 audio) | Works: screen, touch, sound, LED, sleep and web installer. microSD still to do |
 | **PC simulator** (Windows, LVGL + SDL2) | Complete |
 
 ## Layout

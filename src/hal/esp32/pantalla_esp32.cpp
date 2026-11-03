@@ -1,8 +1,7 @@
 /**
  * Pantalla y táctil en la placa.
  *
- * Pantalla: LovyanGFX (en la CYD, la misma configuración que el contador de
- * YouTube) y LVGL encima. El táctil de cada placa está en tactil_*.cpp.
+ * Pantalla: LovyanGFX y LVGL encima. El táctil de cada placa está en tactil_*.cpp.
  */
 #include "hal.h"
 #include "placa.h"
@@ -97,11 +96,6 @@ static void soltar_pines(void)
 #ifdef PIN_AUDIO_EN
     gpio_hold_dis((gpio_num_t)PIN_AUDIO_EN);
 #endif
-#ifdef PIN_LED_R
-    for (uint8_t pin : {PIN_LED_R, PIN_LED_G, PIN_LED_B}) {
-        gpio_hold_dis((gpio_num_t)pin);
-    }
-#endif
 #ifdef PIN_LED_WS2812
     gpio_hold_dis((gpio_num_t)PIN_LED_WS2812);
 #endif
@@ -182,15 +176,6 @@ void hal_apagar(void)
     pinMode(PIN_TFT_BL, OUTPUT);
     digitalWrite(PIN_TFT_BL, LOW);
     gpio_hold_en((gpio_num_t)PIN_TFT_BL);
-#ifdef PIN_LED_R
-    /* LED de ánodo común: apagado a nivel alto */
-    for (uint8_t pin : {PIN_LED_R, PIN_LED_G, PIN_LED_B}) {
-        ledcDetachPin(pin);
-        pinMode(pin, OUTPUT);
-        digitalWrite(pin, HIGH);
-        gpio_hold_en((gpio_num_t)pin);
-    }
-#endif
 #ifdef PIN_LED_WS2812
     /* El WS2812 se queda con el último color mientras tenga corriente:
      * hay que mandarle negro y dejar su pin quieto */

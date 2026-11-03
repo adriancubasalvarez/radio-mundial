@@ -1,7 +1,6 @@
 /**
- * Táctil de cada placa (lo usa pantalla_esp32.cpp):
- *   CYD      XPT2046 resistivo por SPI software (tactil_xpt2046.cpp)
- *   FNK0104  FT6336 capacitivo por I2C (tactil_ft6336.cpp)
+ * Táctil de la placa (lo usa pantalla_esp32.cpp). En la FNK0104 es un
+ * FT6336 capacitivo por I2C (tactil_ft6336.cpp).
  */
 #pragma once
 

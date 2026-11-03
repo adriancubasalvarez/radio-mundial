@@ -12,7 +12,7 @@ It is about **150 × 74 × 45 mm**.
 
 | File | What it is | Print |
 |---|---|---|
-| `front.stl` | Body, for both boards: **Freenove FNK0104** (ESP32-S3) and **CYD FNK0114F** (ESP32) | Face down, no supports |
+| `front.stl` | Body for the **Freenove FNK0104** (ESP32-S3) | Face down, no supports |
 | `back_cover.stl` | Back cover with vents | Outer face down |
 | `speaker_ring.stl` | Ring that clamps the speaker | Flat |
 | `front_52.stl`, `speaker_ring_52.stl` | Same parts for a **52 mm speaker**: larger grille with a name plate across it | As above |
@@ -46,7 +46,6 @@ The microSD slot and the BOOT/RESET buttons stay inside. Remove the back cover t
 `radio.scad` is parametric (OpenSCAD 2021.01 or newer).
 Change `altavoz` (`"40mm"` or `"52mm"`), the sizes, the tilt or the engraved text, then export each part with `pieza = "frente" | "tapa" | "aro"`.
 
-- `comprobar_choque.scad` intersects the body with a board model to look for collisions.
 - `stl_a_step.py` converts the STL files to STEP for SolidWorks or other CAD software (`pip install cadquery-ocp`). The STEP files are faceted and large, so they are not kept in the repository.
 
 > Both boards were test-fitted on printed cases: the screen is centred, the board sits on its posts and the USB-C plug goes in.
@@ -64,7 +63,7 @@ Mide unos **150 × 74 × 45 mm**.
 
 | Archivo | Qué es | Impresión |
 |---|---|---|
-| `front.stl` | Cuerpo, para las dos placas: **Freenove FNK0104** (ESP32-S3) y **CYD FNK0114F** (ESP32) | Boca abajo, sin soportes |
+| `front.stl` | Cuerpo para la **Freenove FNK0104** (ESP32-S3) | Boca abajo, sin soportes |
 | `back_cover.stl` | Tapa trasera con ventilación | Cara exterior sobre la cama |
 | `speaker_ring.stl` | Aro que sujeta el altavoz | Plano |
 | `front_52.stl`, `speaker_ring_52.stl` | Las mismas piezas para un **altavoz de 52 mm**: rejilla más grande con una placa con el nombre | Igual que arriba |

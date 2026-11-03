@@ -15,7 +15,7 @@ Requisitos: PlatformIO (pio) y esptool (python -m pip install esptool).
 
 Uso:
   python tools/build_release.py            todas las placas
-  python tools/build_release.py cyd        solo una
+  python tools/build_release.py fnk0104    solo una
 """
 
 import csv
@@ -32,16 +32,6 @@ BOOT_APP0 = Path.home() / ".platformio" / "packages" / "framework-arduinoespress
 
 # Placas que se publican. «familia» es el nombre de chip que usa ESP Web Tools.
 PLACAS = {
-    "cyd": {
-        "nombre": 'CYD 2,8" Freenove FNK0114F',
-        "chip": "esp32",
-        "familia": "ESP32",
-        "particiones": "particiones_4mb.csv",
-        "tam_flash": "4MB",
-        "modo_flash": "dio",
-        "frec_flash": "40m",
-        "arranque": 0x1000,   # en el ESP32 clásico el arranque va en 0x1000
-    },
     "fnk0104": {
         "nombre": 'Freenove FNK0104 (ESP32-S3, 2,8")',
         "chip": "esp32s3",
