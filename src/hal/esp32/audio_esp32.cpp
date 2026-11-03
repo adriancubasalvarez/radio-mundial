@@ -15,6 +15,9 @@
 #include "placa.h"
 
 #include <Arduino.h>
+
+#ifdef PLACA_CYD
+
 #include <Audio.h>
 #include <WiFi.h>
 
@@ -290,3 +293,46 @@ const char *audio_titulo(void)
     xSemaphoreGive(cerrojo);
     return copia;
 }
+
+#else
+
+/* FNK0104: el audio (códec ES8311) llega en la Fase 2. Mientras, la radio
+ * hace como que suena para poder probar la navegación. */
+static EstadoAudio estado = AUDIO_PARADO;
+
+void audio_iniciar(void)
+{
+}
+
+void audio_reproducir(const char *url)
+{
+    Serial.printf("[audio] sin audio todavía en esta placa (Fase 2): %s\n", url);
+    estado = AUDIO_SONANDO;
+}
+
+void audio_parar(void)
+{
+    estado = AUDIO_PARADO;
+}
+
+EstadoAudio audio_estado(void)
+{
+    return estado;
+}
+
+void audio_volumen(uint8_t volumen)
+{
+    (void)volumen;
+}
+
+uint8_t audio_nivel(void)
+{
+    return 0;
+}
+
+const char *audio_titulo(void)
+{
+    return "";
+}
+
+#endif

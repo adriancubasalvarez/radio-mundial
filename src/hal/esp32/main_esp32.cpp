@@ -29,6 +29,7 @@ void setup()
     Serial.println("=== Radio Mundial ===");
     Serial.printf("Memoria libre al arrancar: %u bytes (bloque mayor %u)\n",
                   (unsigned)ESP.getFreeHeap(), (unsigned)ESP.getMaxAllocHeap());
+    Serial.printf("PSRAM: %u bytes (libres %u)\n", (unsigned)ESP.getPsramSize(), (unsigned)ESP.getFreePsram());
 
     archivos_iniciar();
     informe_memoria("archivos");

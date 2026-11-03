@@ -41,7 +41,9 @@ static int siguiente_byte(HalArchivo *a)
 }
 
 static bool sd_montada = false;
+#ifndef SIN_SD
 static SPIClass bus_sd(VSPI);
+#endif
 
 /* Monta LittleFS y, si hay tarjeta, la SD. Lo llama main_esp32.cpp. */
 bool archivos_iniciar(void)

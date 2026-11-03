@@ -4,12 +4,21 @@
  *   PLACA_CYD  Freenove FNK0114F (CYD 2,8" ILI9341, táctil resistivo
  *              XPT2046, ESP32 sin PSRAM). Pines del repositorio oficial
  *              Freenove_ESP32_Display, probados en el contador de YouTube.
+ *
+ *   PLACA_FNK0104  Freenove FNK0104 (ESP32-S3 con 8 MB de PSRAM y 16 MB de
+ *              flash, 2,8" ILI9341, táctil capacitivo FT6336). Pines del
+ *              esquema 2.8inch_ESP32-S3_Display_Schematic.pdf y de los
+ *              ejemplos oficiales (repositorio Freenove_ESP32_S3_Display).
  */
 #pragma once
 
 #if defined(PLACA_CYD)
 
 /* Pantalla ILI9341 por HSPI */
+#define TFT_SPI_HOST SPI2_HOST
+#define TFT_INVERTIR false
+/* Giro de la pantalla para que se vea derecha con el USB a la izquierda */
+#define TFT_ROTACION 1
 #define PIN_TFT_SCLK 14
 #define PIN_TFT_MOSI 13
 #define PIN_TFT_MISO 12
@@ -55,6 +64,29 @@
 #define LED_BALANCE_G 255
 #define LED_BALANCE_B 82
 
+#elif defined(PLACA_FNK0104)
+
+/* Pantalla ILI9341 por SPI (FSPI) */
+#define TFT_SPI_HOST SPI2_HOST
+#define PIN_TFT_SCLK 12
+#define PIN_TFT_MOSI 11
+#define PIN_TFT_MISO 13
+#define PIN_TFT_CS   10
+#define PIN_TFT_DC   46
+#define PIN_TFT_BL   45   /* retroiluminación encendida a nivel alto */
+#define TFT_INVERTIR true
+/* Freenove usa el giro 1, con el USB a la derecha; en nuestra carcasa el USB
+ * va a la izquierda: media vuelta más */
+#define TFT_ROTACION 3
+
+/* Táctil capacitivo FT6336 por I2C (dirección 0x38). El códec de audio
+ * ES8311 comparte el mismo bus (Fase 2). INT va a nivel bajo mientras se
+ * toca y es un pin RTC: puede despertar al ESP32. */
+#define PIN_I2C_SDA    16
+#define PIN_I2C_SCL    15
+#define PIN_TOUCH_RST  18
+#define PIN_TOUCH_IRQ  17
+
 #else
-#error "Placa no definida: compila con -D PLACA_CYD (ver platformio.ini)"
+#error "Placa no definida: compila con -D PLACA_CYD o -D PLACA_FNK0104 (ver platformio.ini)"
 #endif
