@@ -36,6 +36,15 @@ void hal_brillo(uint8_t porcentaje);
 /* Hora local. Devuelve false si aún no se sabe (la placa sin Internet). */
 bool hal_hora(int *hora, int *minuto);
 
+/* Fecha local: año, mes (1..12), día (1..31) y día de la semana (0 domingo).
+ * false si aún no se sabe. */
+bool hal_fecha(int *anio, int *mes, int *dia, int *dia_semana);
+
+/* Diferencia con la hora universal en segundos (p. ej. 3600 en Madrid en
+ * invierno): la radio la saca de la previsión del tiempo de su ubicación.
+ * En el simulador no hace nada (usa la hora del PC). */
+void hal_zona_horaria(int segundos);
+
 /* Número aleatorio de 32 bits */
 uint32_t hal_aleatorio(void);
 
@@ -66,6 +75,14 @@ const char *hal_red_portal(void);
 
 /* Abre el portal para elegir otra WiFi */
 void hal_red_configurar(void);
+
+/* Descarga una URL http:// (sin cifrado) y devuelve el cuerpo terminado en
+ * cero, o NULL si falla. Bloquea unos segundos: llamarla solo desde una
+ * tarea en segundo plano. Liberar con free(). */
+char *hal_http_get(const char *url);
+
+/* Ejecuta tarea() una vez en segundo plano, sin parar la pantalla */
+void hal_segundo_plano(void (*tarea)(void));
 
 /* Cierra el portal sin cambiar nada (vuelve a la WiFi guardada) */
 void hal_red_cancelar(void);

@@ -30,6 +30,25 @@ bool hal_hora(int *hora, int *minuto)
     return true;
 }
 
+bool hal_fecha(int *anio, int *mes, int *dia, int *dia_semana)
+{
+    time_t ahora = time(NULL);
+    struct tm *local = localtime(&ahora);
+    if (local == NULL) {
+        return false;
+    }
+    *anio = local->tm_year + 1900;
+    *mes = local->tm_mon + 1;
+    *dia = local->tm_mday;
+    *dia_semana = local->tm_wday;
+    return true;
+}
+
+void hal_zona_horaria(int segundos)
+{
+    (void)segundos;  /* el simulador usa la hora del PC */
+}
+
 uint32_t hal_aleatorio(void)
 {
     static std::mt19937 generador{std::random_device{}()};

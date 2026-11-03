@@ -43,11 +43,19 @@ RANGO_SIMBOLOS = (
     "62016,62017,62018,62019,62020,62087,62099,62212,62189,62810,63426,63650"
     # Símbolos propios de Radio Mundial: estrella (favoritos), aleatorio y lupa
     ",0xF005,0xF074,0xF002"
+    # y para el reposo: el tiempo, la hoja (calidad del aire), flechas y ubicación
+    ",0xF185,0xF186,0xF0C2,0xF6C4,0xF6C3,0xF73D,0xF740,0xF2DC,0xF0E7,0xF75F"
+    ",0xF06C,0xF062,0xF063,0xF3C5"
 )
 
-# Fuente grande solo con dígitos y dos puntos para el reloj del reposo
-TAM_RELOJ = 48
-RANGO_RELOJ = "0x20,0x30-0x3A"
+# Iconos grandes del tiempo para el reposo
+TAM_ICONOS = 64
+RANGO_ICONOS = "0xF185,0xF186,0xF0C2,0xF6C4,0xF6C3,0xF73D,0xF740,0xF2DC,0xF0E7,0xF75F,0xF06C"
+
+# Fuente grande para el reloj y la temperatura del reposo: dígitos, dos
+# puntos, el signo menos y el de grado
+TAM_RELOJ = 72
+RANGO_RELOJ = "0x20,0x2D,0x30-0x3A,0xB0"
 
 LV_FONT_CONV = "lv_font_conv@1.5.2"
 
@@ -70,6 +78,7 @@ def main():
                                           "--font", str(simbolos), "-r", RANGO_SIMBOLOS])
                 for tam in TAMANOS]
     trabajos.append((f"radio_reloj_{TAM_RELOJ}.c", TAM_RELOJ, ["--font", str(texto), "-r", RANGO_RELOJ]))
+    trabajos.append((f"radio_iconos_{TAM_ICONOS}.c", TAM_ICONOS, ["--font", str(simbolos), "-r", RANGO_ICONOS]))
 
     for nombre, tam, fuentes in trabajos:
         destino = SALIDA / nombre

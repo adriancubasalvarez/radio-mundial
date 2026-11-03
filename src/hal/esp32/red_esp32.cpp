@@ -14,6 +14,7 @@
 #include "marca.h"
 
 #include <Arduino.h>
+#include <HTTPClient.h>
 #include <WiFi.h>
 #include <WiFiManager.h>
 #include <esp_wifi.h>
@@ -263,4 +264,29 @@ void hal_red_cancelar(void)
         WiFi.mode(WIFI_STA);
         conectar_guardada(false);
     }
+}
+
+/* Descarga http (el tiempo y la ubicación). Se llama desde una tarea en
+ * segundo plano, nunca desde la interfaz. */
+char *hal_http_get(const char *url)
+{
+    if (WiFi.status() != WL_CONNECTED) {
+        return NULL;
+    }
+    HTTPClient http;
+    http.setTimeout(8000);
+    http.setUserAgent("RadioMundial");
+    if (!http.begin(url)) {
+        return NULL;
+    }
+    char *cuerpo = NULL;
+    int codigo = http.GET();
+    if (codigo == 200) {
+        String texto = http.getString();
+        cuerpo = strdup(texto.c_str());
+    } else {
+        Serial.printf("[http] %s -> %d\n", url, codigo);
+    }
+    http.end();
+    return cuerpo;
 }

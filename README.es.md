@@ -65,6 +65,7 @@ python tools/build_stations.py --probar
 **Datos**
 - Mapas: [Natural Earth](https://www.naturalearthdata.com/) (dominio público).
 - Emisoras: [radio-browser.info](https://www.radio-browser.info/), base de datos comunitaria y gratuita.
+- Tiempo y calidad del aire: [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0). Ubicación por la conexión a Internet: [ip-api.com](https://ip-api.com/). Los dos, gratis para uso no comercial y sin claves.
 
 **Fuentes**
 - [Montserrat](https://github.com/JulietaUla/Montserrat) — SIL Open Font License 1.1.

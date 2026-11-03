@@ -67,6 +67,7 @@ python tools/build_stations.py --probar
 **Data**
 - Maps: [Natural Earth](https://www.naturalearthdata.com/) (public domain).
 - Stations: [radio-browser.info](https://www.radio-browser.info/), a free community database.
+- Weather and air quality: [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0). Location from the internet connection: [ip-api.com](https://ip-api.com/). Both free for non-commercial use, without keys.
 
 **Fonts**
 - [Montserrat](https://github.com/JulietaUla/Montserrat) — SIL Open Font License 1.1.

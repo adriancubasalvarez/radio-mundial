@@ -19,6 +19,49 @@ bool hal_hora(int *hora, int *minuto)
     return true;
 }
 
+bool hal_fecha(int *anio, int *mes, int *dia, int *dia_semana)
+{
+    struct tm local;
+    if (!getLocalTime(&local, 0)) {
+        return false;
+    }
+    *anio = local.tm_year + 1900;
+    *mes = local.tm_mon + 1;
+    *dia = local.tm_mday;
+    *dia_semana = local.tm_wday;
+    return true;
+}
+
+/* La zona horaria en formato POSIX lleva el signo al revés: UTC+1 es
+ * «UTC-1». Con los minutos para zonas como la India (UTC+5:30). */
+void hal_zona_horaria(int segundos)
+{
+    static int actual = 1 << 30;
+    if (segundos == actual) {
+        return;
+    }
+    actual = segundos;
+    int minutos = abs(segundos) / 60;
+    char zona[24];
+    snprintf(zona, sizeof(zona), "UTC%c%d:%02d", segundos > 0 ? '-' : '+', minutos / 60, minutos % 60);
+    setenv("TZ", zona, 1);
+    tzset();
+    Serial.printf("Zona horaria: %s\n", zona);
+}
+
+static void ejecutar_tarea(void *parametro)
+{
+    ((void (*)(void))parametro)();
+    vTaskDelete(NULL);
+}
+
+/* En el núcleo 0, con poca prioridad: no estorba a la pantalla (núcleo 1)
+ * ni al audio (núcleo 0, prioridad 2) */
+void hal_segundo_plano(void (*tarea)(void))
+{
+    xTaskCreatePinnedToCore(ejecutar_tarea, "fondo", 8192, (void *)tarea, 1, NULL, 0);
+}
+
 uint32_t hal_aleatorio(void)
 {
     return esp_random();
