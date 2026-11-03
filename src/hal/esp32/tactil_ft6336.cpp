@@ -62,6 +62,13 @@ bool tactil_leer(int *x, int *y)
     *x = py;
     *y = 239 - px;
 #endif
+    /* El panel lee los toques «encogidos» hacia el centro: arriba, unos 20
+     * píxeles más abajo de donde está el dedo (la flecha de atrás, a y = 15,
+     * se leía entre 21 y 48), y abajo, más arriba. Se estiran hacia los
+     * bordes, con lo medido en la placa: x de 31..296 a 10..310 e y de
+     * 33..217 a 12..228. */
+    *x = (*x * 1132 - 25100) / 1000;
+    *y = (*y * 1174 - 26700) / 1000;
     *x = constrain(*x, 0, PANTALLA_ANCHO - 1);
     *y = constrain(*y, 0, PANTALLA_ALTO - 1);
     return true;
