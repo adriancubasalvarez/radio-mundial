@@ -75,9 +75,9 @@
 #define PIN_TFT_DC   46
 #define PIN_TFT_BL   45   /* retroiluminación encendida a nivel alto */
 #define TFT_INVERTIR true
-/* Freenove usa el giro 1, con el USB a la derecha; en nuestra carcasa el USB
- * va a la izquierda: media vuelta más */
-#define TFT_ROTACION 3
+/* Giro para que se vea derecha en la carcasa, con el USB a la izquierda
+ * (el mismo que usan los ejemplos de Freenove; comprobado en la placa) */
+#define TFT_ROTACION 1
 
 /* Táctil capacitivo FT6336 por I2C (dirección 0x38). El códec de audio
  * ES8311 comparte el mismo bus (Fase 2). INT va a nivel bajo mientras se

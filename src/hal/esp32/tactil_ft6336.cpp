@@ -51,15 +51,16 @@ bool tactil_leer(int *x, int *y)
     }
     int px = (d[1] & 0x0F) << 8 | d[2];  // 0..239
     int py = (d[3] & 0x0F) << 8 | d[4];  // 0..319
-
-    /* Del panel en vertical a la pantalla horizontal, con el mismo giro que
-     * la pantalla (ejemplos de Freenove con el giro 1: x = py, y = 240 - px) */
+    /* Del panel en vertical a la pantalla horizontal. Medido en la placa
+     * tocando las cuatro esquinas con LovyanGFX en el giro 1 (arriba a la
+     * izquierda: chip x 21, y 288; abajo a la derecha: x 213, y 24). Ojo:
+     * es media vuelta respecto al ejemplo de Freenove con TFT_eSPI. */
 #if TFT_ROTACION == 1
-    *x = py;
-    *y = 239 - px;
-#else
     *x = 319 - py;
     *y = px;
+#else
+    *x = py;
+    *y = 239 - px;
 #endif
     *x = constrain(*x, 0, PANTALLA_ANCHO - 1);
     *y = constrain(*y, 0, PANTALLA_ALTO - 1);

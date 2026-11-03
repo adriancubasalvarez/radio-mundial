@@ -43,6 +43,9 @@ static lv_obj_t *boton_cabecera(lv_obj_t *cabecera, const char *simbolo, lv_even
     lv_obj_set_style_bg_opa(boton, LV_OPA_30, LV_STATE_PRESSED);
     lv_obj_set_style_bg_color(boton, lv_color_white(), LV_STATE_PRESSED);
     lv_obj_add_event_cb(boton, accion, LV_EVENT_CLICKED, NULL);
+    /* Van pegados al borde de la pantalla, donde el dedo se queda siempre
+     * algo hacia dentro: se aceptan toques un poco fuera del botón */
+    lv_obj_set_ext_click_area(boton, 10);
 
     lv_obj_t *icono = lv_label_create(boton);
     lv_label_set_text(icono, simbolo);

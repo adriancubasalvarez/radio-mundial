@@ -68,8 +68,11 @@ static void crear_capa(void)
     lv_obj_align(nota, LV_ALIGN_BOTTOM_LEFT, 14, -10);
 
     lv_obj_t *cancelar = lv_btn_create(capa);
-    lv_obj_set_size(cancelar, 90, 32);
-    lv_obj_align(cancelar, LV_ALIGN_BOTTOM_RIGHT, -10, -4);
+    lv_obj_set_size(cancelar, 100, 38);
+    lv_obj_align(cancelar, LV_ALIGN_BOTTOM_RIGHT, -8, -4);
+    /* en el borde de la pantalla el dedo suele quedar algo más arriba:
+     * se acepta el toque un poco fuera del botón */
+    lv_obj_set_ext_click_area(cancelar, 14);
     lv_obj_set_style_bg_color(cancelar, lv_color_hex(COLOR_LINEA), 0);
     lv_obj_add_event_cb(cancelar, al_cancelar, LV_EVENT_CLICKED, NULL);
     lv_obj_t *etiqueta = lv_label_create(cancelar);
