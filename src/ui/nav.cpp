@@ -29,6 +29,17 @@ static lv_obj_t *construir(Pantalla pantalla)
     return pantalla_mundo();
 }
 
+/* true mientras dura la animación de un cambio de pantalla. Cambiar otra
+ * vez en ese momento (dos toques seguidos en «Atrás», o el aviso de una
+ * emisora caída que vuelve atrás solo justo cuando se toca «Atrás») hacía
+ * que LVGL usara una pantalla que ya se estaba borrando: la radio se
+ * reiniciaba. Mientras tanto, se ignora la orden. */
+static bool cambiando(void)
+{
+    lv_disp_t *d = lv_disp_get_default();
+    return d != NULL && d->scr_to_load != NULL;
+}
+
 /* Construye la pantalla y sustituye a la actual; la anterior se borra sola
  * al acabar la animación (y con ella sus mapas y listas). */
 static void mostrar(Pantalla pantalla, lv_scr_load_anim_t animacion)
@@ -46,7 +57,7 @@ static void mostrar(Pantalla pantalla, lv_scr_load_anim_t animacion)
 
 void nav_ir(Pantalla pantalla)
 {
-    if (tope + 1 >= MAX_PILA) {
+    if (tope + 1 >= MAX_PILA || cambiando()) {
         return;
     }
     pila[++tope] = pantalla;
@@ -72,13 +83,16 @@ void nav_reiniciar(void)
     lv_obj_t *vacia = lv_obj_create(NULL);
     lv_obj_set_style_bg_color(vacia, lv_color_hex(0x0B1D33), 0);
     lv_scr_load_anim(vacia, LV_SCR_LOAD_ANIM_NONE, 0, 0, true);
-    tope = -1;
-    nav_ir(PANT_MUNDO);
+    /* Sin pasar por nav_ir(): la carga de la pantalla vacía aún «está en
+     * marcha» y nav_ir() la ignoraría */
+    tope = 0;
+    pila[0] = PANT_MUNDO;
+    mostrar(PANT_MUNDO, LV_SCR_LOAD_ANIM_FADE_ON);
 }
 
 void nav_atras(void)
 {
-    if (tope <= 0) {
+    if (tope <= 0 || cambiando()) {
         return;
     }
     tope--;
