@@ -62,6 +62,7 @@ void ajustes_cargar(void)
     ajustes.reposo_s = 120;
     ajustes.reanudar = true;
     ajustes.luz = LUZ_RITMO;
+    ajustes.luz_brillo = 0;
 
     char *texto = hal_ajustes_leer();
     bool de_la_sd = false;
@@ -87,6 +88,10 @@ void ajustes_cargar(void)
     ajustes.luz = doc["luz"] | ajustes.luz;
     if (ajustes.luz >= NUM_MODOS_LUZ) {
         ajustes.luz = LUZ_RITMO;
+    }
+    ajustes.luz_brillo = doc["luz_brillo"] | ajustes.luz_brillo;
+    if (ajustes.luz_brillo >= NUM_BRILLOS_LUZ) {
+        ajustes.luz_brillo = 0;
     }
     /* Idioma: "en" o "es"; si no está, el primer arranque lo pregunta */
     const char *idioma = doc["idioma"] | "";
@@ -117,6 +122,7 @@ void ajustes_guardar(void)
     doc["reposo"] = ajustes.reposo_s;
     doc["reanudar"] = ajustes.reanudar;
     doc["luz"] = ajustes.luz;
+    doc["luz_brillo"] = ajustes.luz_brillo;
     if (ajustes.idioma_elegido) {
         doc["idioma"] = ajustes.espanol ? "es" : "en";
     }

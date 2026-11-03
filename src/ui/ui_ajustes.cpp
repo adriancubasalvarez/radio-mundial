@@ -66,6 +66,23 @@ static void al_luz(lv_event_t *e)
     lv_label_set_text(lv_obj_get_child(lv_event_get_target(e), 0), texto_luz());
 }
 
+static const char *texto_brillo(void)
+{
+    switch (ajustes.luz_brillo) {
+    case 0: return TR("Glow: low", "Brillo: bajo");
+    case 1: return TR("Glow: medium", "Brillo: medio");
+    default: return TR("Glow: high", "Brillo: alto");
+    }
+}
+
+/* Cada toque pasa a la siguiente intensidad: baja -> media -> alta */
+static void al_brillo(lv_event_t *e)
+{
+    ajustes.luz_brillo = (uint8_t)((ajustes.luz_brillo + 1) % NUM_BRILLOS_LUZ);
+    ajustes_guardar();
+    lv_label_set_text(lv_obj_get_child(lv_event_get_target(e), 0), texto_brillo());
+}
+
 /* Al soltar el deslizador: si llegó al final se apaga; si no, vuelve atrás */
 static void al_deslizar(lv_event_t *e)
 {
@@ -158,5 +175,14 @@ void ui_ajustes_abrir(void)
     boton(fila, TR(LV_SYMBOL_WIFI " Wi-Fi", LV_SYMBOL_WIFI " Red WiFi"), false, al_wifi, NULL, 126);
     boton(fila, texto_luz(), false, al_luz, NULL, 126);
     deslizador_apagar(capa);
-    boton(capa, TR("Close", "Cerrar"), false, al_cerrar, NULL);
+
+    /* Intensidad de la luz y Cerrar, en la última fila */
+    fila = lv_obj_create(capa);
+    lv_obj_remove_style_all(fila);
+    lv_obj_set_size(fila, 260, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(fila, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(fila, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_t *brillo = boton(fila, texto_brillo(), false, al_brillo, NULL, 126);
+    lv_obj_set_style_text_font(lv_obj_get_child(brillo, 0), &radio_14, 0);  /* texto largo */
+    boton(fila, TR("Close", "Cerrar"), false, al_cerrar, NULL, 126);
 }

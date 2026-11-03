@@ -16,6 +16,9 @@ typedef enum {
     NUM_MODOS_LUZ,
 } ModoLuz;
 
+/* Intensidad del LED: baja, media o alta (alta = la máxima del LED) */
+#define NUM_BRILLOS_LUZ 3
+
 /* Busca el color de la región del país que empieza a sonar */
 void luz_emisora(const char *codigo_pais);
 

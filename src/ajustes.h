@@ -25,6 +25,7 @@ typedef struct {
     bool idioma_elegido;      /* false: el primer arranque pregunta el idioma */
     bool espanol;             /* idioma: true español, false inglés */
     uint8_t luz;              /* ModoLuz (luz.h): apagada, estado o al ritmo */
+    uint8_t luz_brillo;       /* intensidad del LED: 0 baja, 1 media, 2 alta */
     bool hay_ultima;
     EmisoraGuardada ultima;
     EmisoraGuardada favoritos[MAX_FAVORITOS];

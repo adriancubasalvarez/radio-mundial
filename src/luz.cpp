@@ -9,7 +9,6 @@
 #include <string.h>
 
 #define PERIODO_MS     20     /* cada cuánto se recalcula el LED */
-#define BRILLO         0.6f   /* intensidad máxima del LED (0..1) */
 #define DESTELLOS_MS   1500   /* tres destellos rojos al caerse una emisora */
 #define COLOR_SIN_REGION 0xFFC845  /* ámbar de la interfaz */
 #define ARCOIRIS_MS    20000  /* una vuelta entera al arcoíris en modo ritmo */
@@ -102,7 +101,10 @@ static float respirar(uint32_t ahora, uint32_t periodo_ms)
 
 static void encender(uint32_t color, float k)
 {
-    k *= BRILLO;
+    /* baja, media, alta (alta = el LED a tope). La placa reparte el brillo
+     * «al cuadrado», así que 0,3 y 0,6 quedan en un 9 % y un 36 %. */
+    static const float BRILLOS[NUM_BRILLOS_LUZ] = {0.3f, 0.6f, 1.0f};
+    k *= BRILLOS[ajustes.luz_brillo < NUM_BRILLOS_LUZ ? ajustes.luz_brillo : 0];
     hal_led((uint8_t)((color >> 16 & 0xFF) * k), (uint8_t)((color >> 8 & 0xFF) * k), (uint8_t)((color & 0xFF) * k));
 }
 

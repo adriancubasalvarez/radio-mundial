@@ -102,6 +102,9 @@ static void soltar_pines(void)
         gpio_hold_dis((gpio_num_t)pin);
     }
 #endif
+#ifdef PIN_LED_WS2812
+    gpio_hold_dis((gpio_num_t)PIN_LED_WS2812);
+#endif
     tactil_soltar();
     gpio_deep_sleep_hold_dis();
 }
@@ -187,6 +190,15 @@ void hal_apagar(void)
         digitalWrite(pin, HIGH);
         gpio_hold_en((gpio_num_t)pin);
     }
+#endif
+#ifdef PIN_LED_WS2812
+    /* El WS2812 se queda con el último color mientras tenga corriente:
+     * hay que mandarle negro y dejar su pin quieto */
+    neopixelWrite(PIN_LED_WS2812, 0, 0, 0);
+    delay(5);
+    pinMode(PIN_LED_WS2812, OUTPUT);
+    digitalWrite(PIN_LED_WS2812, LOW);
+    gpio_hold_en((gpio_num_t)PIN_LED_WS2812);
 #endif
     tactil_dormir();
     gpio_deep_sleep_hold_en();

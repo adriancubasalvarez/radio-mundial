@@ -97,6 +97,12 @@
 #define PIN_I2S_DOUT 8
 #define PIN_AUDIO_EN 1
 
+/* LED RGB direccionable WS2812B (ejemplo Sketch_02.1_LedPixel de Freenove).
+ * Luce muchísimo (Freenove lo usa a 10 de 255): la intensidad se elige en
+ * Ajustes y la «alta» lo pone a tope. */
+#define PIN_LED_WS2812 42
+#define LED_MAXIMO     255  /* tope de cada color (0..255) */
+
 #else
 #error "Placa no definida: compila con -D PLACA_CYD o -D PLACA_FNK0104 (ver platformio.ini)"
 #endif
