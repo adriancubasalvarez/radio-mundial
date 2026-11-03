@@ -81,15 +81,15 @@
 
   <h2><span class="paso">1</span>Choose your board</h2>
   <div class="placas" role="group" aria-label="Board">
-    <button class="placa" data-placa="cyd" aria-pressed="true">
-      <strong>CYD 2.8" Freenove FNK0114F</strong>
-      <span>ESP32, resistive touch screen</span><br>
-      <span class="etiqueta">Testing</span>
-    </button>
-    <button class="placa" data-placa="fnk0104" disabled>
+    <button class="placa" data-placa="fnk0104" aria-pressed="true">
       <strong>Freenove FNK0104</strong>
       <span>ESP32-S3, capacitive touch and audio</span><br>
-      <span class="etiqueta">Coming soon</span>
+      <span class="etiqueta">Recommended</span>
+    </button>
+    <button class="placa" data-placa="cyd" aria-pressed="false">
+      <strong>CYD 2.8" Freenove FNK0114F</strong>
+      <span>ESP32, resistive touch screen</span><br>
+      <span class="etiqueta">Limited: no https stations</span>
     </button>
   </div>
 
@@ -100,7 +100,7 @@
       <li>Click <strong>Install</strong>, pick the board's port in the browser window and confirm.</li>
       <li>Wait until it finishes (1–2 minutes). Don't unplug the board.</li>
     </ol>
-    <esp-web-install-button id="instalador" manifest="../firmware/manifest-cyd.json">
+    <esp-web-install-button id="instalador" manifest="../firmware/manifest-fnk0104.json">
       <button slot="activate">Install Radio Mundial</button>
       <span slot="unsupported" class="aviso">Your browser can't install: use <strong>Chrome</strong> or <strong>Edge</strong> on a computer (not on a phone).</span>
       <span slot="not-allowed" class="aviso">Installing requires a secure page (https).</span>

@@ -42,6 +42,16 @@ PLACAS = {
         "frec_flash": "40m",
         "arranque": 0x1000,   # en el ESP32 clásico el arranque va en 0x1000
     },
+    "fnk0104": {
+        "nombre": 'Freenove FNK0104 (ESP32-S3, 2,8")',
+        "chip": "esp32s3",
+        "familia": "ESP32-S3",
+        "particiones": "particiones_16mb.csv",
+        "tam_flash": "16MB",
+        "modo_flash": "dio",  # el arranque cambia a QIO solo, como al flashear con pio
+        "frec_flash": "80m",
+        "arranque": 0x0,      # en el ESP32-S3 el arranque va en 0x0
+    },
 }
 
 

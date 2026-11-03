@@ -81,15 +81,15 @@
 
   <h2><span class="paso">1</span>Elige tu placa</h2>
   <div class="placas" role="group" aria-label="Placa">
-    <button class="placa" data-placa="cyd" aria-pressed="true">
-      <strong>CYD 2,8" Freenove FNK0114F</strong>
-      <span>ESP32, pantalla táctil resistiva</span><br>
-      <span class="etiqueta">En pruebas</span>
-    </button>
-    <button class="placa" data-placa="fnk0104" disabled>
+    <button class="placa" data-placa="fnk0104" aria-pressed="true">
       <strong>Freenove FNK0104</strong>
       <span>ESP32-S3, táctil capacitivo y audio</span><br>
-      <span class="etiqueta">Próximamente</span>
+      <span class="etiqueta">Recomendada</span>
+    </button>
+    <button class="placa" data-placa="cyd" aria-pressed="false">
+      <strong>CYD 2,8" Freenove FNK0114F</strong>
+      <span>ESP32, pantalla táctil resistiva</span><br>
+      <span class="etiqueta">Limitada: sin emisoras https</span>
     </button>
   </div>
 
@@ -100,7 +100,7 @@
       <li>Pulsa <strong>Instalar</strong>, elige el puerto de la placa en la ventana del navegador y confirma.</li>
       <li>Espera a que termine (1–2 minutos). No desconectes la placa.</li>
     </ol>
-    <esp-web-install-button id="instalador" manifest="../firmware/manifest-cyd.json">
+    <esp-web-install-button id="instalador" manifest="../firmware/manifest-fnk0104.json">
       <button slot="activate">Instalar Radio Mundial</button>
       <span slot="unsupported" class="aviso">Tu navegador no puede instalar: usa <strong>Chrome</strong> o <strong>Edge</strong> en un ordenador (no en el móvil).</span>
       <span slot="not-allowed" class="aviso">La instalación necesita una página segura (https).</span>
