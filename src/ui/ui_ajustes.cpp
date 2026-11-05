@@ -91,11 +91,23 @@ static void al_brillo(lv_event_t *e)
     lv_label_set_text(lv_obj_get_child(lv_event_get_target(e), 0), texto_brillo());
 }
 
-/* Al soltar el deslizador: si llegó al final se apaga; si no, vuelve atrás */
+/* El deslizador vale si el dedo empieza en su mitad izquierda y llega cerca
+ * del final: así cuesta poco apagar, pero un toque suelto no apaga */
+static bool empezo_a_la_izquierda;
+
+static void al_pulsar_deslizador(lv_event_t *e)
+{
+    lv_obj_t *deslizador = lv_event_get_target(e);
+    lv_point_t punto;
+    lv_indev_get_point(lv_indev_get_act(), &punto);
+    empezo_a_la_izquierda = punto.x < deslizador->coords.x1 + lv_obj_get_width(deslizador) / 2;
+}
+
+/* Al soltar: si llegó casi al final se apaga; si no, vuelve atrás */
 static void al_deslizar(lv_event_t *e)
 {
     lv_obj_t *deslizador = lv_event_get_target(e);
-    if (lv_slider_get_value(deslizador) < 95) {
+    if (!empezo_a_la_izquierda || lv_slider_get_value(deslizador) < 80) {
         lv_slider_set_value(deslizador, 0, LV_ANIM_ON);
         return;
     }
@@ -104,21 +116,21 @@ static void al_deslizar(lv_event_t *e)
     hal_apagar(alarmas_segundos_para_despertar());
 }
 
-/* «Desliza para apagar»: hay que arrastrar el botón redondo hasta el final,
+/* «Desliza para apagar»: hay que arrastrar el botón redondo hacia el final,
  * así no se apaga con un toque sin querer */
 static void deslizador_apagar(lv_obj_t *padre)
 {
     lv_obj_t *d = lv_slider_create(padre);
     lv_obj_set_size(d, 260 - 40, 40);  /* el botón sobresale media altura a cada lado */
     lv_slider_set_range(d, 0, 100);
-    /* solo se puede agarrar por el botón: tocar la barra no lo mueve */
-    lv_obj_add_flag(d, LV_OBJ_FLAG_ADV_HITTEST);
+    lv_obj_set_ext_click_area(d, 8);
     lv_obj_set_style_radius(d, 20, LV_PART_MAIN);
     lv_obj_set_style_bg_color(d, lv_color_hex(COLOR_LINEA), LV_PART_MAIN);
     lv_obj_set_style_radius(d, 20, LV_PART_INDICATOR);
     lv_obj_set_style_bg_color(d, lv_color_hex(COLOR_ERROR), LV_PART_INDICATOR);
     lv_obj_set_style_bg_color(d, lv_color_hex(COLOR_ERROR), LV_PART_KNOB);
     lv_obj_set_style_pad_all(d, 0, LV_PART_KNOB);
+    lv_obj_add_event_cb(d, al_pulsar_deslizador, LV_EVENT_PRESSED, NULL);
     lv_obj_add_event_cb(d, al_deslizar, LV_EVENT_RELEASED, NULL);
 
     lv_obj_t *etiqueta = lv_label_create(d);

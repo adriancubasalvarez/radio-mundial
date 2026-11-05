@@ -19,6 +19,10 @@
 #include <WiFi.h>
 
 #include "es8311.h"
+#include <soc/gpio_reg.h>
+#include <soc/io_mux_reg.h>
+#include <soc/rtc_cntl_reg.h>
+#include <soc/rtc_io_reg.h>
 
 /* Si no empieza a sonar en este tiempo, se da por fallida */
 #define TIEMPO_MAX_CONEXION 12000
@@ -92,6 +96,15 @@ static void seguir_frecuencia(Audio *a)
 {
     uint32_t fs = a->getSampleRate();
     if (codec != NULL && fs >= 8000 && fs != frecuencia_codec) {
+        if (fs > 16000) {  // PRUEBA
+            es8311_register_dump(codec);
+            Serial.printf("[prueba] pines: mux4 %08x mux5 %08x mux7 %08x mux8 %08x out8 %08x hold %08x\n",
+                          (unsigned)REG_READ(IO_MUX_GPIO4_REG), (unsigned)REG_READ(IO_MUX_GPIO5_REG),
+                          (unsigned)REG_READ(IO_MUX_GPIO7_REG), (unsigned)REG_READ(IO_MUX_GPIO8_REG),
+                          (unsigned)REG_READ(GPIO_FUNC8_OUT_SEL_CFG_REG), (unsigned)REG_READ(RTC_CNTL_DIG_PAD_HOLD_REG));
+            Serial.printf("[prueba] rtcio: pad8 %08x pad1 %08x\n", (unsigned)REG_READ(RTC_IO_TOUCH_PAD8_REG),
+                          (unsigned)REG_READ(RTC_IO_TOUCH_PAD1_REG));
+        }
         if (es8311_sample_frequency_config(codec, fs * 256, fs) == ESP_OK) {
             Serial.printf("[audio] códec a %u Hz\n", (unsigned)fs);
         }
@@ -114,7 +127,10 @@ static void poner_volumen(Audio *a, uint8_t v)
 {
     (void)a;
     if (codec != NULL) {
-        es8311_voice_volume_set(codec, v == 0 ? 0 : 40 + v * 35 / 100, NULL);
+        esp_err_t r = es8311_voice_volume_set(codec, v == 0 ? 0 : 40 + v * 35 / 100, NULL);
+        int leido = -1;
+        es8311_voice_volume_get(codec, &leido);
+        Serial.printf("[prueba] volumen %u: resultado %d, leído %d\n", v, (int)r, leido);
     }
 }
 
@@ -122,6 +138,7 @@ static void poner_volumen(Audio *a, uint8_t v)
 static void amplificador(bool encendido)
 {
     digitalWrite(PIN_AUDIO_EN, encendido ? LOW : HIGH);  // activo a nivel bajo
+    Serial.printf("[prueba] amplificador %d, pin %d\n", (int)encendido, digitalRead(PIN_AUDIO_EN));
 }
 
 /* ---------- Avisos de la librería ---------- */
@@ -193,6 +210,10 @@ static bool crear_libreria(void)
         return false;
     }
     audio = nueva_libreria();
+    /* El códec se configura con el reloj (MCLK) ya en marcha, como en el
+     * ejemplo de Freenove. Configurado sin reloj sonaba solo si la música
+     * empezaba enseguida: tras esperar a oscuras una alarma, no sonaba. */
+    preparar_salida();
     poner_volumen(audio, volumen_actual);
     audio->setConnectionTimeout(5000, 8000);
     Serial.printf("[audio] librería creada; memoria DMA libre %u\n",
@@ -204,6 +225,9 @@ static void tarea_audio(void *parametro)
 {
     (void)parametro;
     char url[256];
+    /* La librería se crea al arrancar: si se creaba minutos después, justo al
+     * saltar una alarma, la emisora conectaba pero no se oía nada */
+    crear_libreria();
     for (;;) {
         bool conectar = false, parar = false, tono = false;
         int volumen = -1;
@@ -321,7 +345,6 @@ void audio_iniciar(void)
 {
     pinMode(PIN_AUDIO_EN, OUTPUT);
     amplificador(false);
-    preparar_salida();
     preparar_cerrojo();
     xTaskCreatePinnedToCore(tarea_audio, "audio", 8192, NULL, 2, NULL, 0);
 }
