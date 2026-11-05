@@ -225,9 +225,6 @@ static void tarea_audio(void *parametro)
 {
     (void)parametro;
     char url[256];
-    /* La librería se crea al arrancar: si se creaba minutos después, justo al
-     * saltar una alarma, la emisora conectaba pero no se oía nada */
-    crear_libreria();
     for (;;) {
         bool conectar = false, parar = false, tono = false;
         int volumen = -1;
