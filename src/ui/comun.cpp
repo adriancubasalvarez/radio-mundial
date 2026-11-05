@@ -117,6 +117,7 @@ lv_obj_t *comun_boton_cabecera(lv_obj_t *cabecera, const char *simbolo, lv_event
 
 /* Filas apagadas: se marcan con este control de celda */
 #define FILA_APAGADA LV_TABLE_CELL_CTRL_CUSTOM_1
+#define FILA_GRIS    LV_TABLE_CELL_CTRL_CUSTOM_2
 
 static lv_style_t estilo_lista;
 static lv_style_t estilo_filas;
@@ -165,6 +166,10 @@ static void al_dibujar_celda(lv_event_t *e)
         dsc->label_dsc->font = &radio_14;
         dsc->label_dsc->color = lv_color_hex(COLOR_SECUNDARIO);
         dsc->label_dsc->align = LV_TEXT_ALIGN_RIGHT;
+    }
+    if (lv_table_has_cell_ctrl(tabla, fila, 0, FILA_GRIS) && dsc->label_dsc != NULL) {
+        dsc->label_dsc->color = lv_color_hex(COLOR_SECUNDARIO);
+        dsc->label_dsc->opa = LV_OPA_60;
     }
     if (lv_table_has_cell_ctrl(tabla, fila, 0, FILA_APAGADA) && dsc->label_dsc != NULL) {
         dsc->label_dsc->color = lv_color_hex(COLOR_SECUNDARIO);
@@ -228,6 +233,11 @@ void comun_lista_agregar(lv_obj_t *lista, const char *icono, const char *texto, 
         lv_table_add_cell_ctrl(lista, fila, 0, FILA_APAGADA);
     }
     lv_obj_set_user_data(lista, (void *)(uintptr_t)(fila + 1));
+}
+
+void comun_lista_gris(lv_obj_t *lista)
+{
+    lv_table_add_cell_ctrl(lista, comun_lista_filas(lista) - 1, 0, FILA_GRIS);
 }
 
 void comun_texto_seguro(const char *origen, char *destino, size_t tam)

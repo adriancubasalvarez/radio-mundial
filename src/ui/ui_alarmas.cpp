@@ -48,7 +48,10 @@ lv_obj_t *pantalla_alarmas(void)
         const Alarma *a = &ajustes.alarmas[i];
         char texto[40];
         snprintf(texto, sizeof(texto), "%02d:%02d   %s", a->hora, a->minuto, alarmas_texto_dias(a->dias));
-        comun_lista_agregar(lista, a->activa ? LV_SYMBOL_BELL : "  ", texto, NULL, false);
+        comun_lista_agregar(lista, LV_SYMBOL_BELL, texto, NULL, false);
+        if (!a->activa) {
+            comun_lista_gris(lista);
+        }
     }
     if (ajustes.num_alarmas < MAX_ALARMAS) {
         comun_lista_agregar(lista, LV_SYMBOL_PLUS, TR("New alarm", "Nueva alarma"), NULL, false);

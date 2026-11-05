@@ -49,5 +49,9 @@ lv_obj_t *comun_lista(lv_obj_t *pantalla, AlElegirFila accion);
  * y no responden. */
 void comun_lista_agregar(lv_obj_t *lista, const char *icono, const char *texto, const char *nota, bool apagada);
 
+/* Pone en gris la última fila añadida; a diferencia de las apagadas, sigue
+ * respondiendo al dedo (p. ej. una alarma desactivada) */
+void comun_lista_gris(lv_obj_t *lista);
+
 /* Número de filas añadidas */
 uint16_t comun_lista_filas(lv_obj_t *lista);
