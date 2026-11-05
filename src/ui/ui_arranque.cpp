@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "nav.h"
 #include "comun.h"
+#include "hal.h"
 #include "imagen.h"
 #include "marca.h"
 #include "ajustes.h"
@@ -22,8 +23,8 @@ static lv_timer_t *temporizador;
 /* Como una radio de verdad: al encender vuelve a sonar la última emisora */
 static void reanudar(void)
 {
-    if (!ajustes.reanudar || !ajustes.hay_ultima) {
-        return;
+    if (!ajustes.reanudar || !ajustes.hay_ultima || hal_despertado_por_alarma()) {
+        return;  /* si despertó para una alarma, callada hasta que suene */
     }
     nav.emisora = ajustes.ultima.emisora;
     memset(&nav.pais, 0, sizeof(nav.pais));

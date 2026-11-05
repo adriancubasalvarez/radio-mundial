@@ -111,7 +111,8 @@ void hal_pantalla_init(void)
 
     lcd.init();
     lcd.setRotation(TFT_ROTACION);  // horizontal, con el USB a la izquierda
-    lcd.setBrightness(255);
+    /* Si despierta para una alarma, a oscuras hasta que suene */
+    lcd.setBrightness(hal_despertado_por_alarma() ? 0 : 255);
     lcd.fillScreen(TFT_BLACK);
 
     tactil_iniciar();
@@ -162,7 +163,12 @@ void hal_brillo(uint8_t porcentaje)
     lcd.setBrightness(porcentaje * 255 / 100);
 }
 
-void hal_apagar(void)
+bool hal_despertado_por_alarma(void)
+{
+    return esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER;
+}
+
+void hal_apagar(uint32_t segundos)
 {
     /* Amplificador, retroiluminación y LED apagados, y que sigan así mientras
      * el ESP32 duerme (si no, los pines quedan sueltos) */
@@ -198,5 +204,9 @@ void hal_apagar(void)
     Serial.println("Apagada: toca la pantalla para encenderla");
     Serial.flush();
     esp_sleep_enable_ext0_wakeup((gpio_num_t)PIN_TOUCH_IRQ, 0);
+    if (segundos > 0) {
+        Serial.printf("Despertará para la alarma en %u s\n", (unsigned)segundos);
+        esp_sleep_enable_timer_wakeup(segundos * 1000000ULL);
+    }
     esp_deep_sleep_start();
 }

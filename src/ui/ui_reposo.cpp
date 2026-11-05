@@ -367,7 +367,7 @@ static void vigilar(lv_timer_t *t)
         if (segundos % SEGUNDOS_PAGINA == 0) {
             pasar_pagina();
         }
-    } else if (!alarmas_sonando() && ajustes.reposo_s > 0 &&
+    } else if (!alarmas_sonando() && !alarmas_en_espera() && ajustes.reposo_s > 0 &&
                lv_disp_get_inactive_time(NULL) > ajustes.reposo_s * 1000UL) {
         dormir();
     }

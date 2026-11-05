@@ -8,6 +8,7 @@
 #include "nav.h"
 #include "comun.h"
 #include "ajustes.h"
+#include "alarmas.h"
 #include "hal.h"
 #include "idioma.h"
 #include "luz.h"
@@ -100,7 +101,7 @@ static void al_deslizar(lv_event_t *e)
     }
     audio_parar();
     ajustes_guardar();
-    hal_apagar();
+    hal_apagar(alarmas_segundos_para_despertar());
 }
 
 /* «Desliza para apagar»: hay que arrastrar el botón redondo hasta el final,

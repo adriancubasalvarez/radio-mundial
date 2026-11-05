@@ -164,9 +164,14 @@ static void guardar_bmp(const char *ruta)
 /* En el simulador, apagar es cerrar la ventana */
 static bool apagada;
 
-void hal_apagar(void)
+bool hal_despertado_por_alarma(void)
 {
-    printf("Apagada (simulador): se cierra la ventana\n");
+    return false;
+}
+
+void hal_apagar(uint32_t segundos)
+{
+    printf("Apagada (simulador): se cierra la ventana; despertaría en %u s\n", (unsigned)segundos);
     apagada = true;
 }
 

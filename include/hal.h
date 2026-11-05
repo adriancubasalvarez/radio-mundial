@@ -49,9 +49,13 @@ void hal_zona_horaria(int segundos);
 uint32_t hal_aleatorio(void);
 
 /* Apaga la radio: pantalla y audio fuera y a dormir hasta que se toque la
- * pantalla. En la placa no vuelve: al despertar arranca de nuevo y suena la
- * última emisora. En el simulador cierra la ventana. */
-void hal_apagar(void);
+ * pantalla o pasen «segundos» (0 = sin límite; es para las alarmas). En la
+ * placa no vuelve: al despertar arranca de nuevo y suena la última emisora.
+ * En el simulador cierra la ventana. */
+void hal_apagar(uint32_t segundos);
+
+/* true si esta vez ha despertado el temporizador de una alarma, no un toque */
+bool hal_despertado_por_alarma(void);
 
 /* LED RGB de la placa, 0..255 por color (en placas sin LED no hace nada) */
 void hal_led(uint8_t r, uint8_t g, uint8_t b);

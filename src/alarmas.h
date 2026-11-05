@@ -15,5 +15,12 @@ void alarmas_apagar(void);
 /* true mientras suena una alarma */
 bool alarmas_sonando(void);
 
+/* true si la radio despertó sola y espera a oscuras a que llegue la alarma */
+bool alarmas_en_espera(void);
+
+/* Segundos que puede dormir la radio antes de despertar para la próxima
+ * alarma (0 = no hay ninguna activa) */
+uint32_t alarmas_segundos_para_despertar(void);
+
 /* Días de una alarma en texto corto: «Una vez», «Lun a vie», «L M X»... */
 const char *alarmas_texto_dias(uint8_t dias);
