@@ -23,6 +23,9 @@ typedef struct {
     uint8_t hora, minuto;
     uint8_t dias;             /* bit 0 domingo .. bit 6 sábado; 0 = una vez */
     bool activa;
+    uint8_t volumen;          /* 0..100, al que llega al sonar */
+    bool con_emisora;         /* false: suena la última emisora escuchada */
+    EmisoraGuardada emisora;
 } Alarma;
 
 typedef struct {

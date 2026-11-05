@@ -135,6 +135,10 @@ void audio_reproducir(const char *url);
 /* Para la reproducción */
 void audio_parar(void);
 
+/* Repite sin parar el tono de emergencia de las alarmas (alarma.mp3 de la
+ * memoria interna: suena sin Internet) */
+void audio_tono(void);
+
 typedef enum {
     AUDIO_PARADO,      /* no se ha pedido nada, o se ha parado */
     AUDIO_CONECTANDO,  /* se ha pedido una emisora y aún no suena */

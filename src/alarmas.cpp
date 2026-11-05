@@ -14,36 +14,108 @@
 #define FIN_DE_SEMANA 0x41  /* bits 0 y 6 */
 #define TODOS 0x7F
 
+#define ESPERA_EMISORA_MS 15000UL  /* si no arranca en este tiempo, tono */
+#define RAMPA_MS          60000UL  /* la emisora llega a su volumen en 1 minuto */
+#define RAMPA_TONO_MS     20000UL  /* el tono, antes: tiene que despertar */
+#define TOPE_MS (30UL * 60 * 1000)  /* sin apagarla, se para sola a la media hora */
+#define VOLUMEN_INICIAL   0.3f     /* empieza al 30 % del volumen de la alarma */
+
+typedef enum {
+    SUENA_MUSICA,   /* ya sonaba algo: se deja como está */
+    SUENA_EMISORA,
+    SUENA_TONO,
+} Sonido;
+
 static uint32_t ultimo_ms;
 static int ultimo_minuto = -1;  /* para no disparar dos veces en el mismo minuto */
 static bool sonando;
-static bool puso_audio;         /* la radio estaba callada y la encendió la alarma */
+static Sonido sonido;
+static uint32_t desde_ms;       /* cuándo saltó la alarma */
+static bool subiendo;           /* ya hay sonido y el volumen va subiendo */
+static uint32_t rampa_desde_ms;
+static uint8_t volumen_final;
+static int volumen_puesto;
 
-/* Enciende la última emisora que sonó; si ya suena algo, se deja como está */
-static void poner_audio(void)
+static void poner_volumen(int v)
 {
-    EstadoAudio estado = audio_estado();
-    bool ya_suena = nav.hay_sonando && (estado == AUDIO_SONANDO || estado == AUDIO_CONECTANDO);
-    puso_audio = false;
-    if (ya_suena || !ajustes.hay_ultima) {
-        return;
+    if (v != volumen_puesto) {
+        volumen_puesto = v;
+        audio_volumen((uint8_t)v);
     }
-    nav.emisora = ajustes.ultima.emisora;
-    memset(&nav.pais, 0, sizeof(nav.pais));
-    strncpy(nav.pais.codigo, ajustes.ultima.pais, sizeof(nav.pais.codigo) - 1);
-    strncpy(nav.pais.nombre, ajustes.ultima.nombre_pais, sizeof(nav.pais.nombre) - 1);
-    nav.aleatoria = false;
-    nav_reproducir();
-    puso_audio = true;
 }
 
-static void disparar(int hora, int minuto)
+static void poner_tono(void)
+{
+    printf("Alarma: tono de emergencia\n");
+    sonido = SUENA_TONO;
+    nav.hay_sonando = false;
+    poner_volumen((int)(volumen_final * VOLUMEN_INICIAL));
+    audio_tono();
+    subiendo = true;
+    rampa_desde_ms = hal_millis();
+}
+
+static void poner_emisora(const EmisoraGuardada *e)
+{
+    sonido = SUENA_EMISORA;
+    subiendo = false;
+    poner_volumen((int)(volumen_final * VOLUMEN_INICIAL));
+    nav.emisora = e->emisora;
+    memset(&nav.pais, 0, sizeof(nav.pais));
+    strncpy(nav.pais.codigo, e->pais, sizeof(nav.pais.codigo) - 1);
+    strncpy(nav.pais.nombre, e->nombre_pais, sizeof(nav.pais.nombre) - 1);
+    nav.aleatoria = false;
+    nav_reproducir();
+}
+
+static void disparar(int hora, int minuto, const Alarma *a)
 {
     printf("Alarma de las %02d:%02d\n", hora, minuto);
     sonando = true;
+    desde_ms = hal_millis();
+    volumen_final = a->volumen;
+    volumen_puesto = -1;
     reposo_despertar();
-    poner_audio();
+
+    EstadoAudio estado = audio_estado();
+    const EmisoraGuardada *e = a->con_emisora ? &a->emisora : (ajustes.hay_ultima ? &ajustes.ultima : NULL);
+    if (nav.hay_sonando && (estado == AUDIO_SONANDO || estado == AUDIO_CONECTANDO)) {
+        sonido = SUENA_MUSICA;
+    } else if (e == NULL || hal_red_estado() != RED_CONECTADA) {
+        poner_tono();
+    } else {
+        poner_emisora(e);
+    }
     alarma_mostrar(hora, minuto);
+}
+
+/* Mientras suena: pasa al tono si falla la emisora y sube el volumen */
+static void seguir_sonando(uint32_t ahora)
+{
+    if (ahora - desde_ms > TOPE_MS) {
+        alarmas_apagar();
+        alarma_cerrar();
+        return;
+    }
+    if (sonido == SUENA_MUSICA) {
+        return;
+    }
+    if (sonido == SUENA_EMISORA) {
+        EstadoAudio estado = audio_estado();
+        if (estado == AUDIO_ERROR || estado == AUDIO_PARADO ||
+            (!subiendo && ahora - desde_ms > ESPERA_EMISORA_MS && estado != AUDIO_SONANDO)) {
+            poner_tono();
+        } else if (!subiendo && estado == AUDIO_SONANDO) {
+            subiendo = true;
+            rampa_desde_ms = ahora;
+        }
+    }
+    if (subiendo) {
+        uint32_t rampa = sonido == SUENA_TONO ? RAMPA_TONO_MS : RAMPA_MS;
+        uint32_t pasado = ahora - rampa_desde_ms;
+        float k = pasado >= rampa ? 1.0f : (float)pasado / rampa;
+        poner_volumen((int)(volumen_final * (VOLUMEN_INICIAL + (1.0f - VOLUMEN_INICIAL) * k)));
+    }
 }
 
 void alarmas_atender(void)
@@ -53,6 +125,9 @@ void alarmas_atender(void)
         return;
     }
     ultimo_ms = ahora;
+    if (sonando) {
+        seguir_sonando(ahora);
+    }
 
     int hora, minuto, anio, mes, dia, semana;
     if (!hal_hora(&hora, &minuto) || !hal_fecha(&anio, &mes, &dia, &semana)) {
@@ -64,7 +139,8 @@ void alarmas_atender(void)
     }
     ultimo_minuto = este_minuto;
 
-    bool hay = false, cambio = false;
+    const Alarma *suena = NULL;
+    bool cambio = false;
     for (uint8_t i = 0; i < ajustes.num_alarmas; i++) {
         Alarma *a = &ajustes.alarmas[i];
         if (!a->activa || a->hora != hora || a->minuto != minuto) {
@@ -73,27 +149,27 @@ void alarmas_atender(void)
         if (a->dias == 0) {
             a->activa = false;  /* «una vez»: se apaga sola */
             cambio = true;
-            hay = true;
+            suena = a;
         } else if (a->dias & (1 << semana)) {
-            hay = true;
+            suena = a;
         }
     }
     if (cambio) {
         ajustes_guardar();
     }
-    if (hay && !sonando) {
-        disparar(hora, minuto);
+    if (suena != NULL && !sonando) {
+        disparar(hora, minuto, suena);
     }
 }
 
 void alarmas_apagar(void)
 {
-    sonando = false;
-    if (puso_audio) {
+    if (sonando && sonido != SUENA_MUSICA) {
         audio_parar();
         nav.hay_sonando = false;
-        puso_audio = false;
+        audio_volumen(ajustes.volumen);
     }
+    sonando = false;
 }
 
 bool alarmas_sonando(void)

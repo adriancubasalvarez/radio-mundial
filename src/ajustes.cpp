@@ -117,6 +117,11 @@ void ajustes_cargar(void)
         a->minuto = o["m"] | 0;
         a->dias = o["d"] | 0;
         a->activa = o["a"] | false;
+        a->volumen = o["v"] | 60;
+        if (o["e"].is<JsonObjectConst>()) {
+            de_json(o["e"], &a->emisora);
+            a->con_emisora = true;
+        }
     }
 
     if (de_la_sd) {
@@ -150,6 +155,10 @@ void ajustes_guardar(void)
         o["m"] = ajustes.alarmas[i].minuto;
         o["d"] = ajustes.alarmas[i].dias;
         o["a"] = ajustes.alarmas[i].activa;
+        o["v"] = ajustes.alarmas[i].volumen;
+        if (ajustes.alarmas[i].con_emisora) {
+            a_json(o["e"].to<JsonObject>(), &ajustes.alarmas[i].emisora);
+        }
     }
 
     size_t tam = measureJsonPretty(doc) + 1;

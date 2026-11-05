@@ -32,6 +32,8 @@ static void al_elegir(uint16_t fila)
         a->minuto = 30;
         a->dias = 0x3E;  /* lunes a viernes */
         a->activa = true;
+        a->volumen = 60;
+        a->con_emisora = false;
     }
     editando = fila;
     nav_ir(PANT_ALARMA);
@@ -96,6 +98,12 @@ static void al_salir(lv_event_t *e)
 {
     (void)e;
     ajustes_guardar();
+}
+
+static void al_abrir_sonido(lv_event_t *e)
+{
+    (void)e;
+    nav_ir(PANT_ALARMA_SONIDO);
 }
 
 static lv_obj_t *rodillo(lv_obj_t *padre, int cuantos, int actual, int x, uint8_t *campo)
@@ -164,7 +172,7 @@ lv_obj_t *pantalla_alarma(void)
 
     lv_obj_t *interruptor = lv_switch_create(pantalla);
     lv_obj_set_size(interruptor, 56, 30);
-    lv_obj_set_pos(interruptor, 14, 196);
+    lv_obj_set_pos(interruptor, 12, 197);
     lv_obj_set_style_bg_color(interruptor, lv_color_hex(COLOR_LINEA), 0);
     lv_obj_set_style_bg_color(interruptor, lv_color_hex(COLOR_ACENTO), (unsigned)LV_PART_INDICATOR | LV_STATE_CHECKED);
     if (a->activa) {
@@ -172,14 +180,22 @@ lv_obj_t *pantalla_alarma(void)
     }
     lv_obj_add_event_cb(interruptor, al_cambiar_activa, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_set_ext_click_area(interruptor, 8);
-    lv_obj_t *texto_activa = lv_label_create(pantalla);
-    lv_label_set_text(texto_activa, TR("On", "Activa"));
-    lv_obj_set_style_text_font(texto_activa, &radio_20, 0);
-    lv_obj_set_style_text_color(texto_activa, lv_color_hex(COLOR_TEXTO), 0);
-    lv_obj_set_pos(texto_activa, 80, 200);
+
+    lv_obj_t *sonido = lv_btn_create(pantalla);
+    lv_obj_set_size(sonido, 116, 40);
+    lv_obj_set_pos(sonido, 78, 192);
+    lv_obj_set_style_radius(sonido, 10, 0);
+    lv_obj_set_style_shadow_width(sonido, 0, 0);
+    lv_obj_set_style_bg_color(sonido, lv_color_hex(COLOR_LINEA), 0);
+    lv_obj_add_event_cb(sonido, al_abrir_sonido, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *texto_sonido = lv_label_create(sonido);
+    lv_label_set_text(texto_sonido, TR(LV_SYMBOL_AUDIO " Sound", LV_SYMBOL_AUDIO " Sonido"));
+    lv_obj_set_style_text_font(texto_sonido, &radio_20, 0);
+    lv_obj_set_style_text_color(texto_sonido, lv_color_hex(COLOR_TEXTO), 0);
+    lv_obj_center(texto_sonido);
 
     lv_obj_t *borrar = lv_btn_create(pantalla);
-    lv_obj_set_size(borrar, 110, 40);
+    lv_obj_set_size(borrar, 112, 40);
     lv_obj_set_pos(borrar, 200, 192);
     lv_obj_set_style_radius(borrar, 10, 0);
     lv_obj_set_style_shadow_width(borrar, 0, 0);
@@ -193,16 +209,79 @@ lv_obj_t *pantalla_alarma(void)
     return pantalla;
 }
 
+/* ---------- Sonido de una alarma ---------- */
+
+static lv_obj_t *texto_volumen;
+
+static void poner_texto_volumen(int v)
+{
+    lv_label_set_text_fmt(texto_volumen, TR(LV_SYMBOL_VOLUME_MAX "  Volume %d %%", LV_SYMBOL_VOLUME_MAX "  Volumen %d %%"), v);
+}
+
+static void al_cambiar_volumen(lv_event_t *e)
+{
+    int v = lv_slider_get_value(lv_event_get_target(e));
+    ajustes.alarmas[editando].volumen = (uint8_t)v;
+    poner_texto_volumen(v);
+}
+
+/* Fila 0: la última emisora; las demás, las favoritas */
+static void al_elegir_sonido(uint16_t fila)
+{
+    Alarma *a = &ajustes.alarmas[editando];
+    a->con_emisora = fila > 0;
+    if (a->con_emisora) {
+        a->emisora = ajustes.favoritos[fila - 1];
+    }
+    nav_atras();
+}
+
+lv_obj_t *pantalla_alarma_sonido(void)
+{
+    const Alarma *a = &ajustes.alarmas[editando];
+    lv_obj_t *pantalla = comun_pantalla();
+    comun_cabecera(pantalla, TR("Alarm sound", "Sonido de la alarma"), true, NULL);
+    lv_obj_add_event_cb(pantalla, al_salir, LV_EVENT_DELETE, NULL);
+
+    texto_volumen = lv_label_create(pantalla);
+    lv_obj_set_style_text_color(texto_volumen, lv_color_hex(COLOR_SECUNDARIO), 0);
+    lv_obj_set_pos(texto_volumen, 16, ALTO_CABECERA + 8);
+    poner_texto_volumen(a->volumen);
+    lv_obj_t *barra = lv_slider_create(pantalla);
+    lv_obj_set_size(barra, PANTALLA_ANCHO - 48, 12);
+    lv_obj_set_pos(barra, 24, ALTO_CABECERA + 34);
+    lv_slider_set_range(barra, 10, 100);
+    lv_slider_set_value(barra, a->volumen, LV_ANIM_OFF);
+    lv_obj_set_ext_click_area(barra, 10);
+    lv_obj_add_event_cb(barra, al_cambiar_volumen, LV_EVENT_VALUE_CHANGED, NULL);
+
+    lv_obj_t *lista = comun_lista(pantalla, al_elegir_sonido);
+    lv_obj_set_pos(lista, 0, ALTO_CABECERA + 58);
+    lv_obj_set_size(lista, PANTALLA_ANCHO, PANTALLA_ALTO - ALTO_CABECERA - 58);
+    comun_lista_agregar(lista, a->con_emisora ? "  " : LV_SYMBOL_OK, TR("Last station", "Última emisora"), NULL, false);
+    for (uint8_t i = 0; i < ajustes.num_favoritos; i++) {
+        const EmisoraGuardada *f = &ajustes.favoritos[i];
+        bool es = a->con_emisora && strcmp(a->emisora.emisora.url, f->emisora.url) == 0;
+        comun_lista_agregar(lista, es ? LV_SYMBOL_OK : "  ", f->emisora.nombre, f->pais, false);
+    }
+    return pantalla;
+}
+
 /* ---------- Aviso cuando suena ---------- */
+
+void alarma_cerrar(void)
+{
+    if (capa_aviso != NULL) {
+        lv_obj_del_async(capa_aviso);
+        capa_aviso = NULL;
+    }
+}
 
 static void al_apagar(lv_event_t *e)
 {
     (void)e;
     alarmas_apagar();
-    if (capa_aviso != NULL) {
-        lv_obj_del_async(capa_aviso);
-        capa_aviso = NULL;
-    }
+    alarma_cerrar();
     lv_disp_trig_activity(NULL);
 }
 

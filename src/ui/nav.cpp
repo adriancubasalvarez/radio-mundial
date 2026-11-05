@@ -27,6 +27,7 @@ static lv_obj_t *construir(Pantalla pantalla)
     case PANT_MIS_EMISORAS: return pantalla_mis_emisoras();
     case PANT_ALARMAS:  return pantalla_alarmas();
     case PANT_ALARMA:   return pantalla_alarma();
+    case PANT_ALARMA_SONIDO: return pantalla_alarma_sonido();
     }
     return pantalla_mundo();
 }

@@ -15,6 +15,7 @@
 
 #include <Arduino.h>
 #include <Audio.h>
+#include <LittleFS.h>
 #include <WiFi.h>
 
 #include "es8311.h"
@@ -37,12 +38,14 @@ static SemaphoreHandle_t cerrojo;
 static char url_pedida[256];
 static bool hay_url_pedida = false;
 static bool parar_pedido = false;
+static bool tono_pedido = false;
 static int volumen_pedido = -1;
 
 /* Estado (lo escribe la tarea de audio y lo lee la interfaz) */
 static volatile EstadoAudio estado = AUDIO_PARADO;
 static volatile bool sonido_detectado = false;
 static volatile bool fin_de_stream = false;
+static bool en_tono = false;  /* suena el tono de emergencia (solo en la tarea) */
 static uint32_t inicio_conexion;
 static char titulo[160];
 
@@ -202,7 +205,7 @@ static void tarea_audio(void *parametro)
     (void)parametro;
     char url[256];
     for (;;) {
-        bool conectar = false, parar = false;
+        bool conectar = false, parar = false, tono = false;
         int volumen = -1;
         xSemaphoreTake(cerrojo, portMAX_DELAY);
         if (hay_url_pedida) {
@@ -212,6 +215,8 @@ static void tarea_audio(void *parametro)
         }
         parar = parar_pedido;
         parar_pedido = false;
+        tono = tono_pedido;
+        tono_pedido = false;
         volumen = volumen_pedido;
         volumen_pedido = -1;
         xSemaphoreGive(cerrojo);
@@ -226,12 +231,26 @@ static void tarea_audio(void *parametro)
             audio->stopSong();
             amplificador(false);
             estado = AUDIO_PARADO;
+            en_tono = false;
+        }
+        if (tono && !crear_libreria()) {
+            estado = AUDIO_ERROR;
+            tono = false;
+        }
+        if (tono) {
+            en_tono = true;
+            esperando_wifi = false;
+            fin_de_stream = false;
+            sonido_detectado = false;
+            amplificador(true);
+            estado = audio->connecttoFS(LittleFS, "/alarma.mp3") ? AUDIO_SONANDO : AUDIO_ERROR;
         }
         if (conectar && !crear_libreria()) {
             estado = AUDIO_ERROR;  /* no hay memoria para el audio */
             conectar = false;
         }
         if (conectar) {
+            en_tono = false;
             audio->stopSong();
             sonido_detectado = false;
             fin_de_stream = false;
@@ -269,7 +288,15 @@ static void tarea_audio(void *parametro)
             continue;
         }
 
-        if (estado == AUDIO_CONECTANDO || estado == AUDIO_SONANDO) {
+        if (en_tono && estado == AUDIO_SONANDO) {
+            /* cuando acaba el archivo, otra vez desde el principio */
+            audio->loop();
+            seguir_frecuencia(audio);
+            if (!audio->isRunning()) {
+                audio->connecttoFS(LittleFS, "/alarma.mp3");
+            }
+            vTaskDelay(1);
+        } else if (estado == AUDIO_CONECTANDO || estado == AUDIO_SONANDO) {
             audio->loop();
             seguir_frecuencia(audio);
             if (fin_de_stream || (!audio->isRunning() && millis() - inicio_conexion > 2000)) {
@@ -314,12 +341,23 @@ void audio_reproducir(const char *url)
     inicio_conexion = millis();
 }
 
+void audio_tono(void)
+{
+    preparar_cerrojo();
+    xSemaphoreTake(cerrojo, portMAX_DELAY);
+    tono_pedido = true;
+    hay_url_pedida = false;
+    parar_pedido = false;
+    xSemaphoreGive(cerrojo);
+}
+
 void audio_parar(void)
 {
     preparar_cerrojo();
     xSemaphoreTake(cerrojo, portMAX_DELAY);
     parar_pedido = true;
     hay_url_pedida = false;
+    tono_pedido = false;
     xSemaphoreGive(cerrojo);
     estado = AUDIO_PARADO;
 }

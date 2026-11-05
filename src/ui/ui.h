@@ -18,6 +18,9 @@ void reposo_despertar(void);
 /* Aviso a pantalla completa de una alarma sonando */
 void alarma_mostrar(int hora, int minuto);
 
+/* Quita ese aviso */
+void alarma_cerrar(void);
+
 /* Muestra la pantalla del portal WiFi cuando está abierto */
 void red_ui_iniciar(void);
 
