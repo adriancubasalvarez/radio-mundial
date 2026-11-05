@@ -144,6 +144,42 @@ static void seguir_sonando(uint32_t ahora)
     }
 }
 
+/* Dispara las alarmas de este minuto */
+static void comprobar_reloj(void)
+{
+    int hora, minuto, anio, mes, dia, semana;
+    if (!hal_hora(&hora, &minuto) || !hal_fecha(&anio, &mes, &dia, &semana)) {
+        return;  /* aún no se sabe la hora */
+    }
+    int este_minuto = hora * 60 + minuto;
+    if (este_minuto == ultimo_minuto) {
+        return;
+    }
+    ultimo_minuto = este_minuto;
+
+    const Alarma *suena = NULL;
+    bool cambio = false;
+    for (uint8_t i = 0; i < ajustes.num_alarmas; i++) {
+        Alarma *a = &ajustes.alarmas[i];
+        if (!a->activa || a->hora != hora || a->minuto != minuto) {
+            continue;
+        }
+        if (a->dias == 0) {
+            a->activa = false;  /* «una vez»: se apaga sola */
+            cambio = true;
+            suena = a;
+        } else if (a->dias & (1 << semana)) {
+            suena = a;
+        }
+    }
+    if (cambio) {
+        ajustes_guardar();
+    }
+    if (suena != NULL && !sonando) {
+        disparar(hora, minuto, suena);
+    }
+}
+
 /* Despertó sola y a oscuras: un toque enciende la pantalla; si la alarma aún
  * queda lejos (ya con la hora corregida por Internet), a dormir otra vez */
 static void seguir_esperando(uint32_t ahora)
@@ -180,40 +216,11 @@ void alarmas_atender(void)
     if (sonando) {
         seguir_sonando(ahora);
     }
+    comprobar_reloj();
+    /* Después de comprobar el reloj: en el minuto de la alarma, esta ya no
+     * cuenta como «próxima» y la radio se volvería a dormir sin sonar */
     if (en_espera) {
         seguir_esperando(ahora);
-    }
-
-    int hora, minuto, anio, mes, dia, semana;
-    if (!hal_hora(&hora, &minuto) || !hal_fecha(&anio, &mes, &dia, &semana)) {
-        return;  /* aún no se sabe la hora */
-    }
-    int este_minuto = hora * 60 + minuto;
-    if (este_minuto == ultimo_minuto) {
-        return;
-    }
-    ultimo_minuto = este_minuto;
-
-    const Alarma *suena = NULL;
-    bool cambio = false;
-    for (uint8_t i = 0; i < ajustes.num_alarmas; i++) {
-        Alarma *a = &ajustes.alarmas[i];
-        if (!a->activa || a->hora != hora || a->minuto != minuto) {
-            continue;
-        }
-        if (a->dias == 0) {
-            a->activa = false;  /* «una vez»: se apaga sola */
-            cambio = true;
-            suena = a;
-        } else if (a->dias & (1 << semana)) {
-            suena = a;
-        }
-    }
-    if (cambio) {
-        ajustes_guardar();
-    }
-    if (suena != NULL && !sonando) {
-        disparar(hora, minuto, suena);
     }
 }
 
@@ -277,7 +284,7 @@ const char *alarmas_texto_dias(uint8_t dias)
     if (dias == 0) return TR("Once", "Una vez");
     if (dias == TODOS) return TR("Every day", "Todos los días");
     if (dias == LUN_A_VIE) return TR("Mon to Fri", "Lun a vie");
-    if (dias == FIN_DE_SEMANA) return TR("Weekend", "Fin de semana");
+    if (dias == FIN_DE_SEMANA) return TR("Weekend", "Sáb y dom");
 
     /* De lunes a domingo; los bits van del domingo (0) al sábado (6) */
     static const uint8_t ORDEN[] = {1, 2, 3, 4, 5, 6, 0};

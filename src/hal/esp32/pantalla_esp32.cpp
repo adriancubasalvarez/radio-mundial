@@ -201,11 +201,13 @@ void hal_apagar(uint32_t segundos)
     }
     delay(300);
 
+    if (segundos > 0) {
+        Serial.printf("Despertará para la alarma en %u s\n", (unsigned)segundos);
+    }
     Serial.println("Apagada: toca la pantalla para encenderla");
     Serial.flush();
     esp_sleep_enable_ext0_wakeup((gpio_num_t)PIN_TOUCH_IRQ, 0);
     if (segundos > 0) {
-        Serial.printf("Despertará para la alarma en %u s\n", (unsigned)segundos);
         esp_sleep_enable_timer_wakeup(segundos * 1000000ULL);
     }
     esp_deep_sleep_start();

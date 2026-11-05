@@ -5,6 +5,7 @@
 #include "hal.h"
 
 #include <Arduino.h>
+#include <esp_sleep.h>
 
 bool archivos_iniciar(void);
 void red_iniciar(void);
@@ -27,6 +28,8 @@ void setup()
     delay(200);
     Serial.println();
     Serial.println("=== Radio Mundial ===");
+    Serial.printf("Motivo de arranque: reinicio %d, despertar %d\n", (int)esp_reset_reason(),
+                  (int)esp_sleep_get_wakeup_cause());
     Serial.printf("Memoria libre al arrancar: %u bytes (bloque mayor %u)\n",
                   (unsigned)ESP.getFreeHeap(), (unsigned)ESP.getMaxAllocHeap());
     Serial.printf("PSRAM: %u bytes (libres %u)\n", (unsigned)ESP.getPsramSize(), (unsigned)ESP.getFreePsram());
