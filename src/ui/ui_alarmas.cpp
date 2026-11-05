@@ -32,7 +32,7 @@ static void al_elegir(uint16_t fila)
         a->minuto = 30;
         a->dias = 0x3E;  /* lunes a viernes */
         a->activa = true;
-        a->volumen = 60;
+        a->volumen = 85;
         a->con_emisora = false;
     }
     editando = fila;
@@ -263,6 +263,9 @@ lv_obj_t *pantalla_alarma_sonido(void)
         const EmisoraGuardada *f = &ajustes.favoritos[i];
         bool es = a->con_emisora && strcmp(a->emisora.emisora.url, f->emisora.url) == 0;
         comun_lista_agregar(lista, es ? LV_SYMBOL_OK : "  ", f->emisora.nombre, f->pais, false);
+    }
+    if (ajustes.num_favoritos == 0) {
+        comun_lista_agregar(lista, SIMBOLO_ESTRELLA, TR("No favorites saved yet", "Aún no hay favoritas"), NULL, true);
     }
     return pantalla;
 }

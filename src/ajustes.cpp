@@ -117,7 +117,7 @@ void ajustes_cargar(void)
         a->minuto = o["m"] | 0;
         a->dias = o["d"] | 0;
         a->activa = o["a"] | false;
-        a->volumen = o["v"] | 60;
+        a->volumen = o["v"] | 85;
         if (o["e"].is<JsonObjectConst>()) {
             de_json(o["e"], &a->emisora);
             a->con_emisora = true;

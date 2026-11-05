@@ -15,10 +15,13 @@
 #define TODOS 0x7F
 
 #define ESPERA_EMISORA_MS 15000UL  /* si no arranca en este tiempo, tono */
-#define RAMPA_MS          60000UL  /* la emisora llega a su volumen en 1 minuto */
-#define RAMPA_TONO_MS     20000UL  /* el tono, antes: tiene que despertar */
+#define RAMPA_MS          30000UL  /* la emisora llega a su volumen en 30 s */
+#define RAMPA_TONO_MS     15000UL  /* el tono, antes: tiene que despertar */
 #define TOPE_MS (30UL * 60 * 1000)  /* sin apagarla, se para sola a la media hora */
-#define VOLUMEN_INICIAL   0.3f     /* empieza al 30 % del volumen de la alarma */
+/* Empieza 30 puntos por debajo (unos 14 dB). El volumen va en decibelios:
+ * un porcentaje del final, como el 30 %, apenas se oiría. */
+#define BAJADA_INICIAL    30
+#define VOLUMEN_MINIMO    25
 
 typedef enum {
     SUENA_MUSICA,   /* ya sonaba algo: se deja como está */
@@ -44,12 +47,18 @@ static void poner_volumen(int v)
     }
 }
 
+static int volumen_inicial(void)
+{
+    int v = volumen_final - BAJADA_INICIAL;
+    return v < VOLUMEN_MINIMO ? (volumen_final < VOLUMEN_MINIMO ? volumen_final : VOLUMEN_MINIMO) : v;
+}
+
 static void poner_tono(void)
 {
     printf("Alarma: tono de emergencia\n");
     sonido = SUENA_TONO;
     nav.hay_sonando = false;
-    poner_volumen((int)(volumen_final * VOLUMEN_INICIAL));
+    poner_volumen(volumen_inicial());
     audio_tono();
     subiendo = true;
     rampa_desde_ms = hal_millis();
@@ -59,7 +68,7 @@ static void poner_emisora(const EmisoraGuardada *e)
 {
     sonido = SUENA_EMISORA;
     subiendo = false;
-    poner_volumen((int)(volumen_final * VOLUMEN_INICIAL));
+    poner_volumen(volumen_inicial());
     nav.emisora = e->emisora;
     memset(&nav.pais, 0, sizeof(nav.pais));
     strncpy(nav.pais.codigo, e->pais, sizeof(nav.pais.codigo) - 1);
@@ -114,7 +123,8 @@ static void seguir_sonando(uint32_t ahora)
         uint32_t rampa = sonido == SUENA_TONO ? RAMPA_TONO_MS : RAMPA_MS;
         uint32_t pasado = ahora - rampa_desde_ms;
         float k = pasado >= rampa ? 1.0f : (float)pasado / rampa;
-        poner_volumen((int)(volumen_final * (VOLUMEN_INICIAL + (1.0f - VOLUMEN_INICIAL) * k)));
+        int inicial = volumen_inicial();
+        poner_volumen(inicial + (int)((volumen_final - inicial) * k));
     }
 }
 
