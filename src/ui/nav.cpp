@@ -78,6 +78,20 @@ void nav_reproducir(void)
     printf("Reproduciendo: %s (%s)\n  %s\n", nav.emisora.nombre, nav.pais.codigo, nav.emisora.url);
 }
 
+void nav_ir_al_pais(void)
+{
+    const Region *region = datos_region_de_pais(&nav.indice, nav.pais.codigo);
+    if (region == NULL || cambiando()) {
+        return;
+    }
+    nav.region = *region;
+    pila[0] = PANT_MUNDO;
+    pila[1] = PANT_REGION;
+    pila[2] = PANT_EMISORAS;
+    tope = 2;
+    mostrar(PANT_EMISORAS, LV_SCR_LOAD_ANIM_MOVE_RIGHT);
+}
+
 void nav_reiniciar(void)
 {
     /* La pantalla actual puede ser otro mapamundi, que comparte el mapa en

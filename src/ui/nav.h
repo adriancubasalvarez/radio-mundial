@@ -48,6 +48,10 @@ void nav_ir(Pantalla pantalla);
 /* Vuelve a la pantalla anterior */
 void nav_atras(void);
 
+/* Va a la lista de emisoras de nav.pais, con el camino de vuelta por su
+ * región y el mapamundi, se llegara como se llegara hasta aquí */
+void nav_ir_al_pais(void);
+
 /* Olvida el recorrido y vuelve a crear el mapamundi (p. ej. al cambiar de idioma) */
 void nav_reiniciar(void);
 

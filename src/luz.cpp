@@ -70,26 +70,8 @@ static uint32_t color_region(const Region *region)
 
 void luz_emisora(const char *codigo_pais)
 {
-    /* La región se busca en regiones/<id>.json (1–3 KB cada una) */
-    char buscado[20];
-    snprintf(buscado, sizeof(buscado), "\"codigo\":\"%s\"", codigo_pais);
-    color_emisora = COLOR_SIN_REGION;
-    for (uint8_t i = 0; i < nav.indice.num_regiones; i++) {
-        const Region *region = &nav.indice.regiones[i];
-        char ruta[48];
-        snprintf(ruta, sizeof(ruta), "regiones/%s.json", region->id);
-        size_t tam = 0;
-        char *texto = (char *)hal_leer_archivo(ruta, &tam);
-        if (texto == NULL) {
-            continue;
-        }
-        bool esta = strstr(texto, buscado) != NULL;
-        free(texto);
-        if (esta) {
-            color_emisora = color_region(region);
-            return;
-        }
-    }
+    const Region *region = datos_region_de_pais(&nav.indice, codigo_pais);
+    color_emisora = region != NULL ? color_region(region) : COLOR_SIN_REGION;
 }
 
 /* Respiración: de 0,1 a 1 y vuelta en periodo_ms */

@@ -290,6 +290,28 @@ bool datos_buscar_pais(const char *codigo, Pais *pais)
     return encontrado;
 }
 
+const Region *datos_region_de_pais(const IndiceMundo *indice, const char *codigo)
+{
+    char buscado[20];
+    snprintf(buscado, sizeof(buscado), "\"codigo\":\"%s\"", codigo);
+    for (uint8_t i = 0; i < indice->num_regiones; i++) {
+        const Region *region = &indice->regiones[i];
+        char ruta[48];
+        snprintf(ruta, sizeof(ruta), "regiones/%s.json", region->id);
+        size_t tam = 0;
+        char *texto = (char *)hal_leer_archivo(ruta, &tam);
+        if (texto == NULL) {
+            continue;
+        }
+        bool esta = strstr(texto, buscado) != NULL;
+        free(texto);
+        if (esta) {
+            return region;
+        }
+    }
+    return NULL;
+}
+
 /* Para elegir país al azar: primero se cuentan los que tienen emisoras y
  * luego se recorre el índice otra vez hasta llegar al elegido */
 typedef struct {

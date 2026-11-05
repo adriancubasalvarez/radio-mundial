@@ -51,7 +51,17 @@ static void pintar_favorito(void)
 /* Rellena los textos con la emisora de nav (al entrar o al saltar a otra) */
 static void pintar_emisora(void)
 {
-    lv_label_set_text(titulo_cabecera, nav.pais.nombre);
+    /* «Mis emisoras» usa un código propio («SD») que no es un país: solo
+     * vale si el nombre coincide con el del país de ese código */
+    Pais pais;
+    bool es_pais = datos_buscar_pais(nav.pais.codigo, &pais) && strcmp(pais.nombre, nav.pais.nombre) == 0;
+    if (es_pais) {
+        lv_label_set_text_fmt(titulo_cabecera, "%s  " LV_SYMBOL_RIGHT, nav.pais.nombre);
+        lv_obj_add_flag(titulo_cabecera, LV_OBJ_FLAG_CLICKABLE);
+    } else {
+        lv_label_set_text(titulo_cabecera, nav.pais.nombre);
+        lv_obj_clear_flag(titulo_cabecera, LV_OBJ_FLAG_CLICKABLE);
+    }
     lv_label_set_text(etiqueta_nombre, nav.emisora.nombre);
     if (nav.emisora.bitrate > 0) {
         lv_label_set_text_fmt(etiqueta_detalle, "%s · %d kbps", nav.emisora.codec, nav.emisora.bitrate);
@@ -59,6 +69,12 @@ static void pintar_emisora(void)
         lv_label_set_text(etiqueta_detalle, nav.emisora.codec);
     }
     pintar_favorito();
+}
+
+static void al_tocar_pais(lv_event_t *e)
+{
+    (void)e;
+    nav_ir_al_pais();
 }
 
 static void empezar(void)
@@ -228,6 +244,8 @@ lv_obj_t *pantalla_sonando(void)
     lv_obj_t *pantalla = comun_pantalla();
     lv_obj_add_event_cb(pantalla, al_borrar, LV_EVENT_DELETE, NULL);
     lv_obj_t *cabecera = comun_cabecera(pantalla, nav.pais.nombre, true, &titulo_cabecera);
+    lv_obj_add_event_cb(titulo_cabecera, al_tocar_pais, LV_EVENT_CLICKED, NULL);
+    lv_obj_set_ext_click_area(titulo_cabecera, 8);
     lv_obj_t *favorito = comun_boton_cabecera(cabecera, SIMBOLO_ESTRELLA, al_pulsar_favorito);
     icono_favorito = lv_obj_get_child(favorito, 0);
 
