@@ -16,6 +16,7 @@
 #include "nav.h"
 #include "comun.h"
 #include "ajustes.h"
+#include "alarmas.h"
 #include "hal.h"
 #include "idioma.h"
 #include "tiempo.h"
@@ -307,15 +308,20 @@ static void pasar_pagina(void)
 
 /* ---------- Dormir y despertar ---------- */
 
-static void despertar(lv_event_t *e)
+void reposo_despertar(void)
 {
-    (void)e;
     if (capa != NULL) {
         lv_obj_del_async(capa);
         capa = NULL;
         hal_brillo(BRILLO_NORMAL);
         lv_disp_trig_activity(NULL);
     }
+}
+
+static void al_tocar(lv_event_t *e)
+{
+    (void)e;
+    reposo_despertar();
 }
 
 static void dormir(void)
@@ -326,7 +332,7 @@ static void dormir(void)
     lv_obj_set_style_bg_color(capa, lv_color_black(), 0);
     lv_obj_set_style_bg_opa(capa, LV_OPA_COVER, 0);
     lv_obj_add_flag(capa, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(capa, despertar, LV_EVENT_PRESSED, NULL);
+    lv_obj_add_event_cb(capa, al_tocar, LV_EVENT_PRESSED, NULL);
 
     lienzo = lv_obj_create(capa);
     lv_obj_remove_style_all(lienzo);
@@ -361,7 +367,8 @@ static void vigilar(lv_timer_t *t)
         if (segundos % SEGUNDOS_PAGINA == 0) {
             pasar_pagina();
         }
-    } else if (ajustes.reposo_s > 0 && lv_disp_get_inactive_time(NULL) > ajustes.reposo_s * 1000UL) {
+    } else if (!alarmas_sonando() && ajustes.reposo_s > 0 &&
+               lv_disp_get_inactive_time(NULL) > ajustes.reposo_s * 1000UL) {
         dormir();
     }
 }

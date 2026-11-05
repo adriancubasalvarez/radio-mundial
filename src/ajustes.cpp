@@ -108,6 +108,16 @@ void ajustes_cargar(void)
         }
         de_json(f, &ajustes.favoritos[ajustes.num_favoritos++]);
     }
+    for (JsonObjectConst o : doc["alarmas"].as<JsonArrayConst>()) {
+        if (ajustes.num_alarmas >= MAX_ALARMAS) {
+            break;
+        }
+        Alarma *a = &ajustes.alarmas[ajustes.num_alarmas++];
+        a->hora = o["h"] | 7;
+        a->minuto = o["m"] | 0;
+        a->dias = o["d"] | 0;
+        a->activa = o["a"] | false;
+    }
 
     if (de_la_sd) {
         printf("Ajustes recuperados de la tarjeta SD (%d favoritos)\n", ajustes.num_favoritos);
@@ -132,6 +142,14 @@ void ajustes_guardar(void)
     JsonArray favoritos = doc["favoritos"].to<JsonArray>();
     for (uint8_t i = 0; i < ajustes.num_favoritos; i++) {
         a_json(favoritos.add<JsonObject>(), &ajustes.favoritos[i]);
+    }
+    JsonArray alarmas = doc["alarmas"].to<JsonArray>();
+    for (uint8_t i = 0; i < ajustes.num_alarmas; i++) {
+        JsonObject o = alarmas.add<JsonObject>();
+        o["h"] = ajustes.alarmas[i].hora;
+        o["m"] = ajustes.alarmas[i].minuto;
+        o["d"] = ajustes.alarmas[i].dias;
+        o["a"] = ajustes.alarmas[i].activa;
     }
 
     size_t tam = measureJsonPretty(doc) + 1;

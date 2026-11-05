@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #define MAX_FAVORITOS 20
+#define MAX_ALARMAS 5
 
 /* Emisora con el país al que pertenece */
 typedef struct {
@@ -17,6 +18,12 @@ typedef struct {
     char pais[3];
     char nombre_pais[48];
 } EmisoraGuardada;
+
+typedef struct {
+    uint8_t hora, minuto;
+    uint8_t dias;             /* bit 0 domingo .. bit 6 sábado; 0 = una vez */
+    bool activa;
+} Alarma;
 
 typedef struct {
     uint8_t volumen;          /* 0..100 */
@@ -30,6 +37,8 @@ typedef struct {
     EmisoraGuardada ultima;
     EmisoraGuardada favoritos[MAX_FAVORITOS];
     uint8_t num_favoritos;
+    Alarma alarmas[MAX_ALARMAS];
+    uint8_t num_alarmas;
 } Ajustes;
 
 extern Ajustes ajustes;

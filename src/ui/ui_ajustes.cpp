@@ -41,6 +41,13 @@ static void al_elegir_idioma(lv_event_t *e)
     }
 }
 
+static void al_alarmas(lv_event_t *e)
+{
+    (void)e;
+    cerrar();
+    nav_ir(PANT_ALARMAS);
+}
+
 static void al_wifi(lv_event_t *e)
 {
     (void)e;
@@ -157,14 +164,14 @@ void ui_ajustes_abrir(void)
     lv_obj_set_style_text_font(titulo, &radio_20, 0);
     lv_obj_set_style_text_color(titulo, lv_color_hex(COLOR_ACENTO), 0);
 
-    /* Idioma, en una fila: el inglés, primero; el que está en uso, resaltado */
+    /* Idioma (el botón ofrece el otro) y alarmas, en una fila */
     lv_obj_t *fila = lv_obj_create(capa);
     lv_obj_remove_style_all(fila);
     lv_obj_set_size(fila, 260, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(fila, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(fila, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    boton(fila, "English", !ajustes.espanol, al_elegir_idioma, (void *)(uintptr_t)false, 126);
-    boton(fila, "Español", ajustes.espanol, al_elegir_idioma, (void *)(uintptr_t)true, 126);
+    boton(fila, ajustes.espanol ? "English" : "Español", false, al_elegir_idioma, (void *)(uintptr_t)!ajustes.espanol, 126);
+    boton(fila, TR(LV_SYMBOL_BELL " Alarms", LV_SYMBOL_BELL " Alarmas"), false, al_alarmas, NULL, 126);
 
     /* Red WiFi y luz, en otra fila */
     fila = lv_obj_create(capa);

@@ -2,6 +2,7 @@
  * Bucle principal común al PC y a la placa.
  */
 #include "app.h"
+#include "alarmas.h"
 #include "hal.h"
 #include "luz.h"
 #include "tiempo.h"
@@ -25,6 +26,7 @@ bool app_bucle(void)
     uint32_t espera = lv_timer_handler();
     luz_atender();
     tiempo_atender();
+    alarmas_atender();
     hal_esperar(espera < 5 ? espera : 5);
     return true;
 }
