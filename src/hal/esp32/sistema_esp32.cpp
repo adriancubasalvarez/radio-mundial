@@ -49,6 +49,24 @@ void hal_zona_horaria(int segundos)
     Serial.printf("Zona horaria: %s\n", zona);
 }
 
+/* Protección contra un fallo del núcleo de Arduino: stop_ssl_socket() borra
+ * con memset su estructura y deja el socket en 0 (no en -1). La siguiente
+ * vez, WiFiClientSecure::stop() hace close(0)... y el descriptor 0 no es un
+ * socket, sino el primer archivo abierto de LittleFS. La librería de audio
+ * llama a stop() en cada cambio de emisora: la tarea de audio cerraba el
+ * archivo que estuviera leyendo la pantalla (o el mapa abierto) y la radio
+ * se reiniciaba. Con -Wl,--wrap=close (platformio.ini), los close() pasan
+ * por aquí; fclose() no usa close(), así que los archivos se cierran bien. */
+extern "C" int __real_close(int fd);
+
+extern "C" int __wrap_close(int fd)
+{
+    if (fd == 0) {
+        return -1;
+    }
+    return __real_close(fd);
+}
+
 static void ejecutar_tarea(void *parametro)
 {
     ((void (*)(void))parametro)();
