@@ -34,6 +34,7 @@ static void al_elegir(uint16_t fila)
         a->activa = true;
         a->volumen = 85;
         a->con_emisora = false;
+        a->amanecer = false;
     }
     editando = fila;
     nav_ir(PANT_ALARMA);
@@ -228,13 +229,29 @@ static void al_cambiar_volumen(lv_event_t *e)
     poner_texto_volumen(v);
 }
 
-/* Fila 0: la última emisora; las demás, las favoritas */
+static void al_cambiar_amanecer(lv_event_t *e)
+{
+    ajustes.alarmas[editando].amanecer = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
+}
+
+/* true si la alarma tiene una emisora que ya no está entre las favoritas: la
+ * lista la enseña en una fila propia, para que se vea cuál va a sonar */
+static bool emisora_suelta(const Alarma *a)
+{
+    return a->con_emisora && !ajustes_es_favorito(a->emisora.emisora.url);
+}
+
+/* Fila 0: la última emisora; después, la emisora suelta si la hay, y las
+ * favoritas */
 static void al_elegir_sonido(uint16_t fila)
 {
     Alarma *a = &ajustes.alarmas[editando];
-    a->con_emisora = fila > 0;
-    if (a->con_emisora) {
-        a->emisora = ajustes.favoritos[fila - 1];
+    int primera = emisora_suelta(a) ? 2 : 1;
+    if (fila == 0) {
+        a->con_emisora = false;
+    } else if (fila >= primera) {
+        a->con_emisora = true;
+        a->emisora = ajustes.favoritos[fila - primera];
     }
     nav_atras();
 }
@@ -250,6 +267,21 @@ lv_obj_t *pantalla_alarma_sonido(void)
     lv_obj_set_style_text_color(texto_volumen, lv_color_hex(COLOR_SECUNDARIO), 0);
     lv_obj_set_pos(texto_volumen, 16, ALTO_CABECERA + 8);
     poner_texto_volumen(a->volumen);
+
+    lv_obj_t *texto_amanecer = lv_label_create(pantalla);
+    lv_label_set_text(texto_amanecer, TR("Sunrise", "Amanecer"));
+    lv_obj_set_style_text_color(texto_amanecer, lv_color_hex(COLOR_SECUNDARIO), 0);
+    lv_obj_align(texto_amanecer, LV_ALIGN_TOP_RIGHT, -66, ALTO_CABECERA + 8);
+    lv_obj_t *interruptor = lv_switch_create(pantalla);
+    lv_obj_set_size(interruptor, 46, 24);
+    lv_obj_align(interruptor, LV_ALIGN_TOP_RIGHT, -12, ALTO_CABECERA + 4);
+    lv_obj_set_style_bg_color(interruptor, lv_color_hex(COLOR_LINEA), 0);
+    lv_obj_set_style_bg_color(interruptor, lv_color_hex(COLOR_ACENTO), (unsigned)LV_PART_INDICATOR | LV_STATE_CHECKED);
+    if (a->amanecer) {
+        lv_obj_add_state(interruptor, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(interruptor, al_cambiar_amanecer, LV_EVENT_VALUE_CHANGED, NULL);
+
     lv_obj_t *barra = lv_slider_create(pantalla);
     lv_obj_set_size(barra, PANTALLA_ANCHO - 48, 12);
     lv_obj_set_pos(barra, 24, ALTO_CABECERA + 34);
@@ -262,12 +294,15 @@ lv_obj_t *pantalla_alarma_sonido(void)
     lv_obj_set_pos(lista, 0, ALTO_CABECERA + 58);
     lv_obj_set_size(lista, PANTALLA_ANCHO, PANTALLA_ALTO - ALTO_CABECERA - 58);
     comun_lista_agregar(lista, a->con_emisora ? "  " : LV_SYMBOL_OK, TR("Last station", "Última emisora"), NULL, false);
+    if (emisora_suelta(a)) {
+        comun_lista_agregar(lista, LV_SYMBOL_OK, a->emisora.emisora.nombre, a->emisora.pais, false);
+    }
     for (uint8_t i = 0; i < ajustes.num_favoritos; i++) {
         const EmisoraGuardada *f = &ajustes.favoritos[i];
         bool es = a->con_emisora && strcmp(a->emisora.emisora.url, f->emisora.url) == 0;
         comun_lista_agregar(lista, es ? LV_SYMBOL_OK : "  ", f->emisora.nombre, f->pais, false);
     }
-    if (ajustes.num_favoritos == 0) {
+    if (ajustes.num_favoritos == 0 && !emisora_suelta(a)) {
         comun_lista_agregar(lista, SIMBOLO_ESTRELLA, TR("No favorites saved yet", "Aún no hay favoritas"), NULL, true);
     }
     return pantalla;
@@ -287,6 +322,14 @@ static void al_apagar(lv_event_t *e)
 {
     (void)e;
     alarmas_apagar();
+    alarma_cerrar();
+    lv_disp_trig_activity(NULL);
+}
+
+static void al_posponer(lv_event_t *e)
+{
+    (void)e;
+    alarmas_posponer();
     alarma_cerrar();
     lv_disp_trig_activity(NULL);
 }
@@ -315,9 +358,23 @@ void alarma_mostrar(int hora, int minuto)
     lv_obj_set_style_text_color(reloj, lv_color_hex(0xFFE9C2), 0);
     lv_obj_align(reloj, LV_ALIGN_CENTER, 0, -24);
 
+    lv_obj_t *posponer = lv_btn_create(capa_aviso);
+    lv_obj_set_size(posponer, 132, 64);
+    lv_obj_align(posponer, LV_ALIGN_BOTTOM_LEFT, 12, -14);
+    lv_obj_set_style_radius(posponer, 14, 0);
+    lv_obj_set_style_shadow_width(posponer, 0, 0);
+    lv_obj_set_style_bg_color(posponer, lv_color_hex(COLOR_LINEA), 0);
+    lv_obj_add_event_cb(posponer, al_posponer, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *texto_posponer = lv_label_create(posponer);
+    lv_label_set_text(texto_posponer, TR("Snooze\n10 min", "Posponer\n10 min"));
+    lv_obj_set_style_text_font(texto_posponer, &radio_20, 0);
+    lv_obj_set_style_text_color(texto_posponer, lv_color_hex(COLOR_TEXTO), 0);
+    lv_obj_set_style_text_align(texto_posponer, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_center(texto_posponer);
+
     lv_obj_t *apagar = lv_btn_create(capa_aviso);
-    lv_obj_set_size(apagar, 220, 60);
-    lv_obj_align(apagar, LV_ALIGN_BOTTOM_MID, 0, -16);
+    lv_obj_set_size(apagar, 152, 64);
+    lv_obj_align(apagar, LV_ALIGN_BOTTOM_RIGHT, -12, -14);
     lv_obj_set_style_radius(apagar, 14, 0);
     lv_obj_set_style_shadow_width(apagar, 0, 0);
     lv_obj_set_style_bg_color(apagar, lv_color_hex(COLOR_ACENTO), 0);

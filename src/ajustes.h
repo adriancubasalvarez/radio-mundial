@@ -25,6 +25,7 @@ typedef struct {
     bool activa;
     uint8_t volumen;          /* 0..100, al que llega al sonar */
     bool con_emisora;         /* false: suena la última emisora escuchada */
+    bool amanecer;            /* el LED sube poco a poco antes de sonar */
     EmisoraGuardada emisora;
 } Alarma;
 

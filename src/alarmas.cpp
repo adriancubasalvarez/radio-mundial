@@ -37,6 +37,17 @@ typedef enum {
 #define ESPERA_RED_MS   45000UL  /* lo que se da a la WiFi y a la hora */
 #define DORMIR_OTRA_VEZ_S 60   /* si aún falta para despertar, vuelve a dormir */
 
+#define POSPONER_MS (10UL * 60 * 1000)
+#define AMANECER_MIN 10        /* el LED empieza a subir 10 minutos antes */
+#define AMANECER_MS (AMANECER_MIN * 60UL * 1000)
+#define BAJADA_DORMIR_MS 60000UL  /* el temporizador baja el volumen en el último minuto */
+
+/* Duraciones del temporizador para dormir, en minutos */
+static const uint8_t OPCIONES_DORMIR[] = {0, 15, 30, 60, 90};
+#define NUM_OPCIONES_DORMIR (sizeof(OPCIONES_DORMIR) / sizeof(OPCIONES_DORMIR[0]))
+
+static void alarmas_dormir_cambiar_a(uint8_t opcion);
+
 static uint32_t ultimo_ms;
 static bool en_espera;
 static bool mirar_arranque = true;
@@ -50,6 +61,14 @@ static bool subiendo;           /* ya hay sonido y el volumen va subiendo */
 static uint32_t rampa_desde_ms;
 static uint8_t volumen_final;
 static int volumen_puesto;
+static Alarma alarma_actual;    /* la que sonó: posponer la repite tal cual */
+static bool pospuesta;
+static uint32_t pospuesta_desde_ms;
+static bool en_amanecer;
+static uint32_t amanecer_desde_ms;
+static uint8_t opcion_dormir;   /* posición en OPCIONES_DORMIR */
+static uint32_t dormir_fin_ms;
+static int volumen_dormir = -1;
 
 static void poner_volumen(int v)
 {
@@ -92,6 +111,11 @@ static void poner_emisora(const EmisoraGuardada *e)
 static void disparar(int hora, int minuto, const Alarma *a)
 {
     printf("Alarma de las %02d:%02d\n", hora, minuto);
+    if (a != &alarma_actual) {
+        alarma_actual = *a;
+    }
+    a = &alarma_actual;
+    pospuesta = false;
     sonando = true;
     desde_ms = hal_millis();
     volumen_final = a->volumen;
@@ -144,6 +168,41 @@ static void seguir_sonando(uint32_t ahora)
     }
 }
 
+/* Minutos hasta la próxima vez que suene esta alarma (-1 = nunca) */
+static int minutos_hasta(const Alarma *a, int ahora, int semana)
+{
+    if (!a->activa) {
+        return -1;
+    }
+    for (int d = 0; d <= 7; d++) {
+        int m = a->hora * 60 + a->minuto + d * 1440 - ahora;
+        if (m > 0 && (a->dias == 0 || (a->dias & (1 << ((semana + d) % 7))))) {
+            return m;
+        }
+    }
+    return -1;
+}
+
+/* Enciende o apaga el amanecer; se mira una vez por minuto. Si ya hay música
+ * no empieza: esa persona está despierta. */
+static void mirar_amanecer(int ahora, int semana)
+{
+    int faltan = -1;
+    for (uint8_t i = 0; i < ajustes.num_alarmas; i++) {
+        const Alarma *a = &ajustes.alarmas[i];
+        int m = a->amanecer ? minutos_hasta(a, ahora, semana) : -1;
+        if (m > 0 && m <= AMANECER_MIN && (faltan < 0 || m < faltan)) {
+            faltan = m;
+        }
+    }
+    if (faltan > 0 && !en_amanecer && !nav.hay_sonando) {
+        en_amanecer = true;
+        amanecer_desde_ms = hal_millis() - (AMANECER_MIN - faltan) * 60UL * 1000;
+    } else if (faltan < 0 && en_amanecer && !sonando) {
+        en_amanecer = false;
+    }
+}
+
 /* Dispara las alarmas de este minuto */
 static void comprobar_reloj(void)
 {
@@ -177,6 +236,28 @@ static void comprobar_reloj(void)
     }
     if (suena != NULL && !sonando) {
         disparar(hora, minuto, suena);
+    }
+    mirar_amanecer(este_minuto, semana);
+}
+
+/* Si la alarma salta antes, el temporizador se cancela; si no, baja el volumen
+ * en el último minuto y apaga la radio (despertará para la próxima alarma) */
+static void seguir_temporizador(uint32_t ahora)
+{
+    int32_t resto = (int32_t)(dormir_fin_ms - ahora);
+    if (sonando) {
+        alarmas_dormir_cambiar_a(0);
+    } else if (resto <= 0) {
+        printf("Temporizador: a dormir\n");
+        audio_parar();
+        ajustes_guardar();
+        hal_apagar(alarmas_segundos_para_despertar());
+    } else if ((uint32_t)resto < BAJADA_DORMIR_MS) {
+        int v = (int)(ajustes.volumen * (uint32_t)resto / BAJADA_DORMIR_MS);
+        if (v != volumen_dormir) {
+            volumen_dormir = v;
+            audio_volumen((uint8_t)v);
+        }
     }
 }
 
@@ -216,7 +297,15 @@ void alarmas_atender(void)
     if (sonando) {
         seguir_sonando(ahora);
     }
+    if (pospuesta && !sonando && ahora - pospuesta_desde_ms >= POSPONER_MS) {
+        int hora = 0, minuto = 0;
+        hal_hora(&hora, &minuto);
+        disparar(hora, minuto, &alarma_actual);
+    }
     comprobar_reloj();
+    if (opcion_dormir != 0) {
+        seguir_temporizador(ahora);
+    }
     /* Después de comprobar el reloj: en el minuto de la alarma, esta ya no
      * cuenta como «próxima» y la radio se volvería a dormir sin sonar */
     if (en_espera) {
@@ -232,6 +321,49 @@ void alarmas_apagar(void)
         audio_volumen(ajustes.volumen);
     }
     sonando = false;
+    pospuesta = false;
+    en_amanecer = false;
+}
+
+void alarmas_posponer(void)
+{
+    alarmas_apagar();
+    pospuesta = true;
+    pospuesta_desde_ms = hal_millis();
+    printf("Alarma pospuesta 10 minutos\n");
+}
+
+float alarmas_amanecer(void)
+{
+    if (!en_amanecer) {
+        return -1.0f;
+    }
+    uint32_t pasado = hal_millis() - amanecer_desde_ms;
+    return pasado >= AMANECER_MS ? 1.0f : (float)pasado / AMANECER_MS;
+}
+
+static void alarmas_dormir_cambiar_a(uint8_t opcion)
+{
+    if (volumen_dormir >= 0) {  /* estaba bajando: vuelve el volumen de siempre */
+        volumen_dormir = -1;
+        audio_volumen(ajustes.volumen);
+    }
+    opcion_dormir = opcion;
+    dormir_fin_ms = hal_millis() + OPCIONES_DORMIR[opcion] * 60UL * 1000;
+}
+
+void alarmas_dormir_cambiar(void)
+{
+    alarmas_dormir_cambiar_a((uint8_t)((opcion_dormir + 1) % NUM_OPCIONES_DORMIR));
+}
+
+int alarmas_dormir_restante(void)
+{
+    if (opcion_dormir == 0) {
+        return 0;
+    }
+    int32_t resto = (int32_t)(dormir_fin_ms - hal_millis());
+    return resto <= 0 ? 1 : (int)(resto / 60000) + 1;  /* redondeado hacia arriba */
 }
 
 bool alarmas_sonando(void)
@@ -251,24 +383,27 @@ uint32_t alarmas_segundos_para_despertar(void)
         return 0;
     }
     int ahora = hora * 60 + minuto;
-    int faltan = -1;  /* minutos hasta la próxima alarma */
+    bool hay = false;
+    int faltan = 0;  /* minutos hasta que haya que estar despierta */
     for (uint8_t i = 0; i < ajustes.num_alarmas; i++) {
         const Alarma *a = &ajustes.alarmas[i];
-        if (!a->activa) {
+        int m = minutos_hasta(a, ahora, semana);
+        if (m < 0) {
             continue;
         }
-        for (int d = 0; d <= 7; d++) {
-            int m = a->hora * 60 + a->minuto + d * 1440 - ahora;
-            if (m > 0 && (a->dias == 0 || (a->dias & (1 << ((semana + d) % 7))))) {
-                if (faltan < 0 || m < faltan) {
-                    faltan = m;
-                }
-                break;
-            }
+        if (a->amanecer) {
+            m -= AMANECER_MIN;
+        }
+        if (!hay || m < faltan) {
+            hay = true;
+            faltan = m;
         }
     }
-    if (faltan < 0) {
+    if (!hay) {
         return 0;
+    }
+    if (faltan <= 0) {
+        return 1;  /* ya está dentro del amanecer */
     }
     uint32_t segundos = (uint32_t)faltan * 60;
     uint32_t margen = segundos / MARGEN_DIVISOR;

@@ -12,6 +12,18 @@ void alarmas_atender(void);
 /* Para la alarma que está sonando */
 void alarmas_apagar(void);
 
+/* Para la alarma y la repite dentro de 10 minutos */
+void alarmas_posponer(void);
+
+/* Progreso del amanecer con el LED, de 0 a 1; negativo si no hay ninguno */
+float alarmas_amanecer(void);
+
+/* Temporizador para dormir: cada llamada pasa a la siguiente duración */
+void alarmas_dormir_cambiar(void);
+
+/* Minutos que le quedan al temporizador (0 = desactivado) */
+int alarmas_dormir_restante(void);
+
 /* true mientras suena una alarma */
 bool alarmas_sonando(void);
 

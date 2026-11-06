@@ -9,6 +9,7 @@
 #include "nav.h"
 #include "comun.h"
 #include "ajustes.h"
+#include "alarmas.h"
 #include "hal.h"
 #include "idioma.h"
 
@@ -27,6 +28,7 @@ static lv_obj_t *etiqueta_estado;
 static lv_obj_t *icono_boton;
 static lv_obj_t *icono_favorito;
 static lv_obj_t *etiqueta_volumen;
+static lv_obj_t *icono_dormir;
 static lv_timer_t *vigilante;
 static lv_timer_t *temporizador_aviso;
 static bool llego_a_sonar;  /* para distinguir «no arrancó» de «se cortó» */
@@ -112,9 +114,29 @@ static void al_acabar_aviso(lv_timer_t *t)
     }
 }
 
+/* Botón del temporizador: «Zz» o los minutos que quedan */
+static void pintar_dormir(void)
+{
+    int resto = alarmas_dormir_restante();
+    if (resto == 0) {
+        lv_label_set_text(icono_dormir, "Zz");
+    } else {
+        lv_label_set_text_fmt(icono_dormir, "%d min", resto);
+    }
+    lv_obj_set_style_text_color(icono_dormir, lv_color_hex(resto == 0 ? COLOR_SECUNDARIO : COLOR_ACENTO), 0);
+}
+
+static void al_pulsar_dormir(lv_event_t *e)
+{
+    (void)e;
+    alarmas_dormir_cambiar();
+    pintar_dormir();
+}
+
 static void vigilar(lv_timer_t *t)
 {
     (void)t;
+    pintar_dormir();
     if (!nav.hay_sonando || temporizador_aviso != NULL) {
         return;
     }
@@ -257,6 +279,11 @@ lv_obj_t *pantalla_sonando(void)
     /* Botón grande de reproducir / parar */
     lv_obj_t *boton = crear_boton_redondo(pantalla, 72, 60, COLOR_ACENTO, &radio_28, al_pulsar_boton, &icono_boton);
     lv_obj_align(boton, LV_ALIGN_TOP_MID, 0, ALTO_CABECERA + 96);
+
+    /* Temporizador para dormir: cada toque, otra duración */
+    lv_obj_t *dormir = crear_boton_redondo(pantalla, 66, 44, COLOR_LINEA, &radio_14, al_pulsar_dormir, &icono_dormir);
+    lv_obj_align_to(dormir, boton, LV_ALIGN_OUT_LEFT_MID, -22, 0);
+    pintar_dormir();
 
     /* En modo aleatorio, botón para saltar a otra emisora */
     if (nav.aleatoria) {

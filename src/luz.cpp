@@ -1,5 +1,6 @@
 #include "luz.h"
 #include "ajustes.h"
+#include "alarmas.h"
 #include "hal.h"
 #include "ui/nav.h"
 
@@ -103,6 +104,14 @@ static float ritmo(void)
     return 0.15f + 0.85f * envolvente * envolvente;
 }
 
+/* Amanecer: de rojo oscuro a naranja y a amarillo cálido. Llega al máximo del
+ * LED aunque el brillo elegido sea bajo: su trabajo es despertar. */
+static void pintar_amanecer(float p)
+{
+    float g = (p - 0.2f) / 0.8f, b = (p - 0.65f) / 0.35f;
+    hal_led((uint8_t)(255 * fminf(1.0f, p * 2.0f)), (uint8_t)(190 * fmaxf(0.0f, g)), (uint8_t)(60 * fmaxf(0.0f, b)));
+}
+
 void luz_atender(void)
 {
     uint32_t ahora = hal_millis();
@@ -117,7 +126,10 @@ void luz_atender(void)
     }
     estado_antes = estado;
 
-    if (ajustes.luz == LUZ_APAGADA) {
+    float sol = alarmas_amanecer();
+    if (sol >= 0.0f) {
+        pintar_amanecer(sol);
+    } else if (ajustes.luz == LUZ_APAGADA) {
         encender(0, 0);
     } else if (hal_red_estado() == RED_PORTAL) {
         encender(0x0050FF, respirar(ahora, 2000));

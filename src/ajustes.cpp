@@ -118,6 +118,7 @@ void ajustes_cargar(void)
         a->dias = o["d"] | 0;
         a->activa = o["a"] | false;
         a->volumen = o["v"] | 85;
+        a->amanecer = o["s"] | false;
         if (o["e"].is<JsonObjectConst>()) {
             de_json(o["e"], &a->emisora);
             a->con_emisora = true;
@@ -156,6 +157,7 @@ void ajustes_guardar(void)
         o["d"] = ajustes.alarmas[i].dias;
         o["a"] = ajustes.alarmas[i].activa;
         o["v"] = ajustes.alarmas[i].volumen;
+        o["s"] = ajustes.alarmas[i].amanecer;
         if (ajustes.alarmas[i].con_emisora) {
             a_json(o["e"].to<JsonObject>(), &ajustes.alarmas[i].emisora);
         }
