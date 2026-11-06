@@ -19,10 +19,6 @@
 #include <WiFi.h>
 
 #include "es8311.h"
-#include <soc/gpio_reg.h>
-#include <soc/io_mux_reg.h>
-#include <soc/rtc_cntl_reg.h>
-#include <soc/rtc_io_reg.h>
 
 /* Si no empieza a sonar en este tiempo, se da por fallida */
 #define TIEMPO_MAX_CONEXION 12000
@@ -43,6 +39,7 @@ static char url_pedida[256];
 static bool hay_url_pedida = false;
 static bool parar_pedido = false;
 static bool tono_pedido = false;
+static bool preparar_pedido = false;
 static int volumen_pedido = -1;
 
 /* Estado (lo escribe la tarea de audio y lo lee la interfaz) */
@@ -96,15 +93,6 @@ static void seguir_frecuencia(Audio *a)
 {
     uint32_t fs = a->getSampleRate();
     if (codec != NULL && fs >= 8000 && fs != frecuencia_codec) {
-        if (fs > 16000) {  // PRUEBA
-            es8311_register_dump(codec);
-            Serial.printf("[prueba] pines: mux4 %08x mux5 %08x mux7 %08x mux8 %08x out8 %08x hold %08x\n",
-                          (unsigned)REG_READ(IO_MUX_GPIO4_REG), (unsigned)REG_READ(IO_MUX_GPIO5_REG),
-                          (unsigned)REG_READ(IO_MUX_GPIO7_REG), (unsigned)REG_READ(IO_MUX_GPIO8_REG),
-                          (unsigned)REG_READ(GPIO_FUNC8_OUT_SEL_CFG_REG), (unsigned)REG_READ(RTC_CNTL_DIG_PAD_HOLD_REG));
-            Serial.printf("[prueba] rtcio: pad8 %08x pad1 %08x\n", (unsigned)REG_READ(RTC_IO_TOUCH_PAD8_REG),
-                          (unsigned)REG_READ(RTC_IO_TOUCH_PAD1_REG));
-        }
         if (es8311_sample_frequency_config(codec, fs * 256, fs) == ESP_OK) {
             Serial.printf("[audio] códec a %u Hz\n", (unsigned)fs);
         }
@@ -127,10 +115,7 @@ static void poner_volumen(Audio *a, uint8_t v)
 {
     (void)a;
     if (codec != NULL) {
-        esp_err_t r = es8311_voice_volume_set(codec, v == 0 ? 0 : 40 + v * 35 / 100, NULL);
-        int leido = -1;
-        es8311_voice_volume_get(codec, &leido);
-        Serial.printf("[prueba] volumen %u: resultado %d, leído %d\n", v, (int)r, leido);
+        es8311_voice_volume_set(codec, v == 0 ? 0 : 40 + v * 35 / 100, NULL);
     }
 }
 
@@ -138,7 +123,6 @@ static void poner_volumen(Audio *a, uint8_t v)
 static void amplificador(bool encendido)
 {
     digitalWrite(PIN_AUDIO_EN, encendido ? LOW : HIGH);  // activo a nivel bajo
-    Serial.printf("[prueba] amplificador %d, pin %d\n", (int)encendido, digitalRead(PIN_AUDIO_EN));
 }
 
 /* ---------- Avisos de la librería ---------- */
@@ -193,9 +177,11 @@ uint8_t audio_nivel(void)
 
 static uint8_t volumen_actual = 70;
 
-/* La librería se crea al pedir la primera emisora, no al arrancar: durante
- * el arranque la pantalla de bienvenida (logo) ocupa memoria que luego se
- * libera. Reserva 32 KB de búferes DMA para el I2S y, al conectar, unos
+/* La librería se crea al terminar el logo o al pedir la primera emisora, no
+ * al arrancar: durante el arranque la pantalla de bienvenida ocupa memoria
+ * que luego se libera. Tampoco debe esperar más: si se creaba minutos
+ * después, al saltar una alarma, la emisora conectaba pero no se oía.
+ * Reserva 32 KB de búferes DMA para el I2S y, al conectar, unos
  * 30 KB más para el decodificador; si no hay memoria, se avisa en vez de
  * colgarse. */
 static bool crear_libreria(void)
@@ -240,8 +226,13 @@ static void tarea_audio(void *parametro)
         tono_pedido = false;
         volumen = volumen_pedido;
         volumen_pedido = -1;
+        bool preparar = preparar_pedido;
+        preparar_pedido = false;
         xSemaphoreGive(cerrojo);
 
+        if (preparar) {
+            crear_libreria();
+        }
         if (volumen >= 0) {
             volumen_actual = volumen;
             if (audio != NULL) {
@@ -359,6 +350,14 @@ void audio_reproducir(const char *url)
     xSemaphoreGive(cerrojo);
     estado = AUDIO_CONECTANDO;  // la interfaz lo ve al instante
     inicio_conexion = millis();
+}
+
+void audio_preparar(void)
+{
+    preparar_cerrojo();
+    xSemaphoreTake(cerrojo, portMAX_DELAY);
+    preparar_pedido = true;
+    xSemaphoreGive(cerrojo);
 }
 
 void audio_tono(void)

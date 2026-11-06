@@ -102,6 +102,10 @@ void audio_reproducir(const char *url)
 #endif
 }
 
+void audio_preparar(void)
+{
+}
+
 void audio_tono(void)
 {
     audio_reproducir("data/alarma.mp3");  /* en el simulador suena una vez */

@@ -141,6 +141,7 @@ void audio_parar(void);
 
 /* Repite sin parar el tono de emergencia de las alarmas (alarma.mp3 de la
  * memoria interna: suena sin Internet) */
+void audio_preparar(void);  /* crea la salida de audio sin sonar */
 void audio_tono(void);
 
 typedef enum {

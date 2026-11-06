@@ -24,7 +24,10 @@ static lv_timer_t *temporizador;
 static void reanudar(void)
 {
     if (!ajustes.reanudar || !ajustes.hay_ultima || hal_despertado_por_alarma()) {
-        return;  /* si despertó para una alarma, callada hasta que suene */
+        /* Si despertó para una alarma, callada hasta que suene; pero el audio
+         * se prepara aquí igual: creado más tarde, la alarma no se oía */
+        audio_preparar();
+        return;
     }
     nav.emisora = ajustes.ultima.emisora;
     memset(&nav.pais, 0, sizeof(nav.pais));
