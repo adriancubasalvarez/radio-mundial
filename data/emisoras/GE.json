@@ -4,12 +4,14 @@
  {"n":"radio imedi (Radio Imedi)","u":"https://tv.cdn.xsg.ge/radioimedi/stream01/shoutcast","c":"AAC+","b":133},
  {"n":"WVFJ 93.3 & 102.1 The JOY FM","u":"https://rtn.cdnstream1.com/2576_96.aac?rand=81562","c":"AAC+","b":96},
  {"n":"utsnobi FM (Ucnobi FM)","u":"http://149.3.104.166:8000/stream.ogg","c":"MP3","b":128},
- {"n":"LF Radio","u":"https://rtn.cdnstream1.com/2582_96.aac","c":"AAC+","b":96},
  {"n":"Marneuli FM","u":"http://stream.it-solutions.ge:8000/mp3-radiomarneulifm","c":"MP3","b":128},
+ {"n":"LF Radio","u":"https://rtn.cdnstream1.com/2582_96.aac","c":"AAC+","b":96},
  {"n":"radio p'ozit'ivi (Radio Positive)","u":"https://stream.radiojar.com/sr4vzamzfnruv","c":"MP3","b":0},
  {"n":"radio sivrtse (Radio Sivrce)","u":"https://proxy.streamer.mediabox.ge/ice/8000/sivrce","c":"MP3","b":128},
- {"n":"radio p'alit'ra (Radio Palitra)","u":"https://radiostream.palitra.ge/stream.mp3","c":"MP3","b":0},
+ {"n":"Aradio Sputnik Aphsny","u":"https://icecast-rian.cdnvideo.ru/voicesuh","c":"MP3","b":128},
  {"n":"Mutant Radio","u":"https://listen.radioking.com/radio/282820/stream/328621","c":"MP3","b":128},
+ {"n":"radio p'alit'ra (Radio Palitra)","u":"https://radiostream.palitra.ge/stream.mp3","c":"MP3","b":0},
  {"n":"radio ach'ara (Radio Adjara)","u":"https://edge.mixlr.com/channel/bzorq","c":"MP3","b":0},
  {"n":"rioni FM","u":"https://video.rionitv.com/s;stream","c":"MP3","b":0},
- {"n":"JUKEBOX 94.3","u":"https://stream.radiojukebox.ge/stream.ogg","c":"MP3","b":96}]
+ {"n":"JUKEBOX 94.3","u":"https://stream.radiojukebox.ge/stream.ogg","c":"MP3","b":96},
+ {"n":"Vikentis Radio","u":"https://servidor33-3.brlogic.com:7210/live","c":"MP3","b":192}]

@@ -8,8 +8,8 @@
  {"n":"Radio Tunisie Jeunes","u":"http://rtstream.tanitweb.com/jeunes","c":"MP3","b":128},
  {"n":"Radio Tunisie Monastir","u":"http://rtstream.tanitweb.com/monastir","c":"MP3","b":128},
  {"n":"Radio Tunisie Kef","u":"http://rtstream.tanitweb.com/kef","c":"MP3","b":128},
- {"n":"RTCI","u":"http://rtstream.tanitweb.com/rtci","c":"MP3","b":128},
  {"n":"Mosaique FM Gold","u":"https://radio.mosaiquefm.net/mosagold","c":"MP3","b":128},
+ {"n":"RTCI","u":"http://rtstream.tanitweb.com/rtci","c":"MP3","b":128},
  {"n":"Radio Tunisie Gafsa","u":"http://rtstream.tanitweb.com/gafsa","c":"MP3","b":128},
  {"n":"Mosaique FM Tounsi","u":"https://radio.mosaiquefm.net/mosatounsi","c":"MP3","b":128},
  {"n":"Radio Tunisia Med","u":"https://azuracast.conceptradio.fr:8000/radio.mp3","c":"MP3","b":128},
@@ -26,5 +26,5 @@
  {"n":"Radio Tunisie Culturelle","u":"http://rtstream.tanitweb.com/culturelle","c":"MP3","b":128},
  {"n":"qrt mtnwh","u":"https://qurango.net/radio/mix","c":"MP3","b":128},
  {"n":"Radio Monastir","u":"https://radio.radiotunisienne.tn/monastir","c":"MP3","b":128},
- {"n":"Sodais","u":"https://backup.qurango.net/radio/abdulrahman_alsudaes","c":"MP3","b":128},
- {"n":"rdyw fn Fenn Radio","u":"https://stream.zeno.fm/76e9f1gsduhvv","c":"MP3","b":128}]
+ {"n":"Ambiance FM","u":"https://stream.zeno.fm/0rehsamc9xxtv","c":"MP3","b":192},
+ {"n":"sunnah radio","u":"http://andromeda.shoutca.st:8189/stream","c":"MP3","b":32}]

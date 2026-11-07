@@ -1,7 +1,7 @@
 [{"n":"Radio Cadena YSKL La Poderosa","u":"http://media.dominiocreativo.com:8000/radioyskl","c":"MP3","b":192},
  {"n":"La Mejor FM 98.9","u":"http://158.69.219.162:8024/stream","c":"AAC+","b":56},
- {"n":"FM Globo 93.3","u":"http://158.69.219.162:8026/stream","c":"AAC+","b":64},
  {"n":"Radio María El Salvador 107.3 FM","u":"http://dreamsiteradiocp.com:8098/stream","c":"AAC+","b":64},
+ {"n":"FM Globo 93.3","u":"http://158.69.219.162:8026/stream","c":"AAC+","b":64},
  {"n":"YXY 105.7","u":"http://158.69.200.1:8020/stream","c":"AAC+","b":64},
  {"n":"Radio Láser Inglés","u":"https://sp4.colombiatelecom.com.co/8032/stream","c":"AAC","b":128},
  {"n":"Scan 96.1","u":"http://158.69.200.1:8022/stream","c":"AAC+","b":64},
@@ -16,7 +16,6 @@
  {"n":"100.7 Stereo","u":"https://stream20.usastreams.com/8138/stream","c":"MP3","b":128},
  {"n":"Radio YSKL 104.1 FM","u":"https://media.dominiocreativo.com:8000/stream/1/","c":"MP3","b":192},
  {"n":"Radio Nacional de El Salvador - 96.9","u":"https://streamingcwsradio30.com/8156/stream","c":"MP3","b":128},
- {"n":"Radio YSUCA, 91.7 FM","u":"https://fast.citrus3.com:8314/stream","c":"MP3","b":96},
  {"n":"Femenina","u":"https://sp4.colombiatelecom.com.co/8028/stream","c":"AAC","b":128},
  {"n":"105 Salsa","u":"https://stream.zeno.fm/mdn371ycuwzuv","c":"MP3","b":128},
  {"n":"Radio Láser Español","u":"https://sp4.colombiatelecom.com.co/8030/stream","c":"AAC","b":96},
@@ -24,7 +23,8 @@
  {"n":"Radio Astral 102.9 FM","u":"https://streaming.rcs.com.sv/proxy/astral/stream","c":"MP3","b":128},
  {"n":"Radio Sonora 104.5 FM","u":"http://190.5.147.67:8000/radiosonora","c":"MP3","b":128},
  {"n":"Cuscatlán 98.5 FM","u":"http://icecasthd.net:8298/;","c":"MP3","b":128},
- {"n":"La Central 103.7 FM","u":"https://radio.videct.com/8176/stream","c":"MP3","b":96},
  {"n":"Taylor Swift Radio","u":"https://stream.zeno.fm/xiothj9jrxfvv","c":"MP3","b":128},
  {"n":"Radio Rumba Latina","u":"https://c11.radioboss.fm:8303/stream","c":"AAC","b":48},
- {"n":"Radio Restauracion","u":"https://ssl.rockhost.com/proxy/restauracion?mp=/mp3_64","c":"MP3","b":64}]
+ {"n":"Radio Restauracion","u":"https://ssl.rockhost.com/proxy/restauracion?mp=/mp3_64","c":"MP3","b":64},
+ {"n":"Radio Ranchera","u":"https://sp4.colombiatelecom.com.co/8024/stream","c":"AAC","b":96},
+ {"n":"Radio Que Buena 88.9","u":"https://cast3.my-control-panel.com/proxy/gabriel4/stream","c":"MP3","b":128}]

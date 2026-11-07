@@ -6,7 +6,7 @@
  {"n":"Radio Manele FM","u":"http://a.fmradiomanele.ro:8054/;","c":"MP3","b":128},
  {"n":"Dance FM 89.5 Bucharest","u":"http://edge126.rdsnet.ro:84/profm/dancefm.mp3","c":"MP3","b":0},
  {"n":"Radio Guerrilla","u":"http://live.guerrillaradio.ro:8010/guerrilla.aac","c":"AAC+","b":96},
- {"n":"Radio Cafe Romania","u":"http://live.radiocafe.ro:8048/live.aac","c":"AAC+","b":88},
+ {"n":"Radio Cafe Romania","u":"http://live.radiocafe.ro:8048/live.aac","c":"AAC+","b":56},
  {"n":"Radio Zu","u":"http://zuicast.digitalag.ro:9420/zu","c":"AAC+","b":96},
  {"n":"DIGI FM","u":"http://edge76.rdsnet.ro:84/digifm/digifm.mp3","c":"MP3","b":0},
  {"n":"Lautaru Populara","u":"http://live.radiolautaru.ro:9000/;stream.nsv","c":"MP3","b":128},

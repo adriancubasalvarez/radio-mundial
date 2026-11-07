@@ -7,8 +7,8 @@
  {"n":"RTL Die besten Hits aller Zeiten","u":"http://stream.rtlradio.de/rtl-de-beste-hits/aac-64","c":"AAC","b":0},
  {"n":"Braintrip Radio","u":"https://stream.laut.fm/braintrip-radio","c":"MP3","b":128},
  {"n":"Radio Gutt Laun","u":"https://streams.radio.co/sa631ff66a/listen","c":"MP3","b":64},
+ {"n":"Radio Peiteng on Air","u":"http://stream.peitengonair.lu:9000/live","c":"MP3","b":192},
+ {"n":"Luxembourg Global Radio","u":"https://radio.globalradio.lu:8000/radio.mp3","c":"MP3","b":192},
  {"n":"FCE-CONTINUO Webradio","u":"https://www.radioking.com/play/fce-continuo","c":"MP3","b":128},
  {"n":"Country Radio Gilsdorf 103.9","u":"http://streaming.aoip.international:8000/cr-gilsdorf","c":"MP3","b":185},
- {"n":"Luxembourg Global Radio","u":"https://radio.globalradio.lu:8000/radio.mp3","c":"MP3","b":192},
- {"n":"Radio C Luxembourg","u":"https://edge01.streamonkey.net/radioc-live","c":"AAC","b":0},
- {"n":"Radio Peiteng on Air","u":"http://stream.peitengonair.lu:9000/live","c":"MP3","b":192}]
+ {"n":"Radio C Luxembourg","u":"https://edge01.streamonkey.net/radioc-live","c":"AAC","b":0}]

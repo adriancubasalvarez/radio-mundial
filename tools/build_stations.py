@@ -20,8 +20,8 @@ los de otros alfabetos se transliteran («Радио Рекорд» -> «Radio R
 Uso:
   python tools/build_stations.py              genera la base
   python tools/build_stations.py --probar     además prueba cada emisora con
-                                              ffprobe y descarta las que no
-                                              responden (tarda 10-20 minutos)
+                                              ffprobe y como las pide la placa, y
+                                              descarta las que fallan (10-20 minutos)
   python tools/build_stations.py --max 20     otro límite por país
   python tools/build_stations.py --destino sd --max 100 --probar
                                               base grande para la tarjeta SD
@@ -33,10 +33,13 @@ import json
 import random
 import re
 import shutil
+import ssl
 import subprocess
 import sys
 import time
+import http.client
 import unicodedata
+import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -56,6 +59,7 @@ ARCHIVO_BASE = CACHE / "radio-browser.json"
 ARCHIVO_PRUEBAS = CACHE / "pruebas_emisoras.json"
 
 AGENTE = "RadioMundial/0.1 (proyecto maker; github)"
+AGENTE_PLACA = "RadioMundial/1.0"  # el mismo que pone tools/pio_audio.py
 URL_SERVIDORES = "https://all.api.radio-browser.info/json/servers"
 
 HORAS_CACHE_BASE = 24       # no volver a descargar la base antes de esto
@@ -67,6 +71,12 @@ MAX_BYTES_NOMBRE = 63       # el firmware guarda el nombre en char[64]
 MAX_BYTES_URL = 255         # y la URL en char[256]
 HILOS_PRUEBA = 24
 SEGUNDOS_PRUEBA = 15
+SEGUNDOS_CABECERAS = 8
+VERSION_PRUEBA = 2          # subirla si cambia lo que se comprueba
+
+# Tipos de audio que acepta la librería de la placa (Audio::parseContentType)
+TIPOS_PLACA = {"audio/mpeg", "audio/mpeg3", "audio/x-mpeg", "audio/x-mpeg-3", "audio/mp3",
+               "audio/aac", "audio/x-aac", "audio/aacp"}
 
 # Extensiones de listas de reproducción (no son audio directo)
 LISTAS = re.compile(r"\.(m3u8?|pls|asx|xspf)(\?|$)", re.IGNORECASE)
@@ -249,13 +259,32 @@ def cargar_pruebas():
     return {}
 
 
+def responde_a_la_placa(url):
+    """True si el servidor contesta con audio a una petición igual a la de la
+    placa. Algunos rechazan según los encabezados: ffprobe no lo detectaría."""
+    # La placa no comprueba los certificados
+    contexto = ssl.create_default_context()
+    contexto.check_hostname = False
+    contexto.verify_mode = ssl.CERT_NONE
+    peticion = urllib.request.Request(url, headers={
+        "User-Agent": AGENTE_PLACA, "Icy-MetaData": "1", "Accept-Encoding": "identity;q=1,*;q=0"})
+    try:
+        with urllib.request.urlopen(peticion, timeout=SEGUNDOS_CABECERAS, context=contexto) as r:
+            tipo = (r.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+            return tipo in TIPOS_PLACA
+    except http.client.HTTPException:
+        return True  # servidores antiguos («ICY 200 OK»): la placa sí los entiende
+    except (urllib.error.URLError, OSError, ValueError):
+        return False
+
+
 def probar_url(url):
-    """True si ffprobe consigue leer audio MP3 o AAC de la URL."""
+    """True si ffprobe lee audio MP3 o AAC de la URL y el servidor acepta a la placa."""
     orden = ["ffprobe", "-v", "error", "-rw_timeout", str((SEGUNDOS_PRUEBA - 3) * 1_000_000),
              "-user_agent", AGENTE, "-show_entries", "stream=codec_name", "-of", "csv=p=0", url]
     try:
         r = subprocess.run(orden, capture_output=True, text=True, timeout=SEGUNDOS_PRUEBA)
-        return r.stdout.strip().split("\n")[0].strip() in ("mp3", "aac")
+        return r.stdout.strip().split("\n")[0].strip() in ("mp3", "aac") and responde_a_la_placa(url)
     except (subprocess.TimeoutExpired, OSError):
         return False
 
@@ -268,7 +297,7 @@ def filtrar_probando(por_pais, maximo):
 
     pruebas = cargar_pruebas()
     caduca = time.time() - DIAS_CACHE_PRUEBAS * 86400
-    pruebas = {u: p for u, p in pruebas.items() if p["fecha"] > caduca}
+    pruebas = {u: p for u, p in pruebas.items() if p["fecha"] > caduca and p.get("v") == VERSION_PRUEBA}
 
     # Se prueban algunas más del máximo para cubrir las que fallen
     pendientes = []
@@ -281,7 +310,7 @@ def filtrar_probando(por_pais, maximo):
     hechas = 0
     with ThreadPoolExecutor(HILOS_PRUEBA) as grupo:
         for url, ok in zip(pendientes, grupo.map(probar_url, pendientes)):
-            pruebas[url] = {"ok": ok, "fecha": time.time()}
+            pruebas[url] = {"ok": ok, "fecha": time.time(), "v": VERSION_PRUEBA}
             hechas += 1
             if hechas % 200 == 0:
                 print(f"  {hechas}/{len(pendientes)}")
