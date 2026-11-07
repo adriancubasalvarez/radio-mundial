@@ -18,6 +18,7 @@
   <strong>Contents</strong>
   <ol>
     <li><a href="#need">What you need</a></li>
+    <li><a href="#build">Build the case</a></li>
     <li><a href="#install">Install</a></li>
     <li><a href="#wifi">First start and Wi-Fi</a></li>
     <li><a href="#listen">Find and play stations</a></li>
@@ -43,9 +44,28 @@
   <figure><img src="img/fotos/placa.jpg" alt="Freenove FNK0104 board"><figcaption>The Freenove FNK0104 board.</figcaption></figure>
   <figure><img src="img/fotos/tamano.jpg" alt="The radio in the palm of a hand"><figcaption>The finished radio fits in your hand.</figcaption></figure>
 </div>
-<p>The radio stays plugged in over USB-C: it has no battery. There is no soldering, no account and nothing to pay for.</p>
+<p>The radio stays plugged in over USB-C: it has no battery. No account and nothing to pay for. The only soldering is to lengthen the speaker cable, explained below.</p>
 
-<h2 id="install">2. Install</h2>
+<h2 id="build">2. Build the case</h2>
+<p>You can skip this if you only want to try the radio: it works without a case. The board's own small speaker is enough for the small case.</p>
+<div class="nota">Case files, screw sizes and print settings will be published with the small case. Until then, check the <a href="https://github.com/adriancubasalvarez/radio-mundial/tree/main/carcasa">case folder</a>.</div>
+<ol>
+  <li><strong>Print the front and the back cover.</strong></li>
+  <li><strong>Lengthen the speaker cable.</strong> The speaker that comes with the board has a short cable that does not reach the grille. Cut it, solder a piece of wire in between and cover each joint with heat-shrink tubing. If you would rather not solder, buy the same kind of speaker with a longer cable.</li>
+  <li><strong>Screw the board into the front</strong>, with the screen in its window and the USB-C port facing its opening.</li>
+  <li><strong>Place the speaker behind the grille.</strong> A few dots of hot glue keep it in place: recommended, not essential.</li>
+  <li><strong>Close the back cover</strong> and plug in the USB-C cable.</li>
+</ol>
+<div class="fila">
+  <figure class="web"><img src="img/fotos/impresion.jpg" alt="The printed front coming off the printer bed"><figcaption>1. The printed front.</figcaption></figure>
+  <figure class="web"><img src="img/fotos/soldar.jpg" alt="Soldering an extension to the speaker cable"><figcaption>2. Soldering the extension…</figcaption></figure>
+  <figure class="web"><img src="img/fotos/termorretractil.jpg" alt="Shrinking the tubing over the joints with a heat gun"><figcaption>…and insulating it with heat-shrink tubing.</figcaption></figure>
+  <figure class="web"><img src="img/fotos/tornillos.jpg" alt="The board screwed into the front"><figcaption>3. The board in the front.</figcaption></figure>
+  <figure class="web"><img src="img/fotos/silicona.jpg" alt="Fixing the speaker with a hot glue gun"><figcaption>4. Fixing the speaker with hot glue.</figcaption></figure>
+  <figure class="web"><img src="img/fotos/trasera.jpg" alt="The back cover closed, with the LED glowing"><figcaption>5. Closed, with the LED on.</figcaption></figure>
+</div>
+
+<h2 id="install">3. Install</h2>
 <p>Installing erases whatever was on the board and takes 1 or 2 minutes.</p>
 <ol>
   <li>Connect the board to your computer with the USB cable.</li>
@@ -59,7 +79,7 @@
 </figure>
 <div class="nota"><strong>Board not in the list?</strong> Try another cable or USB port. If it still does not appear, hold the board's BOOT button while you plug in the cable.</div>
 
-<h2 id="wifi">3. First start and Wi-Fi</h2>
+<h2 id="wifi">4. First start and Wi-Fi</h2>
 <figure class="web"><img src="img/fotos/primer_arranque.jpg" alt="Hands holding the radio as it starts for the first time"></figure>
 <p>The first time it starts, the radio asks for your language.</p>
 <figure><img src="img/en/01_idioma.png" alt="Language screen with English and Español buttons"><figcaption>Tap your language.</figcaption></figure>
@@ -71,7 +91,7 @@
 <figure><img src="img/en/18_wifi.png" alt="Wi-Fi screen with a QR code and instructions"><figcaption>If the page does not open by itself, go to 192.168.4.1 in your phone's browser.</figcaption></figure>
 <p>The radio remembers the network. From then on, it connects by itself.</p>
 
-<h2 id="listen">4. Find and play stations</h2>
+<h2 id="listen">5. Find and play stations</h2>
 <ol>
   <li><strong>Tap a region</strong> of the world map.</li>
   <li><strong>Tap a country</strong> on the regional map, or use the list button at the top right to see all its countries.</li>
@@ -91,7 +111,7 @@
 <p>Stations that fail twice in a row move to the end of the list and turn gray. They are never deleted, and go back to their place as soon as they play again.</p>
 <figure><img src="img/en/09_mapa_sonando.png" alt="World map showing the station playing at the bottom"><figcaption>While music plays you can keep exploring. Tap the bottom line to return to the station.</figcaption></figure>
 
-<h2 id="player">5. While a station plays</h2>
+<h2 id="player">6. While a station plays</h2>
 <figure class="web"><img src="img/fotos/sonando.jpg" alt="The radio playing CNN, with the local time of the United States"></figure>
 <div class="fila">
   <figure><img src="img/en/07_sonando.png" alt="Player screen"><figcaption>Player screen.</figcaption></figure>
@@ -108,14 +128,14 @@
 <p>You also see the <strong>local time</strong> of the station's country and, if the station sends it, the song title. In countries with several time zones, the time is that of the capital or main city. Song titles in Arabic, Chinese, Japanese or Korean are not shown, because the screen font does not include those alphabets.</p>
 <p>When you turn the radio on, the last station starts playing again.</p>
 
-<h2 id="favorites">6. Favorites, recent and search</h2>
+<h2 id="favorites">7. Favorites, recent and search</h2>
 <div class="fila">
   <figure><img src="img/en/10_favoritos.png" alt="Favorites list"><figcaption><strong>Favorites:</strong> up to 20. The button at the top right opens Recent.</figcaption></figure>
   <figure><img src="img/en/11_recientes.png" alt="Recent stations list"><figcaption><strong>Recent:</strong> the last 10 stations you played.</figcaption></figure>
   <figure><img src="img/en/12_buscar.png" alt="Search screen with keyboard and genres"><figcaption><strong>Search:</strong> type a name or choose one of 13 genres.</figcaption></figure>
 </div>
 
-<h2 id="settings">7. Settings</h2>
+<h2 id="settings">8. Settings</h2>
 <p><strong>Press and hold the “Radio Mundial” title</strong> on the map for 2 seconds.</p>
 <figure><img src="img/en/13_ajustes.png" alt="Settings menu"></figure>
 <table>
@@ -131,7 +151,7 @@
 
 <figure class="web" style="max-width:360px"><img src="img/fotos/luz.jpg" alt="The LED glowing through the back grille"><figcaption>The LED shines through the back of the case.</figcaption></figure>
 
-<h2 id="alarms">8. Alarms</h2>
+<h2 id="alarms">9. Alarms</h2>
 <p>You can have up to 5. Open them from Settings, then tap one to edit it or tap <strong>New alarm</strong>.</p>
 <div class="fila">
   <figure><img src="img/en/14_alarmas.png" alt="Alarm list"><figcaption>Your alarms. Those turned off appear in gray.</figcaption></figure>
@@ -148,7 +168,7 @@
 </ul>
 <div class="nota">Alarms are a new feature. For something important, keep a backup alarm until you trust it in your home.</div>
 
-<h2 id="update">9. Update the stations</h2>
+<h2 id="update">10. Update the stations</h2>
 <p>Stations change address over time, so the list can be renewed without installing anything again.</p>
 <ol>
   <li>Open Settings and tap the <strong>download icon</strong> at the top right.</li>
@@ -158,7 +178,7 @@
 <figure><img src="img/en/17_actualizar.png" alt="Update stations screen"></figure>
 <p>Try not to unplug it during the update. If the power goes out, nothing breaks: the radio goes back to its original list and you can update again. Your favorites, alarms and Wi-Fi are not affected.</p>
 
-<h2 id="clock">10. Sleep screen</h2>
+<h2 id="clock">11. Sleep screen</h2>
 <p>After 2 minutes without touching the radio, the screen dims and rotates through the clock, the weather and the air quality. Touch it to go back. The music keeps playing.</p>
 <div class="fila">
   <figure><img src="img/en/19_reposo.png" alt="Clock"><figcaption>Clock.</figcaption></figure>
@@ -167,7 +187,7 @@
 </div>
 <p>The radio works out your approximate location and time zone from your internet connection, so you do not need to set anything. The location can be wrong if you use a VPN.</p>
 
-<h2 id="help">11. Troubleshooting</h2>
+<h2 id="help">12. Troubleshooting</h2>
 <table>
   <tr><th>Problem</th><th>What to try</th></tr>
   <tr><td>The Install button does not appear</td><td>Use Chrome or Edge on a computer, not on a phone.</td></tr>
