@@ -25,6 +25,8 @@ On a Bambu Lab P2S: front about 1 h and 31 g, back cover about 45 min and 18 g.
 
 - 4 × M3 × 5 mm screws for the board (M3 × 4 also works). **Not longer than 5 mm**: the posts are 4 mm deep and a 6 mm screw hits the bottom.
 - 4 × M3 × 8 mm screws for the back cover.
+
+**Orientation:** the board goes with its USB-C at the end opposite the speaker. With the radio standing on its feet, the screen must be the right way up.
 - The board's speaker. Its cable is short: lengthen it by soldering a piece of two-wire cable (with heat-shrink tubing), or buy the same kind of speaker with a longer cable.
 - Optional: hot glue to hold the speaker behind the grille.
 
@@ -57,6 +59,8 @@ En una Bambu Lab P2S: frontal en 1 h y 31 g, tapa trasera en 45 min y 18 g.
 
 - 4 tornillos M3 × 5 mm para la placa (M3 × 4 también vale). **No más largos de 5 mm**: los postes tienen 4 mm de fondo y uno de 6 mm toca el fondo.
 - 4 tornillos M3 × 8 mm para la tapa trasera.
+
+**Orientación:** la placa va con el USB-C en el extremo contrario al altavoz. Con la radio apoyada en sus patas, la pantalla debe verse al derecho.
 - El altavoz de la placa. Su cable es corto: alárgalo soldando un trozo de cable de dos hilos (con funda termorretráctil), o compra un altavoz igual con el cable más largo.
 - Opcional: silicona caliente para sujetar el altavoz detrás de la rejilla.
 
