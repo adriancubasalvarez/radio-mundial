@@ -14,6 +14,13 @@ Radio por Internet de escritorio con **mapamundi táctil**: tocas una región, e
 
 Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar» y, al terminar, conecta la radio a tu WiFi desde la misma página (o después, desde el móvil, con el código QR que muestra la pantalla). Para publicar una versión nueva: `python tools/build_release.py`.
 
+## Dónde comprar la placa
+
+**Freenove FNK0104, versión «2.8 Inch IPS Touch»** (la radio no funciona en la versión sin táctil):
+[Amazon España](https://link.amazon/B0c9qnA3x) · [Amazon EE. UU.](https://link.amazon/A0fZ7EvDX)
+
+<sub>Enlaces de afiliado: en calidad de Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables, sin coste extra para ti.</sub>
+
 ## Qué hace
 
 - Mapamundi y 9 regiones con zonas táctiles grandes (pensadas para el dedo).

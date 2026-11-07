@@ -14,6 +14,13 @@ Desktop internet radio with a **touch world map**: tap a region, pick a country,
 
 From Chrome or Edge on a computer: plug the board in over USB, click "Install" and, when it finishes, connect the radio to your Wi-Fi from the same page (or later, from your phone, with the QR code shown on the screen). To publish a new version: `python tools/build_release.py`.
 
+## Where to buy the board
+
+**Freenove FNK0104, «2.8 Inch IPS Touch» version** (the radio does not work on the version without touch):
+[Amazon US](https://link.amazon/A0fZ7EvDX) · [Amazon Spain](https://link.amazon/B0c9qnA3x)
+
+<sub>Affiliate links: as an Amazon Associate I earn from qualifying purchases, at no extra cost to you.</sub>
+
 ## Features
 
 - World map and 9 regions with large touch zones (made for fingers).
