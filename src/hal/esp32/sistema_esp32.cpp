@@ -32,6 +32,30 @@ bool hal_fecha(int *anio, int *mes, int *dia, int *dia_semana)
     return true;
 }
 
+/* La biblioteca de C solo calcula la hora de una zona, la de la variable TZ:
+ * se cambia un momento y se deja como estaba */
+bool hal_hora_en(const char *regla, int *hora, int *minuto)
+{
+    struct tm local;
+    if (!getLocalTime(&local, 0)) {
+        return false;
+    }
+    char antes[32] = "";
+    const char *zona = getenv("TZ");
+    if (zona != NULL) {
+        strncpy(antes, zona, sizeof(antes) - 1);
+    }
+    time_t ahora = time(NULL);
+    setenv("TZ", regla, 1);
+    tzset();
+    localtime_r(&ahora, &local);
+    setenv("TZ", antes, 1);
+    tzset();
+    *hora = local.tm_hour;
+    *minuto = local.tm_min;
+    return true;
+}
+
 /* La zona horaria en formato POSIX lleva el signo al revés: UTC+1 es
  * «UTC-1». Con los minutos para zonas como la India (UTC+5:30). */
 void hal_zona_horaria(int segundos)

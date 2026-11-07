@@ -49,6 +49,14 @@ void hal_zona_horaria(int segundos)
     (void)segundos;  /* el simulador usa la hora del PC */
 }
 
+bool hal_hora_en(const char *regla, int *hora, int *minuto)
+{
+    (void)regla;
+    (void)hora;
+    (void)minuto;
+    return false;  /* en el simulador no se enseña */
+}
+
 uint32_t hal_aleatorio(void)
 {
     static std::mt19937 generador{std::random_device{}()};

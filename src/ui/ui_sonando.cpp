@@ -20,6 +20,7 @@
 #define PERIODO_VIGILANTE 500   /* ms entre comprobaciones */
 #define TIEMPO_AVISO      2500  /* ms que se ve el aviso de error */
 #define TIEMPO_SALTO      1500  /* ms antes de saltar a otra aleatoria */
+#define PERIODO_HORA      5000  /* ms entre repasos de la hora local */
 
 static lv_obj_t *titulo_cabecera;
 static lv_obj_t *etiqueta_nombre;
@@ -33,6 +34,7 @@ static lv_timer_t *vigilante;
 static lv_timer_t *temporizador_aviso;
 static bool llego_a_sonar;  /* para distinguir «no arrancó» de «se cortó» */
 static char ultimo_estado[160];
+static uint32_t hora_mirada_ms;
 
 /* Cambia el texto de estado solo si es distinto (evita reiniciar el desplazamiento) */
 static void mostrar_estado(const char *texto, uint32_t color)
@@ -50,6 +52,28 @@ static void pintar_favorito(void)
     lv_obj_set_style_text_color(icono_favorito, lv_color_hex(es ? COLOR_ACENTO : COLOR_SECUNDARIO), 0);
 }
 
+/* Hora local (de la capital, en los países con varias zonas), códec y kbps */
+static void pintar_detalle(void)
+{
+    char calidad[32], texto[72];
+    if (nav.emisora.bitrate > 0) {
+        snprintf(calidad, sizeof(calidad), "%s · %d kbps", nav.emisora.codec, nav.emisora.bitrate);
+    } else {
+        snprintf(calidad, sizeof(calidad), "%s", nav.emisora.codec);
+    }
+    const char *regla = datos_zona_pais(nav.pais.codigo);
+    int hora, minuto;
+    if (regla != NULL && hal_hora_en(regla, &hora, &minuto)) {
+        snprintf(texto, sizeof(texto), TR("Local time %02d:%02d · %s", "Hora local %02d:%02d · %s"), hora, minuto, calidad);
+    } else {
+        snprintf(texto, sizeof(texto), "%s", calidad);
+    }
+    if (strcmp(lv_label_get_text(etiqueta_detalle), texto) != 0) {
+        lv_label_set_text(etiqueta_detalle, texto);  /* si no, reiniciaría el desplazamiento */
+    }
+    hora_mirada_ms = hal_millis();
+}
+
 /* Rellena los textos con la emisora de nav (al entrar o al saltar a otra) */
 static void pintar_emisora(void)
 {
@@ -65,11 +89,7 @@ static void pintar_emisora(void)
         lv_obj_clear_flag(titulo_cabecera, LV_OBJ_FLAG_CLICKABLE);
     }
     lv_label_set_text(etiqueta_nombre, nav.emisora.nombre);
-    if (nav.emisora.bitrate > 0) {
-        lv_label_set_text_fmt(etiqueta_detalle, "%s · %d kbps", nav.emisora.codec, nav.emisora.bitrate);
-    } else {
-        lv_label_set_text(etiqueta_detalle, nav.emisora.codec);
-    }
+    pintar_detalle();
     pintar_favorito();
 }
 
@@ -137,6 +157,9 @@ static void vigilar(lv_timer_t *t)
 {
     (void)t;
     pintar_dormir();
+    if (hal_millis() - hora_mirada_ms >= PERIODO_HORA) {
+        pintar_detalle();
+    }
     if (!nav.hay_sonando || temporizador_aviso != NULL) {
         return;
     }

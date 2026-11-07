@@ -80,6 +80,9 @@ bool datos_emisora_aleatoria(Emisora *emisora, Pais *pais);
 /* Busca el nombre de un país por su código ISO */
 bool datos_buscar_pais(const char *codigo, Pais *pais);
 
+/* Zona horaria de un país (regla POSIX), o NULL si no se conoce */
+const char *datos_zona_pais(const char *codigo);
+
 /* Busca a qué región del índice pertenece un país (regiones/<id>.json).
  * NULL si no está en ninguna. */
 const Region *datos_region_de_pais(const IndiceMundo *indice, const char *codigo);

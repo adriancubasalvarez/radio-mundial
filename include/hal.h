@@ -45,6 +45,10 @@ bool hal_fecha(int *anio, int *mes, int *dia, int *dia_semana);
  * En el simulador no hace nada (usa la hora del PC). */
 void hal_zona_horaria(int segundos);
 
+/* Hora en otra zona (regla POSIX, como las de zonas.h). false si aún no se
+ * sabe la hora o en el simulador. */
+bool hal_hora_en(const char *regla, int *hora, int *minuto);
+
 /* Número aleatorio de 32 bits */
 uint32_t hal_aleatorio(void);
 

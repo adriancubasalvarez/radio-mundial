@@ -1,4 +1,7 @@
 #include "datos.h"
+#include "zonas.h"
+
+#include <time.h>
 #include "hal.h"
 #include "idioma.h"
 
@@ -256,6 +259,17 @@ void datos_liberar_emisoras(ListaEmisoras *lista)
 }
 
 /* Busca el nombre de un país en regiones.json */
+const char *datos_zona_pais(const char *codigo)
+{
+    for (size_t i = 0; i < sizeof(ZONAS) / sizeof(ZONAS[0]); i++) {
+        if (strcmp(ZONAS[i].codigo, codigo) == 0) {
+            const ZonaPais *z = &ZONAS[i];
+            return z->hasta != 0 && (uint32_t)time(NULL) >= z->hasta ? z->despues : z->regla;
+        }
+    }
+    return NULL;
+}
+
 bool datos_buscar_pais(const char *codigo, Pais *pais)
 {
     /* paises.txt: «código<TAB>español<TAB>inglés» por línea; se lee línea a línea */
