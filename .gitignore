@@ -27,3 +27,6 @@ tools/preview/
 # Carcasa: modelo de la placa (de Freenove) y STEP generados, muy pesados
 carcasa/referencia/
 carcasa/stl/*.step
+
+# Fotos y vídeos originales del montaje (pesan mucho): al manual van recortadas
+VIDEOS Y FOTOS/
