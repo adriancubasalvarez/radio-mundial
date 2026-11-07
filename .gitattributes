@@ -1,2 +1,5 @@
 # Mapas, zonas y logos en formato LVGL: binarios, Git no debe tocarlos
 *.bin binary
+
+# El paquete de emisoras lleva una suma de control: Git no debe tocarlo
+docs/emisoras/* binary
