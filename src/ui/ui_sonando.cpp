@@ -182,6 +182,11 @@ static void vigilar(lv_timer_t *t)
         break;
     case AUDIO_ERROR:
     case AUDIO_PARADO:
+        /* Solo cuenta si no arrancó con la WiFi bien: una caída de la red o un
+         * corte a mitad de canción no dicen nada de la emisora */
+        if (!llego_a_sonar && audio_estado() == AUDIO_ERROR && hal_red_estado() == RED_CONECTADA) {
+            ajustes_anotar_fallo(nav.emisora.url);
+        }
         /* La emisora no arrancó o se cortó: avisar y volver (o saltar) */
         audio_parar();
         nav.hay_sonando = false;

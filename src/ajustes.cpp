@@ -108,6 +108,13 @@ void ajustes_cargar(void)
         }
         de_json(f, &ajustes.favoritos[ajustes.num_favoritos++]);
     }
+    for (JsonArrayConst f : doc["fallos"].as<JsonArrayConst>()) {
+        if (ajustes.num_fallos >= MAX_FALLOS) {
+            break;
+        }
+        ajustes.fallos[ajustes.num_fallos].resumen = f[0] | 0u;
+        ajustes.fallos[ajustes.num_fallos++].veces = f[1] | 1;
+    }
     for (JsonObjectConst r : doc["recientes"].as<JsonArrayConst>()) {
         if (ajustes.num_recientes >= MAX_RECIENTES) {
             break;
@@ -150,6 +157,12 @@ void ajustes_guardar(void)
     }
     if (ajustes.hay_ultima) {
         a_json(doc["ultima"].to<JsonObject>(), &ajustes.ultima);
+    }
+    JsonArray fallos = doc["fallos"].to<JsonArray>();
+    for (uint8_t i = 0; i < ajustes.num_fallos; i++) {
+        JsonArray f = fallos.add<JsonArray>();
+        f.add(ajustes.fallos[i].resumen);
+        f.add(ajustes.fallos[i].veces);
     }
     JsonArray recientes = doc["recientes"].to<JsonArray>();
     for (uint8_t i = 0; i < ajustes.num_recientes; i++) {
@@ -220,6 +233,69 @@ void ajustes_recordar_ultima(const Emisora *emisora, const Pais *pais)
     ajustes.hay_ultima = true;
     recordar_reciente(&ajustes.ultima);
     ajustes_guardar();
+}
+
+#define FALLOS_PARA_BAJAR 2
+
+/* Resumen de la URL (hash FNV-1a, Fowler-Noll-Vo): con 40 emisoras en la
+ * lista, dos URL distintas casi nunca darán el mismo */
+static uint32_t resumen_url(const char *url)
+{
+    uint32_t h = 2166136261u;
+    for (const unsigned char *p = (const unsigned char *)url; *p; p++) {
+        h = (h ^ *p) * 16777619u;
+    }
+    return h;
+}
+
+static int buscar_fallo(const char *url)
+{
+    uint32_t resumen = resumen_url(url);
+    for (int i = 0; i < ajustes.num_fallos; i++) {
+        if (ajustes.fallos[i].resumen == resumen) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static void quitar_fallo(int pos)
+{
+    memmove(&ajustes.fallos[pos], &ajustes.fallos[pos + 1],
+            (ajustes.num_fallos - pos - 1) * sizeof(ajustes.fallos[0]));
+    ajustes.num_fallos--;
+}
+
+void ajustes_anotar_fallo(const char *url)
+{
+    int pos = buscar_fallo(url);
+    if (pos >= 0) {
+        if (ajustes.fallos[pos].veces < 255) {
+            ajustes.fallos[pos].veces++;
+        }
+    } else {
+        if (ajustes.num_fallos >= MAX_FALLOS) {
+            quitar_fallo(0);  /* la lista llena olvida el más antiguo */
+        }
+        ajustes.fallos[ajustes.num_fallos].resumen = resumen_url(url);
+        ajustes.fallos[ajustes.num_fallos++].veces = 1;
+    }
+    ajustes_guardar();
+}
+
+void ajustes_olvidar_fallo(const char *url)
+{
+    int pos = buscar_fallo(url);
+    if (pos >= 0) {
+        quitar_fallo(pos);
+        ajustes_guardar();
+    }
+}
+
+bool ajustes_emisora_floja(const char *url)
+{
+    int pos = buscar_fallo(url);
+    return pos >= 0 && ajustes.fallos[pos].veces >= FALLOS_PARA_BAJAR;
 }
 
 static int buscar_favorito(const char *url)

@@ -62,6 +62,9 @@ lv_obj_t *pantalla_region(void);
 lv_obj_t *pantalla_paises(void);
 lv_obj_t *pantalla_emisoras(void);
 lv_obj_t *pantalla_sonando(void);
+/* Vigila lo que suena; llamarlo en cada vuelta del bucle principal */
+void nav_atender(void);
+
 lv_obj_t *pantalla_favoritos(void);
 lv_obj_t *pantalla_recientes(void);
 lv_obj_t *pantalla_buscar(void);

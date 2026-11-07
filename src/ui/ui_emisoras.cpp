@@ -20,6 +20,24 @@ static void al_elegir(uint16_t fila)
     nav_ir(PANT_SONANDO);
 }
 
+/* Lleva al final las emisoras que vienen fallando, sin cambiar el orden del
+ * resto. Devuelve cuántas quedan arriba. */
+static uint16_t bajar_flojas(void)
+{
+    uint16_t buenas = emisoras.num;
+    for (uint16_t i = 0; i < buenas;) {
+        if (ajustes_emisora_floja(emisoras.emisoras[i].url)) {
+            Emisora floja = emisoras.emisoras[i];
+            memmove(&emisoras.emisoras[i], &emisoras.emisoras[i + 1], (emisoras.num - i - 1) * sizeof(Emisora));
+            emisoras.emisoras[emisoras.num - 1] = floja;
+            buenas--;
+        } else {
+            i++;
+        }
+    }
+    return buenas;
+}
+
 static void al_borrar(lv_event_t *e)
 {
     (void)e;
@@ -42,6 +60,7 @@ lv_obj_t *pantalla_emisoras(void)
         return pantalla;
     }
 
+    uint16_t buenas = bajar_flojas();
     lv_obj_t *lista = comun_lista(pantalla, al_elegir);
     for (uint16_t i = 0; i < emisoras.num; i++) {
         const Emisora *em = &emisoras.emisoras[i];
@@ -50,6 +69,9 @@ lv_obj_t *pantalla_emisoras(void)
         const char *icono = suena ? LV_SYMBOL_VOLUME_MAX
                           : ajustes_es_favorito(em->url) ? SIMBOLO_ESTRELLA : LV_SYMBOL_AUDIO;
         comun_lista_agregar(lista, icono, em->nombre, NULL, false);
+        if (i >= buenas) {
+            comun_lista_gris(lista);
+        }
     }
     return pantalla;
 }

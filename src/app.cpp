@@ -6,6 +6,7 @@
 #include "hal.h"
 #include "luz.h"
 #include "tiempo.h"
+#include "ui/nav.h"
 #include "ui/ui.h"
 
 #include <lvgl.h>
@@ -27,6 +28,7 @@ bool app_bucle(void)
     luz_atender();
     tiempo_atender();
     alarmas_atender();
+    nav_atender();
     hal_esperar(espera < 5 ? espera : 5);
     return true;
 }

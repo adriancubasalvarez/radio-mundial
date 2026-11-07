@@ -1,5 +1,6 @@
 #include "datos.h"
 #include "zonas.h"
+#include "ajustes.h"
 
 #include <time.h>
 #include "hal.h"
@@ -369,6 +370,9 @@ bool datos_emisora_aleatoria(Emisora *emisora, Pais *pais)
         }
         *emisora = lista.emisoras[hal_aleatorio() % lista.num];
         datos_liberar_emisoras(&lista);
+        if (intento < 4 && ajustes_emisora_floja(emisora->url)) {
+            continue;  /* mejor otra; la última vez se acepta la que salga */
+        }
         if (!datos_buscar_pais(codigo, pais)) {
             memset(pais, 0, sizeof(Pais));
             strncpy(pais->codigo, codigo, sizeof(pais->codigo) - 1);

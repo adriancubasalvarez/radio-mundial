@@ -11,6 +11,7 @@
 
 #define MAX_FAVORITOS 20
 #define MAX_RECIENTES 10
+#define MAX_FALLOS 40
 #define MAX_ALARMAS 5
 
 /* Emisora con el país al que pertenece */
@@ -30,6 +31,12 @@ typedef struct {
     EmisoraGuardada emisora;
 } Alarma;
 
+/* Emisora que no llegó a sonar: basta un resumen de su URL */
+typedef struct {
+    uint32_t resumen;
+    uint8_t veces;
+} FalloEmisora;
+
 typedef struct {
     uint8_t volumen;          /* 0..100 */
     uint16_t reposo_s;        /* segundos sin tocar hasta el reposo (0 = nunca) */
@@ -44,6 +51,8 @@ typedef struct {
     uint8_t num_favoritos;
     EmisoraGuardada recientes[MAX_RECIENTES];  /* la más reciente, primero */
     uint8_t num_recientes;
+    FalloEmisora fallos[MAX_FALLOS];  /* el más antiguo, primero */
+    uint8_t num_fallos;
     Alarma alarmas[MAX_ALARMAS];
     uint8_t num_alarmas;
 } Ajustes;
@@ -61,6 +70,15 @@ void ajustes_poner_idioma(bool espanol);
 
 /* Recuerda la emisora que está sonando y guarda */
 void ajustes_recordar_ultima(const Emisora *emisora, const Pais *pais);
+
+/* Una emisora no llegó a sonar (con la WiFi bien): se anota y se guarda */
+void ajustes_anotar_fallo(const char *url);
+
+/* Una emisora volvió a sonar: se olvidan sus fallos */
+void ajustes_olvidar_fallo(const char *url);
+
+/* true si falló varias veces seguidas: va al final de la lista, en gris */
+bool ajustes_emisora_floja(const char *url);
 
 /* true si la URL está en favoritos */
 bool ajustes_es_favorito(const char *url);

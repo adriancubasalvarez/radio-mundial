@@ -69,8 +69,21 @@ void nav_ir(Pantalla pantalla)
     mostrar(pantalla, tope == 0 ? LV_SCR_LOAD_ANIM_FADE_ON : LV_SCR_LOAD_ANIM_MOVE_LEFT);
 }
 
+/* En cuanto suena se olvidan sus fallos, en cualquier pantalla: al arrancar,
+ * la última emisora empieza sola sobre el mapamundi */
+static bool sonido_comprobado;
+
+void nav_atender(void)
+{
+    if (!sonido_comprobado && nav.hay_sonando && audio_estado() == AUDIO_SONANDO) {
+        sonido_comprobado = true;
+        ajustes_olvidar_fallo(nav.sonando.url);
+    }
+}
+
 void nav_reproducir(void)
 {
+    sonido_comprobado = false;
     audio_reproducir(nav.emisora.url);
     nav.sonando = nav.emisora;
     nav.hay_sonando = true;
