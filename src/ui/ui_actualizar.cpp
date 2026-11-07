@@ -4,7 +4,6 @@
  */
 #include "nav.h"
 #include "comun.h"
-#include "ajustes.h"
 #include "hal.h"
 #include "idioma.h"
 
@@ -76,8 +75,6 @@ static void pintar_estado(EstadoActualizar estado)
     case ACT_LISTO:
         lv_label_set_text(texto, TR("Done! Restarting...", "¡Listo! Reiniciando..."));
         mostrar_barra(false);
-        strncpy(ajustes.version_emisoras, hal_actualizar_version(), sizeof(ajustes.version_emisoras) - 1);
-        ajustes_guardar();
         listo_desde_ms = hal_millis();
         break;
     case ACT_ERROR:
@@ -117,7 +114,7 @@ static void al_pulsar_accion(lv_event_t *e)
         nav.hay_sonando = false;
         hal_actualizar_instalar();
     } else {
-        hal_actualizar_comprobar(ajustes.version_emisoras);
+        hal_actualizar_comprobar();
     }
 }
 
@@ -178,7 +175,7 @@ lv_obj_t *pantalla_actualizar(void)
     lv_label_set_text(texto_volver, TR("Back", "Volver"));
 
     visto = ACT_NADA;
-    hal_actualizar_comprobar(ajustes.version_emisoras);
+    hal_actualizar_comprobar();
     vigilante = lv_timer_create(vigilar, PERIODO_MS, NULL);
     vigilar(vigilante);
     return pantalla;

@@ -58,9 +58,8 @@ bool hal_hora_en(const char *regla, int *hora, int *minuto)
 }
 
 /* En el simulador las emisoras se regeneran con las herramientas del PC */
-void hal_actualizar_comprobar(const char *version)
+void hal_actualizar_comprobar(void)
 {
-    (void)version;
 }
 
 void hal_actualizar_instalar(void)
@@ -71,11 +70,6 @@ EstadoActualizar hal_actualizar_estado(uint8_t *progreso)
 {
     *progreso = 0;
     return ACT_ERROR;
-}
-
-const char *hal_actualizar_version(void)
-{
-    return "";
 }
 
 const char *hal_actualizar_fecha(void)

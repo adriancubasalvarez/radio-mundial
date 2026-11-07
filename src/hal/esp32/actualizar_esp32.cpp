@@ -29,7 +29,6 @@
 static volatile EstadoActualizar estado = ACT_NADA;
 static volatile uint8_t porcentaje;
 static volatile bool ocupada;
-static char version_local[16];
 static char version_nueva[16];
 static char fecha_nueva[16];
 static uint32_t suma_nueva;
@@ -70,6 +69,17 @@ static bool empezar(HTTPClient &http, WiFiClientSecure &cliente, const char *arc
     return true;
 }
 
+/* La versión instalada es la que guarda la marca: si un corte de luz la dejó a
+ * medias no hay marca, la radio usa la lista de fábrica y se puede reinstalar */
+static String version_instalada(void)
+{
+    if (!LittleFS.exists(MARCA_LISTO)) {
+        return "";
+    }
+    File marca = LittleFS.open(MARCA_LISTO, FILE_READ);
+    return marca ? marca.readString() : String("");
+}
+
 /* version.txt: «suma tamaño fecha» */
 static void comprobar(void)
 {
@@ -89,7 +99,7 @@ static void comprobar(void)
     }
     suma_nueva = strtoul(version_nueva, NULL, 16);
     tam_nuevo = tam;
-    estado = strcmp(version_nueva, version_local) == 0 ? ACT_AL_DIA : ACT_HAY_NUEVA;
+    estado = version_instalada() == version_nueva ? ACT_AL_DIA : ACT_HAY_NUEVA;
     Serial.printf("[actualizar] versión %s, %u bytes\n", version_nueva, (unsigned)tam_nuevo);
 }
 
@@ -254,10 +264,9 @@ static void lanzar(void *parametro)
     }
 }
 
-void hal_actualizar_comprobar(const char *version)
+void hal_actualizar_comprobar(void)
 {
     if (!ocupada) {
-        strncpy(version_local, version, sizeof(version_local) - 1);
         estado = ACT_COMPROBANDO;
         lanzar(NULL);
     }
@@ -276,11 +285,6 @@ EstadoActualizar hal_actualizar_estado(uint8_t *progreso)
 {
     *progreso = porcentaje;
     return estado;
-}
-
-const char *hal_actualizar_version(void)
-{
-    return version_nueva;
 }
 
 const char *hal_actualizar_fecha(void)

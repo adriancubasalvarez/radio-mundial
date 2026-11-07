@@ -61,8 +61,8 @@ typedef enum {
     ACT_ERROR,
 } EstadoActualizar;
 
-/* Mira si hay una lista distinta de la que indica version */
-void hal_actualizar_comprobar(const char *version);
+/* Mira si hay una lista distinta de la instalada */
+void hal_actualizar_comprobar(void);
 
 /* Descarga e instala la lista que encontró hal_actualizar_comprobar */
 void hal_actualizar_instalar(void);
@@ -70,8 +70,7 @@ void hal_actualizar_instalar(void);
 /* Estado, y progreso de 0 a 100 mientras descarga o instala */
 EstadoActualizar hal_actualizar_estado(uint8_t *progreso);
 
-/* Versión y fecha de la lista encontrada */
-const char *hal_actualizar_version(void);
+/* Fecha de la lista encontrada */
 const char *hal_actualizar_fecha(void);
 
 /* Reinicia la radio */
