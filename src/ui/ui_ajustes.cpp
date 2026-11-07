@@ -49,6 +49,13 @@ static void al_alarmas(lv_event_t *e)
     nav_ir(PANT_ALARMAS);
 }
 
+static void al_actualizar(lv_event_t *e)
+{
+    (void)e;
+    cerrar();
+    nav_ir(PANT_ACTUALIZAR);
+}
+
 static void al_wifi(lv_event_t *e)
 {
     (void)e;
@@ -176,6 +183,12 @@ void ui_ajustes_abrir(void)
     lv_label_set_text(titulo, TR(LV_SYMBOL_SETTINGS "  Settings", LV_SYMBOL_SETTINGS "  Ajustes"));
     lv_obj_set_style_text_font(titulo, &radio_20, 0);
     lv_obj_set_style_text_color(titulo, lv_color_hex(COLOR_ACENTO), 0);
+
+    /* Actualizar emisoras: en la esquina, que el menú ya va lleno */
+    lv_obj_t *actualizar = boton(capa, LV_SYMBOL_DOWNLOAD, false, al_actualizar, NULL, 46);
+    lv_obj_add_flag(actualizar, LV_OBJ_FLAG_IGNORE_LAYOUT);
+    lv_obj_set_height(actualizar, 32);
+    lv_obj_align(actualizar, LV_ALIGN_TOP_RIGHT, -30, 6);
 
     /* Idioma (el botón ofrece el otro) y alarmas, en una fila */
     lv_obj_t *fila = lv_obj_create(capa);

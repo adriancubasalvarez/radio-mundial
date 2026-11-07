@@ -85,6 +85,7 @@ void ajustes_cargar(void)
     ajustes.volumen = doc["volumen"] | ajustes.volumen;
     ajustes.reposo_s = doc["reposo"] | ajustes.reposo_s;
     ajustes.reanudar = doc["reanudar"] | ajustes.reanudar;
+    copiar(ajustes.version_emisoras, sizeof(ajustes.version_emisoras), doc["v_emisoras"]);
     ajustes.luz = doc["luz"] | ajustes.luz;
     if (ajustes.luz >= NUM_MODOS_LUZ) {
         ajustes.luz = LUZ_RITMO;
@@ -150,6 +151,7 @@ void ajustes_guardar(void)
     doc["volumen"] = ajustes.volumen;
     doc["reposo"] = ajustes.reposo_s;
     doc["reanudar"] = ajustes.reanudar;
+    doc["v_emisoras"] = ajustes.version_emisoras;
     doc["luz"] = ajustes.luz;
     doc["luz_brillo"] = ajustes.luz_brillo;
     if (ajustes.idioma_elegido) {

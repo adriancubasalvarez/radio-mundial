@@ -57,6 +57,36 @@ bool hal_hora_en(const char *regla, int *hora, int *minuto)
     return false;  /* en el simulador no se enseña */
 }
 
+/* En el simulador las emisoras se regeneran con las herramientas del PC */
+void hal_actualizar_comprobar(const char *version)
+{
+    (void)version;
+}
+
+void hal_actualizar_instalar(void)
+{
+}
+
+EstadoActualizar hal_actualizar_estado(uint8_t *progreso)
+{
+    *progreso = 0;
+    return ACT_ERROR;
+}
+
+const char *hal_actualizar_version(void)
+{
+    return "";
+}
+
+const char *hal_actualizar_fecha(void)
+{
+    return "";
+}
+
+void hal_reiniciar(void)
+{
+}
+
 uint32_t hal_aleatorio(void)
 {
     static std::mt19937 generador{std::random_device{}()};

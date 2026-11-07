@@ -49,6 +49,34 @@ void hal_zona_horaria(int segundos);
  * sabe la hora o en el simulador. */
 bool hal_hora_en(const char *regla, int *hora, int *minuto);
 
+/* Actualización de las emisoras por Internet, en segundo plano */
+typedef enum {
+    ACT_NADA,
+    ACT_COMPROBANDO,
+    ACT_AL_DIA,
+    ACT_HAY_NUEVA,
+    ACT_DESCARGANDO,
+    ACT_INSTALANDO,
+    ACT_LISTO,
+    ACT_ERROR,
+} EstadoActualizar;
+
+/* Mira si hay una lista distinta de la que indica version */
+void hal_actualizar_comprobar(const char *version);
+
+/* Descarga e instala la lista que encontró hal_actualizar_comprobar */
+void hal_actualizar_instalar(void);
+
+/* Estado, y progreso de 0 a 100 mientras descarga o instala */
+EstadoActualizar hal_actualizar_estado(uint8_t *progreso);
+
+/* Versión y fecha de la lista encontrada */
+const char *hal_actualizar_version(void);
+const char *hal_actualizar_fecha(void);
+
+/* Reinicia la radio */
+void hal_reiniciar(void);
+
 /* Número aleatorio de 32 bits */
 uint32_t hal_aleatorio(void);
 

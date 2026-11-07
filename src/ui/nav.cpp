@@ -23,6 +23,7 @@ static lv_obj_t *construir(Pantalla pantalla)
     case PANT_SONANDO:  return pantalla_sonando();
     case PANT_FAVORITOS: return pantalla_favoritos();
     case PANT_RECIENTES: return pantalla_recientes();
+    case PANT_ACTUALIZAR: return pantalla_actualizar();
     case PANT_BUSCAR:   return pantalla_buscar();
     case PANT_GENERO:   return pantalla_genero();
     case PANT_MIS_EMISORAS: return pantalla_mis_emisoras();

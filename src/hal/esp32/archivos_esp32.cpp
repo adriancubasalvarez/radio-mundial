@@ -41,6 +41,7 @@ static int siguiente_byte(HalArchivo *a)
 }
 
 static bool sd_montada = false;
+static bool emisoras_nuevas = false;  /* hay una actualización completa en /upd */
 #ifndef SIN_SD
 static SPIClass bus_sd(VSPI);
 #endif
@@ -49,6 +50,10 @@ static SPIClass bus_sd(VSPI);
 bool archivos_iniciar(void)
 {
     bool interna = LittleFS.begin(false);
+    emisoras_nuevas = interna && LittleFS.exists("/upd/listo");
+    if (emisoras_nuevas) {
+        Serial.println("Emisoras: se usa la lista actualizada");
+    }
     if (!interna) {
         Serial.println("No se pudo montar LittleFS: ¿has subido los datos (uploadfs)?");
     }
@@ -79,6 +84,10 @@ static File abrir_datos(const char *ruta)
         if (SD.exists(en_sd)) {
             return SD.open(en_sd, FILE_READ);
         }
+    }
+    /* Las emisoras actualizadas tienen preferencia sobre las de fábrica */
+    if (emisoras_nuevas && (r.startsWith("/emisoras/") || r == "/buscar.txt")) {
+        return LittleFS.open("/upd" + r, FILE_READ);
     }
     return LittleFS.open(r, FILE_READ);
 }
