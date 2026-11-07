@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #define MAX_FAVORITOS 20
+#define MAX_RECIENTES 10
 #define MAX_ALARMAS 5
 
 /* Emisora con el país al que pertenece */
@@ -41,6 +42,8 @@ typedef struct {
     EmisoraGuardada ultima;
     EmisoraGuardada favoritos[MAX_FAVORITOS];
     uint8_t num_favoritos;
+    EmisoraGuardada recientes[MAX_RECIENTES];  /* la más reciente, primero */
+    uint8_t num_recientes;
     Alarma alarmas[MAX_ALARMAS];
     uint8_t num_alarmas;
 } Ajustes;

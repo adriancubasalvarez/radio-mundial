@@ -26,6 +26,7 @@ typedef enum {
     PANT_ALARMAS,
     PANT_ALARMA,
     PANT_ALARMA_SONIDO,
+    PANT_RECIENTES,
 } Pantalla;
 
 /* Lo elegido hasta ahora en el recorrido */
@@ -62,6 +63,7 @@ lv_obj_t *pantalla_paises(void);
 lv_obj_t *pantalla_emisoras(void);
 lv_obj_t *pantalla_sonando(void);
 lv_obj_t *pantalla_favoritos(void);
+lv_obj_t *pantalla_recientes(void);
 lv_obj_t *pantalla_buscar(void);
 lv_obj_t *pantalla_genero(void);
 lv_obj_t *pantalla_mis_emisoras(void);

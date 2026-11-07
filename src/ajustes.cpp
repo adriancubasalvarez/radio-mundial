@@ -108,6 +108,12 @@ void ajustes_cargar(void)
         }
         de_json(f, &ajustes.favoritos[ajustes.num_favoritos++]);
     }
+    for (JsonObjectConst r : doc["recientes"].as<JsonArrayConst>()) {
+        if (ajustes.num_recientes >= MAX_RECIENTES) {
+            break;
+        }
+        de_json(r, &ajustes.recientes[ajustes.num_recientes++]);
+    }
     for (JsonObjectConst o : doc["alarmas"].as<JsonArrayConst>()) {
         if (ajustes.num_alarmas >= MAX_ALARMAS) {
             break;
@@ -144,6 +150,10 @@ void ajustes_guardar(void)
     }
     if (ajustes.hay_ultima) {
         a_json(doc["ultima"].to<JsonObject>(), &ajustes.ultima);
+    }
+    JsonArray recientes = doc["recientes"].to<JsonArray>();
+    for (uint8_t i = 0; i < ajustes.num_recientes; i++) {
+        a_json(recientes.add<JsonObject>(), &ajustes.recientes[i]);
     }
     JsonArray favoritos = doc["favoritos"].to<JsonArray>();
     for (uint8_t i = 0; i < ajustes.num_favoritos; i++) {
@@ -184,10 +194,31 @@ void ajustes_poner_idioma(bool espanol)
     ajustes_guardar();
 }
 
+/* La pone la primera de Recientes; si ya estaba, no se repite */
+static void recordar_reciente(const EmisoraGuardada *e)
+{
+    int pos = -1;
+    for (int i = 0; i < ajustes.num_recientes; i++) {
+        if (strcmp(ajustes.recientes[i].emisora.url, e->emisora.url) == 0) {
+            pos = i;
+            break;
+        }
+    }
+    if (pos < 0) {
+        if (ajustes.num_recientes < MAX_RECIENTES) {
+            ajustes.num_recientes++;
+        }
+        pos = ajustes.num_recientes - 1;
+    }
+    memmove(&ajustes.recientes[1], &ajustes.recientes[0], pos * sizeof(ajustes.recientes[0]));
+    ajustes.recientes[0] = *e;
+}
+
 void ajustes_recordar_ultima(const Emisora *emisora, const Pais *pais)
 {
     guardada(&ajustes.ultima, emisora, pais);
     ajustes.hay_ultima = true;
+    recordar_reciente(&ajustes.ultima);
     ajustes_guardar();
 }
 
