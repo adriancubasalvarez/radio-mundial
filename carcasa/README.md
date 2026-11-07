@@ -1,5 +1,7 @@
 # Radio Mundial — 3D printed case
 
+> **Looking for the simplest build?** The [small case](pequena/) uses the speaker that comes with the board. / **¿Buscas el montaje más sencillo?** La [carcasa pequeña](pequena/) usa el altavoz que trae la placa.
+
 *[Español más abajo](#español)*
 
 A 1950s–60s style tabletop radio case: screen on the left, a 40 mm round speaker behind a slotted grille on the right, and an 8° backward tilt.
