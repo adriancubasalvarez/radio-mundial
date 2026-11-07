@@ -4,7 +4,7 @@
 
 Radio por Internet de escritorio con **mapamundi táctil**: tocas una región, eliges un país, una emisora… y suena. Pensada para la comunidad maker: placa barata, sin servidores propios ni claves de API, y fácil de instalar. Interfaz en inglés y en español.
 
-> **Estado: en desarrollo.** La versión de PC (simulador) está completa; ahora se está pasando a las placas.
+> **Estado: funciona en la Freenove FNK0104.** Faltan el manual y la guía de la carcasa 3D.
 
 ## Instalar
 
@@ -15,18 +15,21 @@ Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar�
 ## Qué hace
 
 - Mapamundi y 9 regiones con zonas táctiles grandes (pensadas para el dedo).
-- Unas **3.600 emisoras comprobadas** de 209 países (hasta 8.000 con tarjeta microSD).
+- Unas **3.700 emisoras comprobadas** de 207 países, probadas como las pide la placa.
 - **Buscador** con teclado en pantalla y **13 géneros** (pop, rock, noticias, jazz, clásica…).
-- **Favoritos**, **emisora aleatoria del mundo** y título de la canción que suena.
-- Recuerda la última emisora y el volumen; pantalla de reposo con reloj.
-- Tarjeta microSD opcional: base de emisoras más grande, emisoras propias (`mis_emisoras.csv`) y copia de los favoritos.
+- **Favoritos**, **recientes**, **emisora aleatoria del mundo** y título de la canción que suena.
+- **Hora local** del país de la emisora (la de la capital o ciudad principal en países con varias zonas).
+- **Alarmas** que despiertan a la radio: emisora o tono propio, posponer 10 minutos y amanecer con el LED. También **temporizador para dormir**.
+- Las emisoras que fallan seguido bajan al final de la lista y vuelven cuando suenan.
+- **Actualiza las emisoras desde Ajustes**, sin flashear.
+- Recuerda la última emisora y el volumen; pantalla de reposo con reloj, tiempo y calidad del aire.
 - En inglés o en español: se elige al encenderla por primera vez.
 
 ## Placas
 
 | Placa | Estado |
 |---|---|
-| **Freenove FNK0104** (ESP32-S3, 2,8" táctil capacitivo, audio ES8311) | Funciona: pantalla, táctil, sonido, LED, reposo e instalador web. Falta la microSD |
+| **Freenove FNK0104** (ESP32-S3, 2,8" táctil capacitivo, audio ES8311) | Funciona: pantalla, táctil, sonido, LED, reposo, alarmas e instalador web |
 | **Simulador en el PC** (Windows, LVGL + SDL2) | Completo |
 
 ## Estructura
@@ -52,8 +55,12 @@ pio run -e pc -t exec
 ```
 python -m pip install -r tools/requirements.txt
 python tools/build_maps.py
-python tools/build_stations.py --probar
+python tools/build_zonas.py
+python tools/build_stations.py --descargar --probar
+python tools/build_paquete.py
 ```
+
+`build_paquete.py` escribe `docs/emisoras/`, el paquete que las radios descargan desde Ajustes. Al publicarlo en `main` llega a todas las radios que lo pidan.
 
 ## Licencias
 

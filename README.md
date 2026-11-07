@@ -4,7 +4,7 @@
 
 Desktop internet radio with a **touch world map**: tap a region, pick a country, a station… and it plays. Built for the maker community: a cheap board, no servers of its own, no API keys, and easy to install. Interface in English and Spanish.
 
-> **Status: in development.** The PC version (simulator) is complete; it is now being brought to the boards.
+> **Status: works on the Freenove FNK0104.** The manual and the 3D case guide are still in progress.
 
 ## Install
 
@@ -15,18 +15,21 @@ From Chrome or Edge on a computer: plug the board in over USB, click "Install" a
 ## Features
 
 - World map and 9 regions with large touch zones (made for fingers).
-- About **3,600 tested stations** from 209 countries (up to 8,000 with a microSD card).
+- About **3,700 tested stations** from 207 countries, tested the way the board requests them.
 - **Search** with an on-screen keyboard and **13 genres** (pop, rock, news, jazz, classical…).
-- **Favorites**, **random station from anywhere in the world** and the title of the song playing.
-- Remembers the last station and the volume; sleep screen with a clock.
-- Optional microSD card: bigger station database, your own stations (`mis_emisoras.csv`) and a backup of your favorites.
+- **Favorites**, **recent stations**, **random station from anywhere in the world** and the title of the song playing.
+- **Local time** of the station's country (the capital or main city in countries with several time zones).
+- **Alarms** that wake the radio from sleep: a station or a built-in tone, 10-minute snooze and an LED sunrise. **Sleep timer** too.
+- Stations that keep failing move to the end of the list, and come back when they play again.
+- **Update the stations from Settings**, without flashing.
+- Remembers the last station and the volume; sleep screen with a clock, the weather and air quality.
 - English or Spanish: chosen the first time it starts.
 
 ## Boards
 
 | Board | Status |
 |---|---|
-| **Freenove FNK0104** (ESP32-S3, 2.8" capacitive touch, ES8311 audio) | Works: screen, touch, sound, LED, sleep and web installer. microSD still to do |
+| **Freenove FNK0104** (ESP32-S3, 2.8" capacitive touch, ES8311 audio) | Works: screen, touch, sound, LED, sleep, alarms and web installer |
 | **PC simulator** (Windows, LVGL + SDL2) | Complete |
 
 ## Layout
@@ -54,8 +57,12 @@ pio run -e pc -t exec
 ```
 python -m pip install -r tools/requirements.txt
 python tools/build_maps.py
-python tools/build_stations.py --probar
+python tools/build_zonas.py
+python tools/build_stations.py --descargar --probar
+python tools/build_paquete.py
 ```
+
+`build_paquete.py` writes `docs/emisoras/`, the package radios download from Settings. Publishing it to `main` updates every radio that asks for it.
 
 ## Licenses
 
