@@ -10,6 +10,8 @@ Radio por Internet de escritorio con **mapamundi táctil**: tocas una región, e
 
 **👉 https://adriancubasalvarez.github.io/radio-mundial/instalar/**
 
+**📖 Manual:** https://adriancubasalvarez.github.io/radio-mundial/manual/es/
+
 Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar» y, al terminar, conecta la radio a tu WiFi desde la misma página (o después, desde el móvil, con el código QR que muestra la pantalla). Para publicar una versión nueva: `python tools/build_release.py`.
 
 ## Qué hace

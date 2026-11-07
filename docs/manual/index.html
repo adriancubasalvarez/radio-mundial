@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radio Mundial Manual</title>
+<meta name="description" content="How to install and use Radio Mundial, the internet radio with a touch world map.">
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<main>
+<a class="idioma" href="es/">Español</a>
+<h1>Radio Mundial manual</h1>
+<p class="intro">Tap the world map, pick a country and a station, and it plays. This guide covers installation and everything the radio can do.</p>
+<img class="portada" src="img/radio.jpg" alt="Radio Mundial in a small yellow 3D-printed case, showing the clock and the station playing">
+
+<nav>
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#need">What you need</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="#wifi">First start and Wi-Fi</a></li>
+    <li><a href="#listen">Find and play stations</a></li>
+    <li><a href="#player">While a station plays</a></li>
+    <li><a href="#favorites">Favorites, recent and search</a></li>
+    <li><a href="#settings">Settings</a></li>
+    <li><a href="#alarms">Alarms</a></li>
+    <li><a href="#update">Update the stations</a></li>
+    <li><a href="#clock">Sleep screen</a></li>
+    <li><a href="#help">Troubleshooting</a></li>
+  </ol>
+</nav>
+
+<h2 id="need">1. What you need</h2>
+<ul>
+  <li><strong>Freenove FNK0104</strong> board: ESP32-S3 with a 2.8" capacitive touch screen and a small built-in speaker.</li>
+  <li><strong>USB-C data cable.</strong> Some cables only charge, and those will not work for installing.</li>
+  <li><strong>A computer with Chrome or Edge</strong>, only for the installation. Phones do not work for this step.</li>
+  <li><strong>2.4 GHz Wi-Fi.</strong> The board cannot use 5 GHz networks.</li>
+  <li><strong>A 3D-printed case</strong> is optional. See the <a href="https://github.com/adriancubasalvarez/radio-mundial/tree/main/carcasa">case files</a>.</li>
+</ul>
+<p>The radio stays plugged in over USB-C: it has no battery. There is no soldering, no account and nothing to pay for.</p>
+
+<h2 id="install">2. Install</h2>
+<p>Installing erases whatever was on the board and takes 1 or 2 minutes.</p>
+<ol>
+  <li>Connect the board to your computer with the USB cable.</li>
+  <li>Open the install page in Chrome or Edge:<br><a class="boton" href="https://adriancubasalvarez.github.io/radio-mundial/install/">Open the install page</a></li>
+  <li>Click <strong>Install Radio Mundial</strong>, choose the board's port in the browser window and confirm.</li>
+  <li>Wait until it finishes. Do not unplug the board while it installs.</li>
+</ol>
+<figure class="web">
+  <img src="img/en/00_instalador.png" alt="Install page with the Install Radio Mundial button">
+  <figcaption>The install page. No software to download: the browser does everything.</figcaption>
+</figure>
+<div class="nota"><strong>Board not in the list?</strong> Try another cable or USB port. If it still does not appear, hold the board's BOOT button while you plug in the cable.</div>
+
+<h2 id="wifi">3. First start and Wi-Fi</h2>
+<p>The first time it starts, the radio asks for your language.</p>
+<figure><img src="img/en/01_idioma.png" alt="Language screen with English and Español buttons"><figcaption>Tap your language.</figcaption></figure>
+<p>Then connect it to your Wi-Fi in one of these two ways:</p>
+<ul>
+  <li><strong>From the computer:</strong> when the installation finishes, the same window offers to connect the radio. Choose your network and type the password.</li>
+  <li><strong>From your phone:</strong> if the radio has no Wi-Fi, its screen shows the steps and a QR code. Scan it or join the <strong>RadioMundial-XXXX</strong> network, and a page opens where you choose your Wi-Fi.</li>
+</ul>
+<figure><img src="img/en/18_wifi.png" alt="Wi-Fi screen with a QR code and instructions"><figcaption>If the page does not open by itself, go to 192.168.4.1 in your phone's browser.</figcaption></figure>
+<p>The radio remembers the network. From then on, it connects by itself.</p>
+
+<h2 id="listen">4. Find and play stations</h2>
+<ol>
+  <li><strong>Tap a region</strong> of the world map.</li>
+  <li><strong>Tap a country</strong> on the regional map, or use the list button at the top right to see all its countries.</li>
+  <li><strong>Tap a station</strong> and it starts playing.</li>
+</ol>
+<div class="fila">
+  <figure><img src="img/en/03_mapa.png" alt="World map"><figcaption>World map, with 9 regions.</figcaption></figure>
+  <figure><img src="img/en/04_region.png" alt="Map of Europe"><figcaption>Map of a region.</figcaption></figure>
+  <figure><img src="img/en/05_paises.png" alt="List of countries with their number of stations"><figcaption>Country list, with the number of stations. Gray countries have none yet.</figcaption></figure>
+  <figure><img src="img/en/06_emisoras.png" alt="List of stations in France"><figcaption>Stations of a country, most popular first.</figcaption></figure>
+</div>
+<p>The buttons at the top of the map are <strong>search</strong>, <strong>favorites</strong> and <strong>random station</strong>, which plays something from anywhere in the world.</p>
+<p>Stations that fail twice in a row move to the end of the list and turn gray. They are never deleted, and go back to their place as soon as they play again.</p>
+<figure><img src="img/en/09_mapa_sonando.png" alt="World map showing the station playing at the bottom"><figcaption>While music plays you can keep exploring. Tap the bottom line to return to the station.</figcaption></figure>
+
+<h2 id="player">5. While a station plays</h2>
+<div class="fila">
+  <figure><img src="img/en/07_sonando.png" alt="Player screen"><figcaption>Player screen.</figcaption></figure>
+  <figure><img src="img/en/08_temporizador.png" alt="Player screen with a 15-minute sleep timer"><figcaption>Sleep timer on.</figcaption></figure>
+</div>
+<table>
+  <tr><th>Control</th><th>What it does</th></tr>
+  <tr><td>Country name, at the top</td><td>Goes to that country's station list.</td></tr>
+  <tr><td>Star</td><td>Adds or removes the station from your favorites.</td></tr>
+  <tr><td>Big button</td><td>Stops or plays the station.</td></tr>
+  <tr><td><strong>Zz</strong></td><td>Sleep timer. Each tap changes it: 15, 30, 60 or 90 minutes, then off. In the last minute the volume fades, then the radio powers off.</td></tr>
+  <tr><td>Slider</td><td>Volume.</td></tr>
+</table>
+<p>You also see the <strong>local time</strong> of the station's country and, if the station sends it, the song title. In countries with several time zones, the time is that of the capital or main city. Song titles in Arabic, Chinese, Japanese or Korean are not shown, because the screen font does not include those alphabets.</p>
+<p>When you turn the radio on, the last station starts playing again.</p>
+
+<h2 id="favorites">6. Favorites, recent and search</h2>
+<div class="fila">
+  <figure><img src="img/en/10_favoritos.png" alt="Favorites list"><figcaption><strong>Favorites:</strong> up to 20. The button at the top right opens Recent.</figcaption></figure>
+  <figure><img src="img/en/11_recientes.png" alt="Recent stations list"><figcaption><strong>Recent:</strong> the last 10 stations you played.</figcaption></figure>
+  <figure><img src="img/en/12_buscar.png" alt="Search screen with keyboard and genres"><figcaption><strong>Search:</strong> type a name or choose one of 13 genres.</figcaption></figure>
+</div>
+
+<h2 id="settings">7. Settings</h2>
+<p><strong>Press and hold the “Radio Mundial” title</strong> on the map for 2 seconds.</p>
+<figure><img src="img/en/13_ajustes.png" alt="Settings menu"></figure>
+<table>
+  <tr><th>Button</th><th>What it does</th></tr>
+  <tr><td>Download icon, top right</td><td><a href="#update">Updates the stations.</a></td></tr>
+  <tr><td>Español / English</td><td>Changes the language.</td></tr>
+  <tr><td>Alarms</td><td><a href="#alarms">Opens your alarms.</a></td></tr>
+  <tr><td>Wi-Fi</td><td>Connects the radio to another network.</td></tr>
+  <tr><td>Light</td><td>Board LED: <strong>beat</strong> (rainbow that pulses with the music), <strong>on</strong> (the color of the station's region) or <strong>off</strong>.</td></tr>
+  <tr><td>Glow</td><td>LED brightness: low, medium or high.</td></tr>
+  <tr><td>Slide to power off</td><td>Drag the red button to the right. <strong>Touch the screen to turn it back on.</strong> If an alarm is set, the radio wakes up by itself.</td></tr>
+</table>
+
+<h2 id="alarms">8. Alarms</h2>
+<p>You can have up to 5. Open them from Settings, then tap one to edit it or tap <strong>New alarm</strong>.</p>
+<div class="fila">
+  <figure><img src="img/en/14_alarmas.png" alt="Alarm list"><figcaption>Your alarms. Those turned off appear in gray.</figcaption></figure>
+  <figure><img src="img/en/15_alarma.png" alt="Alarm editor"><figcaption>Set the time and days. With no day marked, it rings once.</figcaption></figure>
+  <figure><img src="img/en/16_sonido.png" alt="Alarm sound screen"><figcaption><strong>Sound:</strong> volume, sunrise and station.</figcaption></figure>
+  <figure><img src="img/en/22_alarma_sonando.png" alt="Alarm ringing with Snooze and Turn off buttons"><figcaption>When it rings: snooze for 10 minutes or turn it off.</figcaption></figure>
+</div>
+<ul>
+  <li>The sound starts low and rises gradually. If you do not turn it off, it stops by itself after 30 minutes.</li>
+  <li><strong>Station:</strong> the last one you played or one of your favorites. If it does not respond or there is no internet, the radio plays a built-in tone.</li>
+  <li><strong>Sunrise:</strong> during the 10 minutes before the alarm, the LED slowly rises from red to warm yellow, at full brightness even if yours is set lower.</li>
+  <li>If you are already listening to a station, it simply keeps playing.</li>
+  <li>The radio can be powered off with the slider and it wakes up for the alarm, but <strong>it must stay plugged in</strong>. If you power it off during a snooze, that repeat is canceled.</li>
+</ul>
+<div class="nota">Alarms are a new feature. For something important, keep a backup alarm until you trust it in your home.</div>
+
+<h2 id="update">9. Update the stations</h2>
+<p>Stations change address over time, so the list can be renewed without installing anything again.</p>
+<ol>
+  <li>Open Settings and tap the <strong>download icon</strong> at the top right.</li>
+  <li>If there is a new list, tap <strong>Update</strong>. The music stops while it installs.</li>
+  <li>Wait: the radio restarts by itself when it finishes.</li>
+</ol>
+<figure><img src="img/en/17_actualizar.png" alt="Update stations screen"></figure>
+<p>Try not to unplug it during the update. If the power goes out, nothing breaks: the radio goes back to its original list and you can update again. Your favorites, alarms and Wi-Fi are not affected.</p>
+
+<h2 id="clock">10. Sleep screen</h2>
+<p>After 2 minutes without touching the radio, the screen dims and rotates through the clock, the weather and the air quality. Touch it to go back. The music keeps playing.</p>
+<div class="fila">
+  <figure><img src="img/en/19_reposo.png" alt="Clock"><figcaption>Clock.</figcaption></figure>
+  <figure><img src="img/en/20_tiempo.png" alt="Weather forecast"><figcaption>Weather and forecast.</figcaption></figure>
+  <figure><img src="img/en/21_aire.png" alt="Air quality"><figcaption>Air quality, sunrise and sunset.</figcaption></figure>
+</div>
+<p>The radio works out your approximate location and time zone from your internet connection, so you do not need to set anything. The location can be wrong if you use a VPN.</p>
+
+<h2 id="help">11. Troubleshooting</h2>
+<table>
+  <tr><th>Problem</th><th>What to try</th></tr>
+  <tr><td>The Install button does not appear</td><td>Use Chrome or Edge on a computer, not on a phone.</td></tr>
+  <tr><td>The port is not listed</td><td>Use a data cable and another USB port, or hold BOOT while plugging in.</td></tr>
+  <tr><td>It does not connect to the Wi-Fi</td><td>Make sure the network is 2.4 GHz. Check the password in Settings → Wi-Fi.</td></tr>
+  <tr><td>“This station could not be played”</td><td>The station may be down. Try another one. If many fail, check your internet connection.</td></tr>
+  <tr><td>A station is gray</td><td>It failed twice. You can still tap it: if it plays, it goes back to its place.</td></tr>
+  <tr><td>No sound</td><td>Check the volume. If the station appears as playing but you hear nothing, unplug the radio for a few seconds and plug it in again.</td></tr>
+  <tr><td>The time or weather is wrong</td><td>They are based on your internet connection. A VPN can change them.</td></tr>
+  <tr><td>Nothing helps</td><td>Run the install page again, or <a href="https://github.com/adriancubasalvarez/radio-mundial/issues">report the problem on GitHub</a>.</td></tr>
+</table>
+
+<footer>
+  A project by @Adriancubas1980 · <a href="https://github.com/adriancubasalvarez/radio-mundial">Source code on GitHub</a><br>
+  Code GPL-3.0 · Content CC BY-NC-SA 4.0 · Stations from <a href="https://www.radio-browser.info/">radio-browser.info</a> · Maps from Natural Earth · Weather from <a href="https://open-meteo.com/">Open-Meteo.com</a>
+</footer>
+</main>
+</body>
+</html>

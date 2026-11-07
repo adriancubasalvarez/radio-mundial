@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de Radio Mundial</title>
+<meta name="description" content="Cómo instalar y usar Radio Mundial, la radio por Internet con mapamundi táctil.">
+<link rel="stylesheet" href="../manual.css">
+</head>
+<body>
+<main>
+<a class="idioma" href="../">English</a>
+<h1>Manual de Radio Mundial</h1>
+<p class="intro">Tocas el mapamundi, eliges un país y una emisora, y suena. Esta guía explica la instalación y todo lo que puede hacer la radio.</p>
+<img class="portada" src="../img/radio.jpg" alt="Radio Mundial en una pequeña carcasa amarilla impresa en 3D, con el reloj y la emisora que suena">
+
+<nav>
+  <strong>Contenido</strong>
+  <ol>
+    <li><a href="#necesitas">Qué necesitas</a></li>
+    <li><a href="#instalar">Instalar</a></li>
+    <li><a href="#wifi">Primer arranque y WiFi</a></li>
+    <li><a href="#escuchar">Buscar y poner emisoras</a></li>
+    <li><a href="#sonando">Mientras suena una emisora</a></li>
+    <li><a href="#favoritos">Favoritos, recientes y buscador</a></li>
+    <li><a href="#ajustes">Ajustes</a></li>
+    <li><a href="#alarmas">Alarmas</a></li>
+    <li><a href="#actualizar">Actualizar las emisoras</a></li>
+    <li><a href="#reposo">Pantalla de reposo</a></li>
+    <li><a href="#ayuda">Solución de problemas</a></li>
+  </ol>
+</nav>
+
+<h2 id="necesitas">1. Qué necesitas</h2>
+<ul>
+  <li>Placa <strong>Freenove FNK0104</strong>: ESP32-S3 con pantalla táctil capacitiva de 2,8" y un pequeño altavoz incluido.</li>
+  <li><strong>Cable USB-C de datos.</strong> Algunos cables solo cargan y esos no sirven para instalar.</li>
+  <li><strong>Un ordenador con Chrome o Edge</strong>, solo para la instalación. Desde el móvil no se puede hacer este paso.</li>
+  <li><strong>WiFi de 2,4 GHz.</strong> La placa no puede usar redes de 5 GHz.</li>
+  <li><strong>Una carcasa impresa en 3D</strong> es opcional. Mira los <a href="https://github.com/adriancubasalvarez/radio-mundial/tree/main/carcasa">archivos de la carcasa</a>.</li>
+</ul>
+<p>La radio funciona siempre enchufada por USB-C: no lleva batería. No hay que soldar, crear cuentas ni pagar nada.</p>
+
+<h2 id="instalar">2. Instalar</h2>
+<p>La instalación borra lo que hubiera en la placa y tarda 1 o 2 minutos.</p>
+<ol>
+  <li>Conecta la placa al ordenador con el cable USB.</li>
+  <li>Abre la página de instalación en Chrome o Edge:<br><a class="boton" href="https://adriancubasalvarez.github.io/radio-mundial/instalar/">Abrir la página de instalación</a></li>
+  <li>Pulsa <strong>Instalar Radio Mundial</strong>, elige el puerto de la placa en la ventana del navegador y confirma.</li>
+  <li>Espera a que termine. No desenchufes la placa mientras se instala.</li>
+</ol>
+<figure class="web">
+  <img src="../img/es/00_instalador.png" alt="Página de instalación con el botón Instalar Radio Mundial">
+  <figcaption>La página de instalación. No hay que descargar ningún programa: el navegador lo hace todo.</figcaption>
+</figure>
+<div class="nota"><strong>¿No aparece la placa en la lista?</strong> Prueba con otro cable u otro puerto USB. Si sigue sin salir, mantén pulsado el botón BOOT de la placa mientras conectas el cable.</div>
+
+<h2 id="wifi">3. Primer arranque y WiFi</h2>
+<p>La primera vez que arranca, la radio pregunta el idioma.</p>
+<figure><img src="../img/es/01_idioma.png" alt="Pantalla de idioma con los botones English y Español"><figcaption>Toca tu idioma.</figcaption></figure>
+<p>Después conéctala a tu WiFi de una de estas dos formas:</p>
+<ul>
+  <li><strong>Desde el ordenador:</strong> al terminar la instalación, la misma ventana ofrece conectar la radio. Elige tu red y escribe la contraseña.</li>
+  <li><strong>Desde el móvil:</strong> si la radio no tiene WiFi, su pantalla muestra los pasos y un código QR. Escanéalo o únete a la red <strong>RadioMundial-XXXX</strong>, y se abrirá una página para elegir tu WiFi.</li>
+</ul>
+<figure><img src="../img/es/18_wifi.png" alt="Pantalla WiFi con un código QR e instrucciones"><figcaption>Si la página no se abre sola, entra en 192.168.4.1 desde el navegador del móvil.</figcaption></figure>
+<p>La radio recuerda la red. A partir de ahí, se conecta sola.</p>
+
+<h2 id="escuchar">4. Buscar y poner emisoras</h2>
+<ol>
+  <li><strong>Toca una región</strong> del mapamundi.</li>
+  <li><strong>Toca un país</strong> en el mapa de la región, o usa el botón de lista de arriba a la derecha para ver todos sus países.</li>
+  <li><strong>Toca una emisora</strong> y empezará a sonar.</li>
+</ol>
+<div class="fila">
+  <figure><img src="../img/es/03_mapa.png" alt="Mapamundi"><figcaption>Mapamundi, con 9 regiones.</figcaption></figure>
+  <figure><img src="../img/es/04_region.png" alt="Mapa de Europa"><figcaption>Mapa de una región.</figcaption></figure>
+  <figure><img src="../img/es/05_paises.png" alt="Lista de países con su número de emisoras"><figcaption>Lista de países, con su número de emisoras. Los que salen en gris aún no tienen.</figcaption></figure>
+  <figure><img src="../img/es/06_emisoras.png" alt="Lista de emisoras de Francia"><figcaption>Emisoras de un país, las más populares primero.</figcaption></figure>
+</div>
+<p>Los botones de arriba del mapa son <strong>buscador</strong>, <strong>favoritos</strong> y <strong>emisora aleatoria</strong>, que pone algo de cualquier parte del mundo.</p>
+<p>Las emisoras que fallan dos veces seguidas bajan al final de la lista y se ven en gris. No se borran nunca, y vuelven a su sitio en cuanto suenan otra vez.</p>
+<figure><img src="../img/es/09_mapa_sonando.png" alt="Mapamundi con la emisora que suena en la parte inferior"><figcaption>Mientras suena, puedes seguir explorando. Toca la línea de abajo para volver a la emisora.</figcaption></figure>
+
+<h2 id="sonando">5. Mientras suena una emisora</h2>
+<div class="fila">
+  <figure><img src="../img/es/07_sonando.png" alt="Pantalla de reproducción"><figcaption>Pantalla de reproducción.</figcaption></figure>
+  <figure><img src="../img/es/08_temporizador.png" alt="Pantalla de reproducción con temporizador de 15 minutos"><figcaption>Temporizador activado.</figcaption></figure>
+</div>
+<table>
+  <tr><th>Control</th><th>Qué hace</th></tr>
+  <tr><td>Nombre del país, arriba</td><td>Va a la lista de emisoras de ese país.</td></tr>
+  <tr><td>Estrella</td><td>Añade o quita la emisora de favoritos.</td></tr>
+  <tr><td>Botón grande</td><td>Para o pone la emisora.</td></tr>
+  <tr><td><strong>Zz</strong></td><td>Temporizador para dormir. Cada toque lo cambia: 15, 30, 60 o 90 minutos, y desactivado. En el último minuto baja el volumen y después la radio se apaga.</td></tr>
+  <tr><td>Barra</td><td>Volumen.</td></tr>
+</table>
+<p>También verás la <strong>hora local</strong> del país de la emisora y, si la emisora lo envía, el título de la canción. En países con varias zonas horarias, la hora es la de la capital o ciudad principal. Los títulos en árabe, chino, japonés o coreano no se muestran, porque la fuente de la pantalla no incluye esos alfabetos.</p>
+<p>Al encender la radio, vuelve a sonar la última emisora.</p>
+
+<h2 id="favoritos">6. Favoritos, recientes y buscador</h2>
+<div class="fila">
+  <figure><img src="../img/es/10_favoritos.png" alt="Lista de favoritos"><figcaption><strong>Favoritos:</strong> hasta 20. El botón de arriba a la derecha abre Recientes.</figcaption></figure>
+  <figure><img src="../img/es/11_recientes.png" alt="Lista de emisoras recientes"><figcaption><strong>Recientes:</strong> las 10 últimas emisoras que escuchaste.</figcaption></figure>
+  <figure><img src="../img/es/12_buscar.png" alt="Buscador con teclado y géneros"><figcaption><strong>Buscador:</strong> escribe un nombre o elige uno de los 13 géneros.</figcaption></figure>
+</div>
+
+<h2 id="ajustes">7. Ajustes</h2>
+<p><strong>Mantén pulsado el título «Radio Mundial»</strong> del mapa durante 2 segundos.</p>
+<figure><img src="../img/es/13_ajustes.png" alt="Menú de ajustes"></figure>
+<table>
+  <tr><th>Botón</th><th>Qué hace</th></tr>
+  <tr><td>Icono de descarga, arriba a la derecha</td><td><a href="#actualizar">Actualiza las emisoras.</a></td></tr>
+  <tr><td>English / Español</td><td>Cambia el idioma.</td></tr>
+  <tr><td>Alarmas</td><td><a href="#alarmas">Abre tus alarmas.</a></td></tr>
+  <tr><td>Red WiFi</td><td>Conecta la radio a otra red.</td></tr>
+  <tr><td>Luz</td><td>LED de la placa: <strong>ritmo</strong> (arcoíris que late con la música), <strong>fija</strong> (el color de la región de la emisora) o <strong>no</strong>.</td></tr>
+  <tr><td>Brillo</td><td>Intensidad del LED: bajo, medio o alto.</td></tr>
+  <tr><td>Desliza para apagar</td><td>Arrastra el botón rojo hacia la derecha. <strong>Toca la pantalla para volver a encenderla.</strong> Si hay una alarma programada, la radio despierta sola.</td></tr>
+</table>
+
+<h2 id="alarmas">8. Alarmas</h2>
+<p>Puedes tener hasta 5. Ábrelas desde Ajustes y toca una para editarla, o toca <strong>Nueva alarma</strong>.</p>
+<div class="fila">
+  <figure><img src="../img/es/14_alarmas.png" alt="Lista de alarmas"><figcaption>Tus alarmas. Las desactivadas salen en gris.</figcaption></figure>
+  <figure><img src="../img/es/15_alarma.png" alt="Editor de alarma"><figcaption>Elige la hora y los días. Sin ningún día marcado, suena una sola vez.</figcaption></figure>
+  <figure><img src="../img/es/16_sonido.png" alt="Pantalla de sonido de la alarma"><figcaption><strong>Sonido:</strong> volumen, amanecer y emisora.</figcaption></figure>
+  <figure><img src="../img/es/22_alarma_sonando.png" alt="Alarma sonando con los botones Posponer y Apagar"><figcaption>Cuando suena: posponer 10 minutos o apagar.</figcaption></figure>
+</div>
+<ul>
+  <li>El sonido empieza bajo y va subiendo. Si no la apagas, se para sola a los 30 minutos.</li>
+  <li><strong>Emisora:</strong> la última que escuchaste o una de tus favoritas. Si no responde o no hay Internet, la radio pone un tono propio.</li>
+  <li><strong>Amanecer:</strong> durante los 10 minutos anteriores a la alarma, el LED sube despacio de rojo a amarillo cálido, al máximo aunque tengas otro brillo elegido.</li>
+  <li>Si ya estás escuchando una emisora, simplemente sigue sonando.</li>
+  <li>La radio puede estar apagada con el deslizador y despierta para la alarma, pero <strong>tiene que seguir enchufada</strong>. Si la apagas mientras está pospuesta, esa repetición se cancela.</li>
+</ul>
+<div class="nota">Las alarmas son una función nueva. Si tienes algo importante, pon otra alarma de respaldo hasta que compruebes que funciona bien en tu casa.</div>
+
+<h2 id="actualizar">9. Actualizar las emisoras</h2>
+<p>Las emisoras cambian de dirección con el tiempo, así que la lista se puede renovar sin volver a instalar nada.</p>
+<ol>
+  <li>Abre Ajustes y toca el <strong>icono de descarga</strong> de arriba a la derecha.</li>
+  <li>Si hay una lista nueva, toca <strong>Actualizar</strong>. La música se para mientras se instala.</li>
+  <li>Espera: la radio se reinicia sola al terminar.</li>
+</ol>
+<figure><img src="../img/es/17_actualizar.png" alt="Pantalla de actualizar emisoras"></figure>
+<p>Procura no desenchufarla durante la actualización. Si se va la luz, no se rompe nada: la radio vuelve a su lista original y puedes actualizar otra vez. Tus favoritos, alarmas y WiFi no se tocan.</p>
+
+<h2 id="reposo">10. Pantalla de reposo</h2>
+<p>Tras 2 minutos sin tocar la radio, la pantalla baja el brillo y va alternando el reloj, el tiempo y la calidad del aire. Tócala para volver. La música sigue sonando.</p>
+<div class="fila">
+  <figure><img src="../img/es/19_reposo.png" alt="Reloj"><figcaption>Reloj.</figcaption></figure>
+  <figure><img src="../img/es/20_tiempo.png" alt="Previsión del tiempo"><figcaption>Tiempo y previsión.</figcaption></figure>
+  <figure><img src="../img/es/21_aire.png" alt="Calidad del aire"><figcaption>Calidad del aire, salida y puesta del sol.</figcaption></figure>
+</div>
+<p>La radio calcula tu ubicación aproximada y tu zona horaria a partir de tu conexión a Internet, así que no hay que configurar nada. La ubicación puede fallar si usas una VPN.</p>
+
+<h2 id="ayuda">11. Solución de problemas</h2>
+<table>
+  <tr><th>Problema</th><th>Qué probar</th></tr>
+  <tr><td>No aparece el botón de instalar</td><td>Usa Chrome o Edge en un ordenador, no en el móvil.</td></tr>
+  <tr><td>El puerto no sale en la lista</td><td>Usa un cable de datos y otro puerto USB, o mantén BOOT pulsado al conectarla.</td></tr>
+  <tr><td>No se conecta a la WiFi</td><td>Comprueba que la red es de 2,4 GHz. Revisa la contraseña en Ajustes → Red WiFi.</td></tr>
+  <tr><td>«No se pudo reproducir esta emisora»</td><td>La emisora puede estar caída. Prueba con otra. Si fallan muchas, revisa tu conexión a Internet.</td></tr>
+  <tr><td>Una emisora sale en gris</td><td>Ha fallado dos veces. Puedes tocarla igualmente: si suena, vuelve a su sitio.</td></tr>
+  <tr><td>No se oye</td><td>Revisa el volumen. Si la emisora aparece sonando pero no oyes nada, desenchufa la radio unos segundos y vuelve a enchufarla.</td></tr>
+  <tr><td>La hora o el tiempo no son correctos</td><td>Dependen de tu conexión a Internet. Una VPN puede cambiarlos.</td></tr>
+  <tr><td>Nada funciona</td><td>Vuelve a pasar por la página de instalación, o <a href="https://github.com/adriancubasalvarez/radio-mundial/issues">cuenta el problema en GitHub</a>.</td></tr>
+</table>
+
+<footer>
+  Un proyecto de @Adriancubas1980 · <a href="https://github.com/adriancubasalvarez/radio-mundial">Código fuente en GitHub</a><br>
+  Código GPL-3.0 · Contenido CC BY-NC-SA 4.0 · Emisoras de <a href="https://www.radio-browser.info/">radio-browser.info</a> · Mapas de Natural Earth · Tiempo de <a href="https://open-meteo.com/">Open-Meteo.com</a>
+</footer>
+</main>
+</body>
+</html>

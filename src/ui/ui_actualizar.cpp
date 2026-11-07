@@ -151,7 +151,9 @@ lv_obj_t *pantalla_actualizar(void)
 {
     lv_obj_t *pantalla = comun_pantalla();
     lv_obj_add_event_cb(pantalla, al_borrar, LV_EVENT_DELETE, NULL);
-    comun_cabecera(pantalla, TR("Update stations", "Actualizar emisoras"), false, NULL);
+    lv_obj_t *titulo;
+    comun_cabecera(pantalla, TR("Update stations", "Actualizar emisoras"), false, &titulo);
+    lv_obj_set_width(titulo, LV_SIZE_CONTENT);  /* aquí no hay botones a la derecha */
 
     texto = lv_label_create(pantalla);
     lv_label_set_long_mode(texto, LV_LABEL_LONG_WRAP);
