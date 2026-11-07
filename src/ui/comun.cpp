@@ -3,6 +3,7 @@
 #include "hal.h"
 #include "imagen.h"
 
+#include <ctype.h>
 #include <string.h>
 
 lv_obj_t *comun_pantalla(void)
@@ -240,28 +241,150 @@ void comun_lista_gris(lv_obj_t *lista)
     lv_table_add_cell_ctrl(lista, comun_lista_filas(lista) - 1, 0, FILA_GRIS);
 }
 
-void comun_texto_seguro(const char *origen, char *destino, size_t tam)
-{
-    size_t d = 0;
-    const unsigned char *s = (const unsigned char *)origen;
-    while (*s && d + 3 < tam) {
-        /* Decodificar un carácter UTF-8 */
-        uint32_t cp;
-        int largo;
-        if (*s < 0x80) { cp = *s; largo = 1; }
-        else if ((*s >> 5) == 6 && (s[1] >> 6) == 2) { cp = ((*s & 0x1F) << 6) | (s[1] & 0x3F); largo = 2; }
-        else if ((*s >> 4) == 14 && (s[1] >> 6) == 2 && (s[2] >> 6) == 2) { cp = 0xFFFF; largo = 3; }
-        else if ((*s >> 3) == 30 && (s[1] >> 6) == 2 && (s[2] >> 6) == 2 && (s[3] >> 6) == 2) { cp = 0xFFFF; largo = 4; }
-        else { cp = 0xFFFF; largo = 1; }
+/* Letras cirílicas de А a я, en latino: la fuente solo tiene Latin-1 */
+static const char *const CIRILICO[32] = {
+    "a", "b", "v", "g", "d", "e", "zh", "z", "i", "y", "k", "l", "m", "n", "o", "p",
+    "r", "s", "t", "u", "f", "kh", "ts", "ch", "sh", "shch", "", "y", "", "e", "yu", "ya",
+};
 
-        if ((cp >= 0x20 && cp <= 0x7E) || (cp >= 0xA0 && cp <= 0xFF)) {
-            memcpy(destino + d, s, largo);
-            d += largo;
-        } else if (cp >= 0x20) {
-            destino[d++] = '?';
+/* Griego de α a ω (la ς final está en su sitio) */
+static const char *const GRIEGO[25] = {
+    "a", "v", "g", "d", "e", "z", "i", "th", "i", "k", "l", "m", "n",
+    "x", "o", "p", "r", "s", "s", "t", "y", "f", "ch", "ps", "o",
+};
+
+/* Equivalente en letras latinas de un carácter (en minúscula, con *mayuscula
+ * a true si iba en mayúscula), o NULL si no lo hay */
+static const char *a_latino(uint32_t cp, bool *mayuscula)
+{
+    *mayuscula = false;
+    switch (cp) {
+    case 0x2018: case 0x2019: case 0x201A: case 0x2032: return "'";
+    case 0x201C: case 0x201D: case 0x201E: return "\"";
+    case 0x2013: case 0x2014: case 0x2015: case 0x2212: return "-";
+    case 0x2026: return "...";
+    case 0x2022: return "\xC2\xB7";  /* · */
+    case 0x401: *mayuscula = true; return "yo";
+    case 0x451: return "yo";
+    case 0x404: *mayuscula = true; return "ye";
+    case 0x454: return "ye";
+    case 0x406: *mayuscula = true; return "i";
+    case 0x456: return "i";
+    case 0x407: *mayuscula = true; return "yi";
+    case 0x457: return "yi";
+    case 0x490: *mayuscula = true; return "g";
+    case 0x491: return "g";
+    case 0x3AC: return "a";
+    case 0x3AD: return "e";
+    case 0x3AE: case 0x3AF: case 0x3CC: return cp == 0x3CC ? "o" : "i";
+    case 0x3CD: return "y";
+    case 0x3CE: return "o";
+    default: break;
+    }
+    if (cp >= 0x410 && cp <= 0x42F) {
+        *mayuscula = true;
+        return CIRILICO[cp - 0x410];
+    }
+    if (cp >= 0x430 && cp <= 0x44F) {
+        return CIRILICO[cp - 0x430];
+    }
+    if (cp >= 0x391 && cp <= 0x3A9 && cp != 0x3A2) {
+        *mayuscula = true;
+        return GRIEGO[cp - 0x391];
+    }
+    if (cp >= 0x3B1 && cp <= 0x3C9) {
+        return GRIEGO[cp - 0x3B1];
+    }
+    return NULL;
+}
+
+/* Lee un carácter UTF-8 y devuelve cuántos bytes ocupa (0 si no es UTF-8) */
+static int leer_utf8(const unsigned char *s, uint32_t *cp)
+{
+    if (*s < 0x80) {
+        *cp = *s;
+        return 1;
+    }
+    if ((*s >> 5) == 6 && (s[1] >> 6) == 2) {
+        *cp = ((*s & 0x1Fu) << 6) | (s[1] & 0x3F);
+        return 2;
+    }
+    if ((*s >> 4) == 14 && (s[1] >> 6) == 2 && (s[2] >> 6) == 2) {
+        *cp = ((*s & 0x0Fu) << 12) | ((s[1] & 0x3Fu) << 6) | (s[2] & 0x3F);
+        return 3;
+    }
+    if ((*s >> 3) == 30 && (s[1] >> 6) == 2 && (s[2] >> 6) == 2 && (s[3] >> 6) == 2) {
+        *cp = 0x1FFFFF;  /* emojis y demás: no hay equivalente */
+        return 4;
+    }
+    return 0;
+}
+
+/* Algunas emisoras no mandan UTF-8 sino codificaciones antiguas. Si casi todo
+ * son bytes altos sueltos, es texto cirílico (Windows-1251); si son pocos,
+ * letras acentuadas en Latin-1. */
+static bool parece_cp1251(const unsigned char *s)
+{
+    int altos = 0, letras = 0;
+    while (*s) {
+        uint32_t cp;
+        int largo = leer_utf8(s, &cp);
+        if (largo == 0) {
+            altos += *s >= 0xC0;
+            largo = 1;
+        } else if (cp < 0x80 && isalpha((int)cp)) {
+            letras++;
         }
         s += largo;
     }
+    return altos > letras;
+}
+
+void comun_texto_seguro(const char *origen, char *destino, size_t tam)
+{
+    const unsigned char *s = (const unsigned char *)origen;
+    bool cp1251 = parece_cp1251(s);
+    size_t d = 0;
+    int legibles = 0, perdidos = 0;
+    while (*s && d + 6 < tam) {
+        uint32_t cp;
+        int largo = leer_utf8(s, &cp);
+        if (largo == 0) {  /* no es UTF-8: un byte de una codificación antigua */
+            largo = 1;
+            cp = *s;
+            if (cp1251 && cp >= 0xC0) {
+                cp += 0x410 - 0xC0;
+            }
+        }
+        s += largo;
+
+        bool mayuscula;
+        const char *latino = a_latino(cp, &mayuscula);
+        if ((cp >= 0x20 && cp <= 0x7E) || (cp >= 0xA0 && cp <= 0xFF)) {
+            if (cp < 0x80) {
+                destino[d++] = (char)cp;
+                legibles += isalnum((int)cp) != 0;
+            } else {
+                destino[d++] = (char)(0xC0 | cp >> 6);
+                destino[d++] = (char)(0x80 | (cp & 0x3F));
+                legibles++;
+            }
+        } else if (latino != NULL) {
+            size_t n = strlen(latino);
+            memcpy(destino + d, latino, n);
+            if (mayuscula && n > 0) {
+                destino[d] = (char)toupper((unsigned char)destino[d]);
+            }
+            d += n;
+            legibles++;
+        } else if (cp >= 0x20) {
+            perdidos++;  /* árabe, chino, emojis...: la fuente no los tiene */
+        }
+    }
     destino[d] = '\0';
+    /* Con solo unos restos no se entendería nada: mejor sin título */
+    if (perdidos > legibles) {
+        destino[0] = '\0';
+    }
 }
 
