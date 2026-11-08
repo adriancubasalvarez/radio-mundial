@@ -1,99 +1,23 @@
-# Radio Mundial — 3D printed case
+# Radio Mundial — 3D printed cases
 
-> **Looking for the simplest build?** The [small case](pequena/) uses the speaker that comes with the board. / **¿Buscas el montaje más sencillo?** La [carcasa pequeña](pequena/) usa el altavoz que trae la placa.
+**English** · [Español](#español)
 
-*[Español más abajo](#español)*
-
-A 1950s–60s style tabletop radio case: screen on the left, a 40 mm round speaker behind a slotted grille on the right, and an 8° backward tilt.
-It is about **150 × 74 × 45 mm**.
-
-![Assembled case](img/conjunto.png)
-![Exploded view](img/explosion.png)
-
-## Parts (`stl/`)
-
-| File | What it is | Print |
+| Folder | What it is | Status |
 |---|---|---|
-| `front.stl` | Body for the **Freenove FNK0104** (ESP32-S3) | Face down, no supports |
-| `back_cover.stl` | Back cover with vents | Outer face down |
-| `speaker_ring.stl` | Ring that clamps the speaker | Flat |
-| `front_52.stl`, `speaker_ring_52.stl` | Same parts for a **52 mm speaker**: larger grille with a name plate across it | As above |
+| [`pequena/`](pequena/) | **Small case** for the Freenove FNK0104, using the speaker that comes with the board. It is the one shown in the video and in the build guide. | Ready to print |
+| [`boombox/`](boombox/) | Reference parts to design a larger boombox version with two 4" speakers. | In progress |
 
-![Case for a 52 mm speaker](img/conjunto_52.png)
-
-In the 52 mm version only the centre of the grille (46 mm, the cone and its surround) is open; the outer ring of slots is engraved and decorative, so the speaker stays sealed against the front.
-
-Suggested settings: PLA, 0.2 mm layers, 3 walls, 15–20 % infill.
-The body is printed with the front on the bed, so the grille, the bevelled window and the engraved details need no supports. The USB-C hole is small enough to bridge.
-
-## Hardware
-
-- 4 × M3 × 6 self-tapping screws for the board (both boards), so they do not reach the front face.
-- 4 × M3 × 10 countersunk self-tapping screws (back cover).
-- 3 × M2.5 × 5 self-tapping screws (speaker ring).
-- 1 × 40 mm round speaker, 4–8 Ω, 1–3 W (or a 52 mm one, up to 32 mm deep, with the `_52` parts).
-  The FNK0104 accepts up to 2 W at 4 Ω or 1.5 W at 8 Ω, through a 1.25 mm connector.
-- Optional: a thin foam ring between the speaker and the front, for a better seal.
-
-## Assembly
-
-1. Put the speaker in its round seat behind the grille and screw the ring on top.
-2. Place the board with the screen against the window and the **USB-C to the left** (seen from the front), then screw it to the 4 posts.
-3. Plug in the speaker, close the back cover and plug a USB-C cable through the left side.
-
-The microSD slot and the BOOT/RESET buttons stay inside. Remove the back cover to reach them; the web installer does not need them.
-
-## Editing
-
-`radio.scad` is parametric (OpenSCAD 2021.01 or newer).
-Change `altavoz` (`"40mm"` or `"52mm"`), the sizes, the tilt or the engraved text, then export each part with `pieza = "frente" | "tapa" | "aro"`.
-
-- `stl_a_step.py` converts the STL files to STEP for SolidWorks or other CAD software (`pip install cadquery-ocp`). The STEP files are faceted and large, so they are not kept in the repository.
-
-> Both boards were test-fitted on printed cases: the screen is centred, the board sits on its posts and the USB-C plug goes in.
-
-License: CC BY-NC-SA 4.0 — @Adriancubas1980
+The small case is also on [MakerWorld](https://makerworld.com/en/models/3568249) and [Printables](https://www.printables.com/model/1905906).
 
 ---
 
 ## Español
 
-Carcasa de radio de sobremesa al estilo de los años 50–60: pantalla a la izquierda, altavoz redondo de 40 mm tras una rejilla de ranuras a la derecha, e inclinada 8° hacia atrás.
-Mide unos **150 × 74 × 45 mm**.
-
-### Piezas (`stl/`)
-
-| Archivo | Qué es | Impresión |
+| Carpeta | Qué es | Estado |
 |---|---|---|
-| `front.stl` | Cuerpo para la **Freenove FNK0104** (ESP32-S3) | Boca abajo, sin soportes |
-| `back_cover.stl` | Tapa trasera con ventilación | Cara exterior sobre la cama |
-| `speaker_ring.stl` | Aro que sujeta el altavoz | Plano |
-| `front_52.stl`, `speaker_ring_52.stl` | Las mismas piezas para un **altavoz de 52 mm**: rejilla más grande con una placa con el nombre | Igual que arriba |
+| [`pequena/`](pequena/) | **Carcasa pequeña** para la Freenove FNK0104, con el altavoz que trae la placa. Es la que sale en el vídeo y en la guía de montaje. | Lista para imprimir |
+| [`boombox/`](boombox/) | Piezas de referencia para diseñar una versión boombox más grande, con dos altavoces de 4". | En desarrollo |
 
-En la versión de 52 mm solo está abierto el centro de la rejilla (46 mm, el cono y su suspensión); el anillo exterior de ranuras va grabado y es decorativo, así el altavoz queda cerrado contra el frente.
+La carcasa pequeña también está en [MakerWorld](https://makerworld.com/es/models/3568249) y [Printables](https://www.printables.com/model/1905906).
 
-Ajustes recomendados: PLA, capas de 0,2 mm, 3 perímetros y relleno del 15–20 %.
-
-### Tornillería
-
-- 4 tornillos M3 × 6 rosca chapa para la placa (las dos placas), para que no lleguen a la cara frontal.
-- 4 tornillos M3 × 10 avellanados rosca chapa (tapa).
-- 3 tornillos M2,5 × 5 rosca chapa (aro del altavoz).
-- 1 altavoz redondo de 40 mm, de 4–8 Ω y 1–3 W (o uno de 52 mm y hasta 32 mm de fondo, con las piezas `_52`).
-  La FNK0104 admite hasta 2 W a 4 Ω o 1,5 W a 8 Ω, con un conector de 1,25 mm.
-
-### Montaje
-
-1. Coloca el altavoz en su asiento detrás de la rejilla y atornilla el aro encima.
-2. Coloca la placa con la pantalla contra la ventana y el **USB-C a la izquierda** (visto de frente), y atorníllala a los 4 postes.
-3. Conecta el altavoz, cierra la tapa y enchufa el cable USB-C por el lateral izquierdo.
-
-La ranura microSD y los botones BOOT/RESET quedan dentro: para usarlos se quita la tapa. El instalador web no los necesita.
-
-### Editar
-
-`radio.scad` es paramétrico (OpenSCAD 2021.01 o posterior).
-Cambia `altavoz` (`"40mm"` o `"52mm"`), las medidas, la inclinación o los textos, y exporta cada pieza con `pieza = "frente" | "tapa" | "aro"`.
-`stl_a_step.py` genera los STEP para SolidWorks.
-
-> Las dos placas se probaron montadas en carcasas impresas: la pantalla queda centrada, la placa apoya en los postes y el USB-C entra.
+Licencia / License: CC BY-NC-SA 4.0 — see [`LICENSE-CONTENIDO.md`](../LICENSE-CONTENIDO.md).

@@ -24,10 +24,6 @@ copias_placa/
 # Previsualizaciones de los mapas y el logo (se regeneran con los scripts)
 tools/preview/
 
-# Carcasa: modelo de la placa (de Freenove) y STEP generados, muy pesados
-carcasa/referencia/
-carcasa/stl/*.step
-
 # Carpetas locales de cada proyecto (hardware, SolidWorks, fotos y vídeos 4K,
 # edición y publicaciones): pesan mucho y llevan copias de la flash con datos
 # personales. Al manual solo van fotos recortadas.
