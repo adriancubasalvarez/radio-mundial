@@ -14,6 +14,8 @@ Desktop internet radio with a **touch world map**: tap a region, pick a country,
 
 **🖨️ 3D case:** [MakerWorld](https://makerworld.com/en/models/3568249) · [Printables](https://www.printables.com/model/1905906) (files also in [`carcasa/pequena`](carcasa/pequena))
 
+**🛠️ Step-by-step build guide:** [Instructables](https://www.instructables.com/Radio-Mundial-a-Tiny-Cute-Internet-Radio-With-a-To/) · **🎬 Video:** [YouTube](https://youtu.be/h7qwVlGDZos)
+
 From Chrome or Edge on a computer: plug the board in over USB, click "Install" and, when it finishes, connect the radio to your Wi-Fi from the same page (or later, from your phone, with the QR code shown on the screen). To publish a new version: `python tools/build_release.py`.
 
 ## Where to buy the board
