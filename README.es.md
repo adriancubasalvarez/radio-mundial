@@ -12,6 +12,8 @@ Radio por Internet de escritorio con **mapamundi táctil**: tocas una región, e
 
 **📖 Manual:** https://adriancubasalvarez.github.io/radio-mundial/manual/es/
 
+**🖨️ Carcasa 3D en MakerWorld:** https://makerworld.com/es/models/3568249 (los archivos también están en [`carcasa/pequena`](carcasa/pequena))
+
 Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar» y, al terminar, conecta la radio a tu WiFi desde la misma página (o después, desde el móvil, con el código QR que muestra la pantalla). Para publicar una versión nueva: `python tools/build_release.py`.
 
 ## Dónde comprar la placa

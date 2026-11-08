@@ -4,6 +4,8 @@
 
 A compact case for the **Freenove FNK0104** that uses the small speaker that comes with the board. The front measures **130 × 69 × 17 mm**, plus a 4 mm back cover. Designed in SolidWorks by @Adriancubas1980.
 
+**🖨️ Print it from MakerWorld** (Bambu Studio profile, both parts on one plate): https://makerworld.com/en/models/3568249
+
 ![The small case](../../docs/manual/img/fotos/portada.jpg)
 
 ## Files
@@ -39,6 +41,8 @@ License: **CC BY-NC-SA 4.0** (see [`LICENSE-CONTENIDO.md`](../../LICENSE-CONTENI
 ---
 
 ## Español
+
+**🖨️ Imprímela desde MakerWorld** (perfil de Bambu Studio, las dos piezas en una bandeja): https://makerworld.com/es/models/3568249
 
 Carcasa compacta para la **Freenove FNK0104** que usa el altavoz pequeño que trae la placa. El frontal mide **130 × 69 × 17 mm**, más una tapa trasera de 4 mm. Diseñada en SolidWorks por @Adriancubas1980.
 
