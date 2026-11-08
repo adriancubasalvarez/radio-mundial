@@ -28,5 +28,9 @@ tools/preview/
 carcasa/referencia/
 carcasa/stl/*.step
 
-# Fotos y vídeos originales del montaje (pesan mucho): al manual van recortadas
-VIDEOS Y FOTOS/
+# Carpetas locales de cada proyecto (hardware, SolidWorks, fotos y vídeos 4K,
+# edición y publicaciones): pesan mucho y llevan copias de la flash con datos
+# personales. Al manual solo van fotos recortadas.
+RADIO MUNDIAL SMALL/
+RADIO MUNDIAL BOOMBOX/
+REORGANIZACION_*.txt
