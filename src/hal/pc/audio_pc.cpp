@@ -158,3 +158,9 @@ void audio_volumen(uint8_t volumen)
         inicio_ms -= TIEMPO_CONEXION_MS; /* ya sonaba: no volver a «conectando» */
     }
 }
+
+/* En el PC el sonido sale siempre por los altavoces del ordenador */
+void audio_salida(bool externa)
+{
+    (void)externa;
+}

@@ -1,9 +1,13 @@
 /**
  * Audio en la placa con la librería ESP32-audioI2S (schreibfaul1).
  *
- * FNK0104: sale por I2S hacia el códec ES8311 (24 bits), configurado por
- * I2C, y de ahí al amplificador (AUDIO_EN = GPIO1, a nivel bajo). El volumen
- * lo baja el códec, no la librería: así no se pierde calidad al bajarlo.
+ * FNK0104, dos salidas (se elige en Ajustes):
+ *  - Altavoz integrado: I2S hacia el códec ES8311 (24 bits), configurado por
+ *    I2C, y de ahí al amplificador (AUDIO_EN = GPIO1, a nivel bajo). El
+ *    volumen lo baja el códec, no la librería: así no se pierde calidad.
+ *  - DAC externo (PCM5102A o UDA1334A) por el conector P3, hacia un
+ *    amplificador más potente. Estos DAC no tienen volumen: se aplica en
+ *    las muestras, y el amplificador integrado se queda apagado.
  *
  * La librería necesita que se llame a audio.loop() muy a menudo, así que
  * vive en una tarea propia en el núcleo 0 (el de la WiFi); la interfaz
@@ -41,6 +45,7 @@ static bool parar_pedido = false;
 static bool tono_pedido = false;
 static bool preparar_pedido = false;
 static int volumen_pedido = -1;
+static int salida_pedida = -1;  /* 0 integrado, 1 externo, -1 nada pedido */
 
 /* Estado (lo escribe la tarea de audio y lo lee la interfaz) */
 static volatile EstadoAudio estado = AUDIO_PARADO;
@@ -63,6 +68,13 @@ static void preparar_cerrojo(void)
 /* ---------- Salida de audio de cada placa ---------- */
 
 
+static bool salida_externa = false;  /* la salida en uso (solo la tarea la cambia) */
+
+/* Ganancia de las muestras con el DAC externo, en coma fija: 32768 = x1.
+ * Llega hasta x2 porque la librería divide las muestras entre dos antes de
+ * sus filtros (deja 6 dB de margen); con x2 se recupera la escala completa. */
+static volatile int32_t ganancia = 32768;
+
 static es8311_handle_t codec;
 static uint32_t frecuencia_codec;  /* frecuencia de muestreo configurada */
 
@@ -71,7 +83,13 @@ static uint32_t frecuencia_codec;  /* frecuencia de muestreo configurada */
  * el táctil (Wire, puerto 0). */
 static void preparar_salida(void)
 {
-    codec = es8311_create(I2C_NUM_0, ES8311_ADDRESS_0);
+    if (salida_externa) {
+        Serial.println("[audio] salida: DAC externo (conector P3)");
+        return;  /* el DAC externo no necesita configuración */
+    }
+    if (codec == NULL) {
+        codec = es8311_create(I2C_NUM_0, ES8311_ADDRESS_0);
+    }
     const es8311_clock_config_t reloj = {
         .mclk_inverted = false,
         .sclk_inverted = false,
@@ -92,7 +110,7 @@ static void preparar_salida(void)
 static void seguir_frecuencia(Audio *a)
 {
     uint32_t fs = a->getSampleRate();
-    if (codec != NULL && fs >= 8000 && fs != frecuencia_codec) {
+    if (!salida_externa && codec != NULL && fs >= 8000 && fs != frecuencia_codec) {
         if (es8311_sample_frequency_config(codec, fs * 256, fs) == ESP_OK) {
             Serial.printf("[audio] códec a %u Hz\n", (unsigned)fs);
         }
@@ -102,9 +120,13 @@ static void seguir_frecuencia(Audio *a)
 
 static Audio *nueva_libreria(void)
 {
-    Audio *a = new Audio(false);  // I2S hacia un DAC externo
-    a->setPinout(PIN_I2S_BCK, PIN_I2S_WS, PIN_I2S_DOUT, I2S_PIN_NO_CHANGE, PIN_I2S_MCK);
-    a->setVolume(21);  // la librería al máximo: el volumen lo pone el códec
+    Audio *a = new Audio(false);  // I2S hacia un DAC (el códec o el externo)
+    if (salida_externa) {
+        a->setPinout(PIN_EXT_BCK, PIN_EXT_WS, PIN_EXT_DOUT);  // sin MCLK
+    } else {
+        a->setPinout(PIN_I2S_BCK, PIN_I2S_WS, PIN_I2S_DOUT, I2S_PIN_NO_CHANGE, PIN_I2S_MCK);
+    }
+    a->setVolume(21);  // la librería al máximo: el volumen lo ponemos nosotros
     return a;
 }
 
@@ -114,6 +136,12 @@ static Audio *nueva_libreria(void)
 static void poner_volumen(Audio *a, uint8_t v)
 {
     (void)a;
+    if (salida_externa) {
+        /* Misma idea con el DAC externo: de -40 dB a +6 dB (escala
+         * completa) en las muestras; 0 = silencio */
+        ganancia = v == 0 ? 0 : (int32_t)(32768.0f * powf(10.0f, (-40.0f + 0.46f * v) / 20.0f));
+        return;
+    }
     if (codec != NULL) {
         es8311_voice_volume_set(codec, v == 0 ? 0 : 40 + v * 35 / 100, NULL);
     }
@@ -122,7 +150,8 @@ static void poner_volumen(Audio *a, uint8_t v)
 
 static void amplificador(bool encendido)
 {
-    digitalWrite(PIN_AUDIO_EN, encendido ? LOW : HIGH);  // activo a nivel bajo
+    /* Con el DAC externo, el amplificador integrado se queda apagado */
+    digitalWrite(PIN_AUDIO_EN, encendido && !salida_externa ? LOW : HIGH);  // activo a nivel bajo
 }
 
 /* ---------- Avisos de la librería ---------- */
@@ -160,6 +189,13 @@ void audio_process_i2s(uint32_t *muestra, bool *seguir)
     *seguir = true;
     int16_t izq = (int16_t)(*muestra & 0xFFFF);
     int16_t der = (int16_t)(*muestra >> 16);
+    if (salida_externa) {
+        /* volumen del DAC externo, recortando si se pasa de la escala */
+        int32_t g = ganancia;
+        izq = (int16_t)constrain(((int32_t)izq * g) >> 15, -32768, 32767);
+        der = (int16_t)constrain(((int32_t)der * g) >> 15, -32768, 32767);
+        *muestra = ((uint32_t)(uint16_t)der << 16) | (uint16_t)izq;
+    }
     uint16_t m = (uint16_t)max(abs(izq), abs(der));
     if (m > pico) {
         pico = m;
@@ -210,7 +246,7 @@ static bool crear_libreria(void)
 static void tarea_audio(void *parametro)
 {
     (void)parametro;
-    char url[256];
+    char url[256] = "";
     for (;;) {
         bool conectar = false, parar = false, tono = false;
         int volumen = -1;
@@ -228,7 +264,33 @@ static void tarea_audio(void *parametro)
         volumen_pedido = -1;
         bool preparar = preparar_pedido;
         preparar_pedido = false;
+        int salida = salida_pedida;
+        salida_pedida = -1;
         xSemaphoreGive(cerrojo);
+
+        if (salida >= 0 && (salida == 1) != salida_externa) {
+            /* Cambio de salida: se rehace la librería con los otros pines y,
+             * si sonaba algo, vuelve a sonar por la nueva */
+            bool sonaba = !en_tono && (estado == AUDIO_SONANDO || estado == AUDIO_CONECTANDO);
+            bool sonaba_tono = en_tono && estado == AUDIO_SONANDO;
+            amplificador(false);
+            if (audio != NULL) {
+                delete audio;  // también libera el I2S
+                audio = NULL;
+            }
+            salida_externa = salida == 1;
+            estado = AUDIO_PARADO;
+            en_tono = false;
+            if (sonaba && !conectar && !parar) {
+                conectar = true;  // la misma emisora (url guarda la última)
+            }
+            if (sonaba_tono && !parar) {
+                tono = true;
+            }
+            if (audio == NULL && (preparar || conectar || tono || sonaba)) {
+                crear_libreria();
+            }
+        }
 
         if (preparar) {
             crear_libreria();
@@ -391,6 +453,14 @@ void audio_volumen(uint8_t volumen)
     preparar_cerrojo();
     xSemaphoreTake(cerrojo, portMAX_DELAY);
     volumen_pedido = volumen;
+    xSemaphoreGive(cerrojo);
+}
+
+void audio_salida(bool externa)
+{
+    preparar_cerrojo();
+    xSemaphoreTake(cerrojo, portMAX_DELAY);
+    salida_pedida = externa ? 1 : 0;
     xSemaphoreGive(cerrojo);
 }
 

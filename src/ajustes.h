@@ -45,6 +45,7 @@ typedef struct {
     bool espanol;             /* idioma: true español, false inglés */
     uint8_t luz;              /* ModoLuz (luz.h): apagada, estado o al ritmo */
     uint8_t luz_brillo;       /* intensidad del LED: 0 baja, 1 media, 2 alta */
+    bool salida_externa;      /* audio por un DAC externo (I2S) en lugar del altavoz */
     bool hay_ultima;
     EmisoraGuardada ultima;
     EmisoraGuardada favoritos[MAX_FAVORITOS];

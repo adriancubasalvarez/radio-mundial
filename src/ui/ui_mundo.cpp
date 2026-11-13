@@ -229,6 +229,7 @@ void ui_inicio(void)
     lv_disp_set_theme(disp, tema);
 
     ajustes_cargar();
+    audio_salida(ajustes.salida_externa);
     audio_volumen(ajustes.volumen);
 
     if (!datos_cargar_indice(&nav.indice)) {

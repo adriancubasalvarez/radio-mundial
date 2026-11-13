@@ -188,6 +188,11 @@ EstadoAudio audio_estado(void);
 /* Volumen de 0 a 100 */
 void audio_volumen(uint8_t volumen);
 
+/* Elige por dónde sale el sonido: false = altavoz integrado, true = DAC
+ * externo por I2S. Si estaba sonando una emisora, vuelve a sonar por la
+ * nueva salida. En el simulador no hace nada. */
+void audio_salida(bool externa);
+
 /* Nivel de la música desde la última llamada (pico), de 0 a 255 */
 uint8_t audio_nivel(void);
 

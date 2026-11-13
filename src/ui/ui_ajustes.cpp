@@ -98,6 +98,26 @@ static void al_brillo(lv_event_t *e)
     lv_label_set_text(lv_obj_get_child(lv_event_get_target(e), 0), texto_brillo());
 }
 
+/* Salida de audio: altavoz integrado o DAC externo (I2S) hacia un
+ * amplificador. Si suena una emisora, sigue sonando por la nueva salida. */
+static const char *texto_salida(void)
+{
+    return ajustes.salida_externa ? LV_SYMBOL_AUDIO " DAC" : LV_SYMBOL_VOLUME_MAX;
+}
+
+static void al_salida(lv_event_t *e)
+{
+    ajustes.salida_externa = !ajustes.salida_externa;
+    ajustes_guardar();
+    audio_salida(ajustes.salida_externa);
+    /* resaltado (como un botón marcado) mientras se usa el DAC externo */
+    lv_obj_t *b = lv_event_get_target(e);
+    lv_obj_t *etiqueta = lv_obj_get_child(b, 0);
+    lv_obj_set_style_bg_color(b, lv_color_hex(ajustes.salida_externa ? COLOR_ACENTO : COLOR_LINEA), 0);
+    lv_obj_set_style_text_color(etiqueta, lv_color_hex(ajustes.salida_externa ? COLOR_FONDO : COLOR_TEXTO), 0);
+    lv_label_set_text(etiqueta, texto_salida());
+}
+
 /* El deslizador vale si el dedo empieza en su mitad izquierda y llega cerca
  * del final: así cuesta poco apagar, pero un toque suelto no apaga */
 static bool empezo_a_la_izquierda;
@@ -189,6 +209,13 @@ void ui_ajustes_abrir(void)
     lv_obj_add_flag(actualizar, LV_OBJ_FLAG_IGNORE_LAYOUT);
     lv_obj_set_height(actualizar, 32);
     lv_obj_align(actualizar, LV_ALIGN_TOP_RIGHT, -30, 6);
+
+    /* Salida de audio, en la otra esquina: altavoz (integrado) o DAC (externo) */
+    lv_obj_t *salida = boton(capa, texto_salida(), ajustes.salida_externa, al_salida, NULL, 64);
+    lv_obj_add_flag(salida, LV_OBJ_FLAG_IGNORE_LAYOUT);
+    lv_obj_set_height(salida, 32);
+    lv_obj_set_style_text_font(lv_obj_get_child(salida, 0), &radio_14, 0);
+    lv_obj_align(salida, LV_ALIGN_TOP_LEFT, 30, 6);
 
     /* Idioma (el botón ofrece el otro) y alarmas, en una fila */
     lv_obj_t *fila = lv_obj_create(capa);
