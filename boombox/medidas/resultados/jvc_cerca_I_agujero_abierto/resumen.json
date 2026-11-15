@@ -1,0 +1,54 @@
+{
+  "nombre": "jvc_cerca_I_agujero_abierto",
+  "tipo": "cerca",
+  "archivo": "grabaciones\\jvc_cerca_I_agujero_abierto.wav",
+  "canal": 0,
+  "fs": 48000,
+  "pico_dbfs": -10.908573382627043,
+  "deriva_ppm": -29.356033703464846,
+  "snr_db": 84.93275586403267,
+  "f_min": 20.0,
+  "f_max": 1000.0,
+  "ventana_ms": 150.0,
+  "caja": {
+    "fc": 176.693465234441,
+    "qtc": 2.79,
+    "ganancia": -16.34727614007209,
+    "error_db": 1.4674570548718344,
+    "f_lo": 50.0,
+    "f_hi": 600.0,
+    "desplaz_db": -3.1428807591028214
+  },
+  "cortes": {
+    "F3": 123.53095353680257,
+    "F6": 115.53345958024507,
+    "F10": 103.07922327717843
+  },
+  "avisos": [],
+  "ecualizacion": [
+    {
+      "refuerzo_db": 3,
+      "f3_nueva": 148.66902320871282,
+      "potencia_x": 1.9952623149688795
+    },
+    {
+      "refuerzo_db": 6,
+      "f3_nueva": 125.08939384094772,
+      "potencia_x": 3.9810717055349722
+    },
+    {
+      "refuerzo_db": 9,
+      "f3_nueva": 105.24960824911581,
+      "potencia_x": 7.943282347242816
+    },
+    {
+      "refuerzo_db": 12,
+      "f3_nueva": 88.55650904086609,
+      "potencia_x": 15.848931924611133
+    }
+  ],
+  "joroba": {
+    "f": 174.48123722644124,
+    "db": 5.120963729151422
+  }
+}

@@ -1,0 +1,5 @@
+# Se regeneran con generar_senales.py (unos 45 MB)
+senales/
+# Grabaciones originales del micrófono
+grabaciones/
+__pycache__/
