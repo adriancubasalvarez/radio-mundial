@@ -1,0 +1,21 @@
+{
+  "medida": "jvc_cerca_I",
+  "objetivo_f3": 90.0,
+  "error_db": 1.16,
+  "parametros": {
+    "pasoalto": 65.0,
+    "joroba_f": 167.2,
+    "joroba_db": -9.75,
+    "joroba_q": 2.11,
+    "grave_f": 75.0,
+    "grave_db": 9.0,
+    "grave_q": 0.91,
+    "ganancia": -7.0
+  },
+  "f3_antes": 116.45225462737498,
+  "f3_despues": 103.74716437208077,
+  "joroba_antes_db": 6.0,
+  "joroba_despues_db": 1.5,
+  "refuerzo_max_db": 6.4,
+  "ganancia_60hz_db": 3.4
+}

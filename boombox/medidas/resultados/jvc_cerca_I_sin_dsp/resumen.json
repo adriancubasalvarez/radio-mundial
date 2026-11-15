@@ -1,0 +1,54 @@
+{
+  "nombre": "jvc_cerca_I_sin_dsp",
+  "tipo": "cerca",
+  "archivo": "D:\\INTERNET RADIO ESP32\\boombox\\medidas\\grabaciones\\jvc_cerca_I_sin_dsp.wav",
+  "canal": 0,
+  "fs": 48000,
+  "pico_dbfs": -10.876988294593179,
+  "deriva_ppm": 498.10606060596285,
+  "snr_db": 81.7241619985975,
+  "f_min": 20.0,
+  "f_max": 1000.0,
+  "ventana_ms": 150.0,
+  "caja": {
+    "fc": 190.40443800980668,
+    "qtc": 4.4799999999999995,
+    "ganancia": -18.84068289178679,
+    "error_db": 3.9698096609631928,
+    "f_lo": 50.0,
+    "f_hi": 600.0,
+    "desplaz_db": -5.005111673152019
+  },
+  "cortes": {
+    "F3": 123.94296914317553,
+    "F6": 119.25352714293352,
+    "F10": 112.74032479168557
+  },
+  "avisos": [],
+  "ecualizacion": [
+    {
+      "refuerzo_db": 3,
+      "f3_nueva": 160.20536908913505,
+      "potencia_x": 1.9952623149688795
+    },
+    {
+      "refuerzo_db": 6,
+      "f3_nueva": 134.79601921707354,
+      "potencia_x": 3.9810717055349722
+    },
+    {
+      "refuerzo_db": 9,
+      "f3_nueva": 113.41671568235805,
+      "potencia_x": 7.943282347242816
+    },
+    {
+      "refuerzo_db": 12,
+      "f3_nueva": 95.42827355649047,
+      "potencia_x": 15.848931924611133
+    }
+  ],
+  "joroba": {
+    "f": 171.9797343873114,
+    "db": 6.16432724315716
+  }
+}
