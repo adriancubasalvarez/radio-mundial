@@ -12,7 +12,9 @@ Uso:
       sube --atenuacion (dB que se baja la señal desde el PC) y usa la
       misma en todas las medidas que vayas a comparar.
   python medir.py --nombre jvc_cerca_I [--tipo cerca] [--canal I]
-      Medida completa (unos 72 s): graba, analiza y abre el informe.
+      Medida completa (unos 72 s): primero un tono de 1 s para comprobar
+      que suena (si no, se para y dice qué revisar); luego graba, analiza
+      y abre el informe.
 
 Opciones de dispositivos (basta un trozo del nombre):
   --salida "Radio Mundial"        altavoz Bluetooth del ESP32
@@ -110,8 +112,53 @@ def comprobar_nivel(salida, entrada, canal, atenuacion):
         print("→ CORRECTO. No toques el mando entre las medidas que vayas a comparar.")
 
 
-def medir(nombre, tipo, canal, salida, entrada, ventana, atenuacion):
+LISTA = """Revisa antes de repetir:
+  1. Amplificador encendido y conectado, mando en su marca.
+  2. Cable de la cápsula conectado al amplificador (canal correcto).
+  3. ESP32 alimentado y «Radio Mundial BT» en «Conectado – Música» en Windows.
+  4. Volumen de Windows para «Radio Mundial BT» en su valor de siempre.
+  5. Móvil sin Bluetooth (que no le quite la conexión al PC).
+  6. Receptor y transmisor del DJI encendidos; micro a 1 cm del cono."""
+
+
+def comprobar_sonido(salida, entrada, canal, atenuacion):
+    """Tono de 300 Hz de 1 s: comprueba que el micrófono lo oye antes de
+    grabar una medida larga. Devuelve False si no llega sonido."""
+    n = FS
+    t = np.arange(n) / FS
+    tono = AMPLITUD * 10 ** (-atenuacion / 20) * np.sin(2 * np.pi * 300 * t)
+    tono *= np.minimum(1, np.minimum(t, t[::-1]) / 0.02)
+    g = reproducir_y_grabar(estereo(tono, canal), salida, entrada, cola=1.5)
+    x = g[:, int(np.argmax(np.sum(g ** 2, axis=0)))]
+    b = FS // 10
+    bloques = x[: len(x) // b * b].reshape(-1, b)
+    espectros = np.abs(np.fft.rfft(bloques * np.hanning(b), axis=1)) ** 2
+    f = np.fft.rfftfreq(b, 1 / FS)
+    banda = (f > 280) & (f < 320)
+    nivel = 10 * np.log10(np.sum(espectros[:, banda], axis=1) + 1e-20)
+    snr = float(np.max(nivel) - np.median(nivel))
+    pico = 20 * np.log10(max(float(np.max(np.abs(x))), 1e-9))
+    if snr < 20:
+        print(f"✗ NO LLEGA SONIDO: el tono de prueba apenas se oye ({snr:.0f} dB sobre el ruido).")
+        print(LISTA)
+        return False
+    if pico < -35:
+        print(f"✗ Suena demasiado bajo (pico {pico:.1f} dBFS). Revisa el volumen de Windows para "
+              "«Radio Mundial BT» (se puede quedar bajo al reconectar el Bluetooth) y el mando "
+              "del amplificador, o baja --atenuacion.")
+        return False
+    if pico > -1:
+        print(f"✗ El micrófono satura (pico {pico:.1f} dBFS): sube --atenuacion o baja el mando.")
+        return False
+    print(f"✓ Suena (tono {snr:.0f} dB sobre el ruido).")
+    return True
+
+
+def medir(nombre, tipo, canal, salida, entrada, ventana, atenuacion, comprobar=True):
     from analizar import analizar, guardar, texto_resumen
+
+    if comprobar and not comprobar_sonido(salida, entrada, canal, atenuacion):
+        sys.exit(1)
 
     carpeta = CARPETA / "grabaciones"
     carpeta.mkdir(exist_ok=True)
@@ -143,6 +190,8 @@ def main():
     ap.add_argument("--salida", default="Radio Mundial")
     ap.add_argument("--entrada", default="Wireless Microphone")
     ap.add_argument("--ventana", type=float, default=5.0)
+    ap.add_argument("--sin-comprobar", action="store_true",
+                    help="no hacer la prueba de sonido de 1 s antes de medir")
     ap.add_argument("--atenuacion", type=float, default=0.0,
                     help="dB que se baja la señal desde el PC (para no saturar el micrófono)")
     a = ap.parse_args()
@@ -155,7 +204,8 @@ def main():
     if a.nivel:
         comprobar_nivel(salida, entrada, a.canal, a.atenuacion)
     elif a.nombre:
-        medir(a.nombre, a.tipo, a.canal, salida, entrada, a.ventana, a.atenuacion)
+        medir(a.nombre, a.tipo, a.canal, salida, entrada, a.ventana, a.atenuacion,
+              not a.sin_comprobar)
     else:
         ap.error("usa --lista, --nivel o --nombre")
 
