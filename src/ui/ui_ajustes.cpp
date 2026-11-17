@@ -1,7 +1,7 @@
 /**
  * Menú de ajustes rápido: se abre manteniendo pulsado el título del
- * mapamundi. Permite cambiar el idioma, la red WiFi y la luz, y apagar la
- * radio.
+ * mapamundi. Permite cambiar el idioma, la red WiFi, la luz y la ubicación
+ * del tiempo, y apagar la radio.
  * Se dibuja en la capa superior de LVGL, encima del mapamundi.
  */
 #include "ui.h"
@@ -54,6 +54,13 @@ static void al_actualizar(lv_event_t *e)
     (void)e;
     cerrar();
     nav_ir(PANT_ACTUALIZAR);
+}
+
+static void al_ubicacion(lv_event_t *e)
+{
+    (void)e;
+    cerrar();
+    nav_ir(PANT_UBICACION);
 }
 
 static void al_wifi(lv_event_t *e)
@@ -189,6 +196,13 @@ void ui_ajustes_abrir(void)
     lv_obj_add_flag(actualizar, LV_OBJ_FLAG_IGNORE_LAYOUT);
     lv_obj_set_height(actualizar, 32);
     lv_obj_align(actualizar, LV_ALIGN_TOP_RIGHT, -30, 6);
+
+    /* Ubicación del tiempo y la hora: en la otra esquina (amarilla si se
+     * eligió una ciudad a mano) */
+    lv_obj_t *ubicacion = boton(capa, "\xEF\x8F\x85", ajustes.ubicacion_fija, al_ubicacion, NULL, 46);
+    lv_obj_add_flag(ubicacion, LV_OBJ_FLAG_IGNORE_LAYOUT);
+    lv_obj_set_height(ubicacion, 32);
+    lv_obj_align(ubicacion, LV_ALIGN_TOP_LEFT, 30, 6);
 
     /* Idioma (el botón ofrece el otro) y alarmas, en una fila */
     lv_obj_t *fila = lv_obj_create(capa);

@@ -55,3 +55,8 @@ void comun_lista_gris(lv_obj_t *lista);
 
 /* Número de filas añadidas */
 uint16_t comun_lista_filas(lv_obj_t *lista);
+
+/* Teclado en pantalla propio (mayúsculas, números y espacio, con teclas
+ * grandes) pegado abajo y unido al campo de texto. Lo usan «Buscar» y
+ * «Ubicación». */
+lv_obj_t *comun_teclado(lv_obj_t *pantalla, lv_obj_t *campo, lv_coord_t alto);

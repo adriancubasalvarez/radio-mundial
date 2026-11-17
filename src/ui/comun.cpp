@@ -388,3 +388,41 @@ void comun_texto_seguro(const char *origen, char *destino, size_t tam)
     }
 }
 
+
+/* Teclado propio: solo mayúsculas, números y espacio (lo que hace falta
+ * para buscar), con teclas más grandes que el de serie. «1#» y «ABC» son
+ * los textos que LVGL reconoce para cambiar de modo. */
+static const char *mapa_letras[] = {
+    "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "\n",
+    "A", "S", "D", "F", "G", "H", "J", "K", "L", "\n",
+    "1#", "Z", "X", "C", "V", "B", "N", "M", LV_SYMBOL_BACKSPACE, "\n",
+    " ", LV_SYMBOL_OK, ""};
+static const lv_btnmatrix_ctrl_t control_letras[] = {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1,
+    LV_KEYBOARD_CTRL_BTN_FLAGS | 2, 2, 2, 2, 2, 2, 2, 2, LV_BTNMATRIX_CTRL_CHECKED | 3,
+    6, LV_KEYBOARD_CTRL_BTN_FLAGS | 2};
+
+static const char *mapa_numeros[] = {
+    "1", "2", "3", "4", "5", "\n",
+    "6", "7", "8", "9", "0", "\n",
+    "ABC", " ", LV_SYMBOL_BACKSPACE, LV_SYMBOL_OK, ""};
+static const lv_btnmatrix_ctrl_t control_numeros[] = {
+    1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1,
+    LV_KEYBOARD_CTRL_BTN_FLAGS | 1, 2, LV_BTNMATRIX_CTRL_CHECKED | 1, LV_KEYBOARD_CTRL_BTN_FLAGS | 1};
+
+lv_obj_t *comun_teclado(lv_obj_t *pantalla, lv_obj_t *campo, lv_coord_t alto)
+{
+    lv_obj_t *teclado = lv_keyboard_create(pantalla);
+    lv_obj_set_size(teclado, PANTALLA_ANCHO, alto);
+    lv_obj_align(teclado, LV_ALIGN_BOTTOM_MID, 0, 0);
+    lv_obj_set_style_text_font(teclado, &radio_20, 0);
+    lv_obj_set_style_pad_all(teclado, 3, 0);
+    lv_obj_set_style_pad_gap(teclado, 3, 0);
+    lv_keyboard_set_map(teclado, LV_KEYBOARD_MODE_TEXT_UPPER, mapa_letras, control_letras);
+    lv_keyboard_set_map(teclado, LV_KEYBOARD_MODE_SPECIAL, mapa_numeros, control_numeros);
+    lv_keyboard_set_mode(teclado, LV_KEYBOARD_MODE_TEXT_UPPER);
+    lv_keyboard_set_textarea(teclado, campo);
+    return teclado;
+}

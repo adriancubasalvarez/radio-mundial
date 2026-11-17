@@ -55,6 +55,12 @@ typedef struct {
     uint8_t num_fallos;
     Alarma alarmas[MAX_ALARMAS];
     uint8_t num_alarmas;
+    /* Ubicación para el tiempo y la hora. false: automática, por la IP de la
+     * conexión (algunos proveedores dan una ciudad lejana); true: la ciudad
+     * que eligió el usuario en Ajustes */
+    bool ubicacion_fija;
+    char ciudad[40];
+    float latitud, longitud;
 } Ajustes;
 
 extern Ajustes ajustes;
