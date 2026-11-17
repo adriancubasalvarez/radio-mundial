@@ -35,10 +35,11 @@ def conector(ax, x, y, nombre, pines, arriba=True):
     for i, p in enumerate(pines):
         px = x + 2.5 + i * 5
         ax.plot(px, y, "s", ms=6, mfc="#ddd", mec="#333", zorder=5)
-        ax.text(px, y + (4 if arriba else -4), p, ha="center", va="bottom" if arriba else "top",
-                fontsize=7, family="monospace", rotation=90 if len(p) > 3 else 0)
+        # Las etiquetas van en el lado contrario al de los cables, para que no las tapen
+        ax.text(px, y + (-3.5 if arriba else 3.5), p, ha="center", va="top" if arriba else "bottom",
+                fontsize=6.5, family="monospace")
         xs.append(px)
-    ax.text(x + 10, y + (-8 if arriba else 8), nombre, ha="center", va="center", fontsize=8,
+    ax.text(x + 10, y + (-11 if arriba else 11), nombre, ha="center", va="center", fontsize=8,
             weight="bold")
     return xs
 
