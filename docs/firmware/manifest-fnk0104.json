@@ -8,8 +8,24 @@
       "chipFamily": "ESP32-S3",
       "parts": [
         {
-          "path": "radio-mundial-fnk0104.bin",
+          "path": "radio-mundial-fnk0104-arranque.bin",
           "offset": 0
+        },
+        {
+          "path": "radio-mundial-fnk0104-particiones.bin",
+          "offset": 32768
+        },
+        {
+          "path": "radio-mundial-fnk0104-otadata.bin",
+          "offset": 57344
+        },
+        {
+          "path": "radio-mundial-fnk0104-programa.bin",
+          "offset": 65536
+        },
+        {
+          "path": "radio-mundial-fnk0104-datos.bin",
+          "offset": 3211264
         }
       ]
     }
