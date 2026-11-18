@@ -56,6 +56,32 @@
   li { margin: 6px 0; }
   a { color: var(--acento); }
   code { background: var(--linea); padding: 1px 6px; border-radius: 4px; }
+  /* My stations */
+  .me { background: var(--tarjeta); border-radius: 12px; padding: 20px; margin-top: 12px; }
+  .me button, .me input { font: inherit; }
+  .me-boton { background: var(--acento); color: var(--fondo); border: 0; border-radius: 10px; padding: 10px 20px;
+              font-weight: 700; cursor: pointer; }
+  .me-boton:disabled { opacity: .6; cursor: wait; }
+  .me-pendiente { box-shadow: 0 0 0 3px rgba(255, 200, 69, .35); }
+  .me-pequeno { background: var(--linea); color: var(--texto); border: 0; border-radius: 8px; padding: 6px 10px;
+                cursor: pointer; white-space: nowrap; }
+  .me-pequeno:hover:not(:disabled) { filter: brightness(1.25); }
+  .me-pequeno:disabled { opacity: .5; cursor: default; }
+  .me-anadir { background: var(--acento); color: var(--fondo); font-weight: 700; }
+  .me ul { list-style: none; padding: 0; margin: 8px 0; }
+  .me li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--linea); margin: 0; }
+  .me li > div { flex: 1; min-width: 0; }
+  .me li strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .me li span { display: block; color: var(--suave); font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .me-vacia { color: var(--suave); }
+  .me form { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .me input { flex: 1 1 200px; min-width: 0; background: var(--fondo); color: var(--texto); border: 1px solid var(--linea);
+              border-radius: 8px; padding: 8px 10px; }
+  .me h3 { font-size: 1rem; margin: 20px 0 4px; }
+  .me-pie { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
+  #me-contador, #me-nota { color: var(--suave); font-size: .85rem; }
+  #me-estado { margin: 10px 0 0; min-height: 1.5em; }
+  @media (max-width: 420px) { .me li { flex-wrap: wrap; } .me li > div { flex-basis: 100%; } }
   footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--linea); color: var(--suave); font-size: .9rem; }
 </style>
 </head>
@@ -110,6 +136,26 @@
   </ul>
   <p>The Wi-Fi must be <strong>2.4 GHz</strong> (ESP32 boards don't use 5 GHz).</p>
 
+  <h2><span class="paso">4</span>My stations (optional)</h2>
+  <p>Add your own stations to the radio, on top of the built-in ones: search for them here, listen, and save them over the same USB cable. They show up on the radio in <strong>Search › My stations</strong> and are kept when you reinstall. Up to 20 stations.</p>
+  <div class="me">
+    <button type="button" class="me-boton" id="me-conectar"></button>
+    <div id="me-editor" hidden>
+      <ul id="me-lista"></ul>
+      <div class="me-pie">
+        <button type="button" class="me-boton" id="me-guardar"></button>
+        <span id="me-contador"></span>
+      </div>
+      <h3>Search stations</h3>
+      <form id="me-buscar"><input id="me-texto" type="search" autocomplete="off"><button class="me-pequeno" id="me-boton-buscar"></button></form>
+      <ul id="me-resultados"></ul>
+      <h3>Or paste a stream URL</h3>
+      <form id="me-manual"><input id="me-nombre" autocomplete="off"><input id="me-url" type="url" autocomplete="off"><button class="me-pequeno" id="me-boton-url"></button></form>
+      <p id="me-nota"></p>
+    </div>
+    <p id="me-estado" role="status"></p>
+  </div>
+
   <h2>The board doesn't show up in the list?</h2>
   <ul>
     <li>Try another USB cable or another port on your computer.</li>
@@ -135,5 +181,6 @@
     });
   });
 </script>
+<script type="module" src="../mis-emisoras.js"></script>
 </body>
 </html>

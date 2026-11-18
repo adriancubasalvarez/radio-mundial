@@ -2,11 +2,11 @@
  * Buscador.
  *
  *   «Buscar»       campo de texto en la cabecera y teclado en pantalla.
- *                  Sin texto: lista de géneros (y «Mis emisoras» si hay SD).
+ *                  Sin texto: lista de géneros (y «Mis emisoras» si hay alguna).
  *                  Con texto: emisoras cuyo nombre contiene las palabras,
  *                  de la más popular a la menos, mientras se escribe.
  *   «Género»       emisoras más populares de un género.
- *   «Mis emisoras» las de mis_emisoras.csv en la tarjeta SD.
+ *   «Mis emisoras» las que añadió el usuario desde la página de instalación.
  */
 #include "nav.h"
 #include "comun.h"
@@ -91,14 +91,14 @@ static void nueva_lista(void)
     ajustar_alto_lista();
 }
 
-/* Sin texto: géneros y, si hay tarjeta con el archivo, «Mis emisoras» */
+/* Sin texto: géneros y, si hay emisoras propias, «Mis emisoras» */
 static void mostrar_inicio(void)
 {
     nueva_lista();
     mostrando_inicio = true;
     hay_mis_emisoras = datos_hay_mis_emisoras();
     if (hay_mis_emisoras) {
-        comun_lista_agregar(lista_buscar, LV_SYMBOL_SD_CARD, TR("My stations (SD)", "Mis emisoras (SD)"), NULL, false);
+        comun_lista_agregar(lista_buscar, LV_SYMBOL_HOME, TR("My stations", "Mis emisoras"), NULL, false);
     }
     for (int i = 0; i < NUM_GENEROS; i++) {
         comun_lista_agregar(lista_buscar, LV_SYMBOL_LIST, TR(GENEROS[i].nombre_en, GENEROS[i].nombre), NULL, false);
@@ -249,7 +249,7 @@ lv_obj_t *pantalla_genero(void)
     return pantalla;
 }
 
-/* ---------- Pantalla «Mis emisoras» (tarjeta SD) ---------- */
+/* ---------- Pantalla «Mis emisoras» (las añadidas desde la página de instalación) ---------- */
 
 static ListaEmisoras mis_emisoras;
 
@@ -257,7 +257,7 @@ static void al_elegir_mia(uint16_t fila)
 {
     nav.emisora = mis_emisoras.emisoras[fila];
     memset(&nav.pais, 0, sizeof(nav.pais));
-    strcpy(nav.pais.codigo, "SD");
+    strcpy(nav.pais.codigo, "MI");
     strcpy(nav.pais.nombre, TR("My stations", "Mis emisoras"));
     nav.aleatoria = false;
     nav_ir(PANT_SONANDO);
@@ -277,8 +277,8 @@ lv_obj_t *pantalla_mis_emisoras(void)
 
     if (!datos_cargar_mis_emisoras(&mis_emisoras) || mis_emisoras.num == 0) {
         lv_obj_t *aviso = lv_label_create(pantalla);
-        lv_label_set_text(aviso, TR("No stations in\n" ARCHIVO_MIS_EMISORAS "\n\nOne per line:  name;url",
-                                     "No hay emisoras en\n" ARCHIVO_MIS_EMISORAS "\n\nUna por línea:  nombre;url"));
+        lv_label_set_text(aviso, TR("No stations yet.\n\nAdd your own from the\ninstall page, over USB.",
+                                     "Aún no hay emisoras.\n\nAñade las tuyas desde la\npágina de instalación, por USB."));
         lv_obj_set_style_text_color(aviso, lv_color_hex(COLOR_SECUNDARIO), 0);
         lv_obj_set_style_text_align(aviso, LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_align(aviso, LV_ALIGN_CENTER, 0, ALTO_CABECERA / 2);
@@ -286,7 +286,9 @@ lv_obj_t *pantalla_mis_emisoras(void)
     }
     lv_obj_t *lista = comun_lista(pantalla, al_elegir_mia);
     for (uint16_t i = 0; i < mis_emisoras.num; i++) {
-        comun_lista_agregar(lista, LV_SYMBOL_SD_CARD, mis_emisoras.emisoras[i].nombre, NULL, false);
+        char nombre[sizeof(mis_emisoras.emisoras[i].nombre)];
+        comun_texto_seguro(mis_emisoras.emisoras[i].nombre, nombre, sizeof(nombre));
+        comun_lista_agregar(lista, LV_SYMBOL_AUDIO, nombre, NULL, false);
     }
     return pantalla;
 }

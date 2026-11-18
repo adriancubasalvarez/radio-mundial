@@ -8,7 +8,8 @@
  *    el móvil se conecta y se abre una página para elegir la WiFi de casa.
  * 3. Además escucha Improv por el puerto serie: así la página de
  *    instalación (ESP Web Tools) puede mandar la WiFi por USB justo después
- *    de instalar el firmware.
+ *    de instalar el firmware. Por el mismo puerto llegan las órdenes de
+ *    «Mis emisoras» (ver mis_emisoras_usb.cpp).
  */
 #include "hal.h"
 #include "marca.h"
@@ -144,10 +145,13 @@ static bool orden_improv(improv::ImprovCommand orden)
     }
 }
 
+void mis_emisoras_usb_byte(uint8_t b);  /* mis_emisoras_usb.cpp */
+
 static void atender_improv(void)
 {
     while (Serial.available()) {
         uint8_t b = Serial.read();
+        mis_emisoras_usb_byte(b);  /* órdenes «RM» de la página de instalación */
         if (posicion_improv >= sizeof(bufer_improv)) {
             posicion_improv = 0;
         }

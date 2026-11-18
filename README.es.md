@@ -30,6 +30,7 @@ Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar�
 - Mapamundi y 9 regiones con zonas táctiles grandes (pensadas para el dedo).
 - Unas **3.700 emisoras comprobadas** de 207 países, probadas como las pide la placa.
 - **Buscador** con teclado en pantalla y **13 géneros** (pop, rock, noticias, jazz, clásica…).
+- **Mis emisoras**: añade hasta 20 emisoras propias desde la página de instalación, por USB.
 - **Favoritos**, **recientes**, **emisora aleatoria del mundo** y título de la canción que suena.
 - **Hora local** del país de la emisora (la de la capital o ciudad principal en países con varias zonas).
 - **Alarmas** que despiertan a la radio: emisora o tono propio, posponer 10 minutos y amanecer con el LED. También **temporizador para dormir**.
