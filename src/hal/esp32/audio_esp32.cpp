@@ -118,15 +118,30 @@ static void seguir_frecuencia(Audio *a)
     }
 }
 
-static Audio *nueva_libreria(void)
+/* Pines del I2S hacia la salida en uso. Se puede llamar también con la
+ * librería ya creada: la librería admite cambiar los pines en caliente
+ * (solo re-enruta las señales por la matriz de GPIO). */
+static void pines_salida(Audio *a)
 {
-    Audio *a = new Audio(false);  // I2S hacia un DAC (el códec o el externo)
     if (salida_externa) {
+        Serial.println("[audio] salida: DAC externo (conector P3)");
         a->setPinout(PIN_EXT_BCK, PIN_EXT_WS, PIN_EXT_DOUT);  // sin MCLK
     } else {
+        // Al cambiar de externa a salida, ambas interfaces emiten sonido. Esto lo evita.
+        pinMode(PIN_EXT_BCK, INPUT);
+        pinMode(PIN_EXT_WS, INPUT);
+        pinMode(PIN_EXT_DOUT, INPUT);
+
+        Serial.println("[audio] salida: códec ES8311 (altavoz integrado)");
         a->setPinout(PIN_I2S_BCK, PIN_I2S_WS, PIN_I2S_DOUT, I2S_PIN_NO_CHANGE, PIN_I2S_MCK);
     }
     a->setVolume(21);  // la librería al máximo: el volumen lo ponemos nosotros
+}
+
+static Audio *nueva_libreria(void)
+{
+    Audio *a = new Audio(false);  // I2S hacia un DAC (el códec o el externo)
+    pines_salida(a);
     return a;
 }
 
@@ -269,16 +284,21 @@ static void tarea_audio(void *parametro)
         xSemaphoreGive(cerrojo);
 
         if (salida >= 0 && (salida == 1) != salida_externa) {
-            /* Cambio de salida: se rehace la librería con los otros pines y,
-             * si sonaba algo, vuelve a sonar por la nueva */
+            /* Cambio de salida: la librería NO se destruye (recrearla falla
+             * en la placa: el driver I2S no vuelve a instalar bien y hasta el
+             * reinicio no suena por ninguna salida). Solo se cambian los
+             * pines del I2S hacia la otra salida y, si sonaba algo, vuelve a
+             * sonar por la nueva. */
             bool sonaba = !en_tono && (estado == AUDIO_SONANDO || estado == AUDIO_CONECTANDO);
             bool sonaba_tono = en_tono && estado == AUDIO_SONANDO;
             amplificador(false);
-            if (audio != NULL) {
-                delete audio;  // también libera el I2S
-                audio = NULL;
-            }
             salida_externa = salida == 1;
+            if (audio != NULL) {
+                audio->stopSong();
+                pines_salida(audio);
+                preparar_salida();  /* el códec, si la salida es la integrada */
+                poner_volumen(audio, volumen_actual);
+            }
             estado = AUDIO_PARADO;
             en_tono = false;
             if (sonaba && !conectar && !parar) {
@@ -286,9 +306,6 @@ static void tarea_audio(void *parametro)
             }
             if (sonaba_tono && !parar) {
                 tono = true;
-            }
-            if (audio == NULL && (preparar || conectar || tono || sonaba)) {
-                crear_libreria();
             }
         }
 
