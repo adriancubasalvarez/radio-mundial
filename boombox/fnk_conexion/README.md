@@ -22,11 +22,15 @@ pio run -e tono -t upload
 | I/O pin port (P3) | IO14 | BCK |
 | I/O pin port (P3) | IO21 | LCK |
 | I/O pin port (P3) | IO3 | not connected |
-| Serial port / UART (P2) | 5V | VCC |
+| Serial port / UART (P2) | 5V | VCC (only if the DAC board has a regulator, like the purple WCMCU-5102) |
 | Serial port / UART (P2) | GND | GND |
 | Serial port / UART (P2) | TXD, RXD | not connected |
+| IIC (P4) | 3V3, GND | VCC and GND instead, for DAC boards that only take 3.3 V |
+| — | — | **SCK → GND** (wire or solder bridge): required |
 
 Two 1.25 mm 4-pin cables are needed (the kit includes one).
+
+**Check your DAC board first:** SCK must be tied to GND, and some PCM5102A boards only take 3.3 V (power them from P4). Thanks to Jay (@jsissom) for spotting both.
 
 ---
 
@@ -44,3 +48,7 @@ la radio.
 
 La tabla de conexiones es la misma de arriba. Hacen falta dos cables de
 1,25 mm y 4 pines (el kit trae uno).
+
+**Antes de nada, mira tu placa DAC:** SCK tiene que ir a GND, y algunas placas
+PCM5102A solo admiten 3,3 V (aliméntalas desde el P4). Gracias a Jay (@jsissom)
+por avisar de las dos cosas.

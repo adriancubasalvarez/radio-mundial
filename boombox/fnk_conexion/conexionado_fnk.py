@@ -81,8 +81,10 @@ def pagina_esquema(pdf):
         ax.plot(100, y, "o", ms=6, mfc="white", mec="#333", zorder=5)
         ax.text(103, y, p, va="center", fontsize=9, family="monospace")
         ys_dac[p] = y
-    ax.text(121, 26, "FLT, DMP, SCL, FMT → GND\nXMT → 3.3V del DAC", fontsize=7, ha="center",
-            color="#444")
+    ax.text(121, 30, "SCK → GND (obligatorio)\nFLT, DEMP, FMT → GND · XSMT → 3,3 V", fontsize=7,
+            ha="center", color="#444")
+    ax.text(121, 23, "VCC a 5 V solo si el DAC lleva regulador;\nsi es de 3,3 V: 3V3 del conector IIC (P4)",
+            fontsize=6.5, ha="center", color=ROJO)
 
     # Cables de señal
     io2, io3, io14, io21 = xs_io
@@ -102,7 +104,7 @@ def pagina_esquema(pdf):
 
     # Leyenda
     ley = [(NARANJA, "IO2 → DIN (datos)"), (AZUL, "IO14 → BCK (reloj de bit)"),
-           (VERDE, "IO21 → LCK (izquierda/derecha)"), (ROJO, "5V → VCC"), (NEGRO, "GND → GND"),
+           (VERDE, "IO21 → LCK (izquierda/derecha)"), (ROJO, "5V → VCC (o 3V3 del P4)"), (NEGRO, "GND → GND"),
            ("white", "IO3, TXD y RXD: sin conectar")]
     for i, (c, t) in enumerate(ley):
         ax.plot([150, 158], [108 - i * 5] * 2, color=c, lw=3)
@@ -134,6 +136,13 @@ def main():
     with PdfPages(SALIDA) as pdf:
         pagina_esquema(pdf)
         pagina_texto(pdf, "Paso a paso", [
+            ("0. Antes de empezar: mira tu placa DAC", [
+                "• SCK debe ir a GND: con un cable al GND o con el puente de soldadura que hay",
+                "   junto al pin SCK. Sin esto el DAC no suena (o suena mal).",
+                "• Alimentación: las placas moradas (WCMCU-5102, HENGBIRD) llevan regulador y",
+                "   aceptan 5 V del P2. Otras placas PCM5102A solo admiten 3,3 V: aliméntalas",
+                "   desde el conector IIC (P4): pin 1 = 3V3, pin 2 = GND. Si dudas, usa 3,3 V.",
+            ]),
             ("Material", [
                 "• FNK0104 de 2,8\" con táctil, el DAC PCM5102A (WCMCU-5102), el amplificador.",
                 "• DOS cables de 1,25 mm de 4 pines a Dupont: el kit trae uno; hace falta otro.",
@@ -158,7 +167,7 @@ def main():
                 "4. Marca cada cable (cinta o rotulador).",
             ]),
             ("3. Conectar el DAC (con todo APAGADO)", [
-                "IO2 → DIN   IO14 → BCK   IO21 → LCK   5V → VCC   GND → GND",
+                "IO2 → DIN   IO14 → BCK   IO21 → LCK   5V (o 3V3) → VCC   GND → GND   SCK → GND",
                 "La salida del DAC (jack o L/G/R) al amplificador, como en la prueba Bluetooth.",
                 "Antes de encender: mando del amplificador BAJO.",
             ]),
@@ -176,7 +185,9 @@ def main():
         pagina_texto(pdf, "Si algo no va", [
             ("No suena nada con el tono", [
                 "• ¿GND conectado? Sin GND común el DAC no recibe nada. Es lo primero.",
-                "• ¿5V llega al DAC? Mide entre VCC y GND del DAC: ~5 V; y entre 3.3V y GND: ~3,3 V.",
+                "• ¿SCK a GND? Si queda al aire, el DAC no saca sonido o hace ruido.",
+                "• ¿Llega tensión al DAC? Entre VCC y GND: ~5 V (o ~3,3 V si es de 3,3 V);",
+                "   en las placas con regulador, entre 3.3V y GND: ~3,3 V.",
                 "• ¿Amplificador encendido, cápsula conectada, mando subido?",
                 "• Cambia IO2 (DIN) y IO21 (LCK) de sitio si dudas: es el error más típico.",
             ]),
