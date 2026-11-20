@@ -4,6 +4,7 @@
  */
 #include "nav.h"
 #include "comun.h"
+#include "bateria.h"
 #include "ui.h"
 #include "ajustes.h"
 #include "alarmas.h"
@@ -142,7 +143,7 @@ lv_obj_t *pantalla_alarma(void)
     comun_cabecera(pantalla, TR("Alarm", "Alarma"), true, NULL);
     lv_obj_add_event_cb(pantalla, al_salir, LV_EVENT_DELETE, NULL);
 
-    rodillo(pantalla, 24, a->hora, -52, &a->hora);
+    lv_obj_t *rodillo_hora = rodillo(pantalla, 24, a->hora, -52, &a->hora);
     rodillo(pantalla, 60, a->minuto, 52, &a->minuto);
     lv_obj_t *dos_puntos = lv_label_create(pantalla);
     lv_label_set_text(dos_puntos, ":");
@@ -176,7 +177,9 @@ lv_obj_t *pantalla_alarma(void)
 
     lv_obj_t *interruptor = lv_switch_create(pantalla);
     lv_obj_set_size(interruptor, 56, 30);
-    lv_obj_set_pos(interruptor, 12, 197);
+    /* A la izquierda de la hora (antes estaba abajo a la izquierda, donde
+     * ahora va el icono de batería, si hay batería) */
+    lv_obj_align_to(interruptor, rodillo_hora, LV_ALIGN_OUT_LEFT_MID, -12, 0);
     lv_obj_set_style_bg_color(interruptor, lv_color_hex(COLOR_LINEA), 0);
     lv_obj_set_style_bg_color(interruptor, lv_color_hex(COLOR_ACENTO), (unsigned)LV_PART_INDICATOR | LV_STATE_CHECKED);
     if (a->activa) {
@@ -292,7 +295,7 @@ lv_obj_t *pantalla_alarma_sonido(void)
 
     lv_obj_t *lista = comun_lista(pantalla, al_elegir_sonido);
     lv_obj_set_pos(lista, 0, ALTO_CABECERA + 58);
-    lv_obj_set_size(lista, PANTALLA_ANCHO, PANTALLA_ALTO - ALTO_CABECERA - 58);
+    lv_obj_set_size(lista, PANTALLA_ANCHO, PANTALLA_ALTO - ALTO_CABECERA - 58 - bateria_reserva());
     comun_lista_agregar(lista, a->con_emisora ? "  " : LV_SYMBOL_OK, TR("Last station", "Última emisora"), NULL, false);
     if (emisora_suelta(a)) {
         comun_lista_agregar(lista, LV_SYMBOL_OK, a->emisora.emisora.nombre, a->emisora.pais, false);

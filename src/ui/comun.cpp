@@ -1,4 +1,5 @@
 #include "comun.h"
+#include "bateria.h"
 #include "nav.h"
 #include "hal.h"
 #include "imagen.h"
@@ -203,7 +204,8 @@ lv_obj_t *comun_lista(lv_obj_t *pantalla, AlElegirFila accion)
 {
     iniciar_estilos();
     lv_obj_t *tabla = lv_table_create(pantalla);
-    lv_obj_set_size(tabla, PANTALLA_ANCHO, PANTALLA_ALTO - ALTO_CABECERA);
+    /* Con batería, abajo a la izquierda va su icono: la lista acaba antes */
+    lv_obj_set_size(tabla, PANTALLA_ANCHO, PANTALLA_ALTO - ALTO_CABECERA - bateria_reserva());
     lv_obj_set_pos(tabla, 0, ALTO_CABECERA);
     lv_obj_add_style(tabla, &estilo_lista, 0);
     lv_obj_add_style(tabla, &estilo_filas, LV_PART_ITEMS);
@@ -416,7 +418,8 @@ lv_obj_t *comun_teclado(lv_obj_t *pantalla, lv_obj_t *campo, lv_coord_t alto)
 {
     lv_obj_t *teclado = lv_keyboard_create(pantalla);
     lv_obj_set_size(teclado, PANTALLA_ANCHO, alto);
-    lv_obj_align(teclado, LV_ALIGN_BOTTOM_MID, 0, 0);
+    /* Subido lo que ocupa el icono de batería, si hay batería */
+    lv_obj_align(teclado, LV_ALIGN_BOTTOM_MID, 0, -bateria_reserva());
     lv_obj_set_style_text_font(teclado, &radio_20, 0);
     lv_obj_set_style_pad_all(teclado, 3, 0);
     lv_obj_set_style_pad_gap(teclado, 3, 0);

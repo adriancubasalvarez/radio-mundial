@@ -9,6 +9,7 @@
  */
 #include "nav.h"
 #include "comun.h"
+#include "bateria.h"
 #include "ajustes.h"
 #include "tiempo.h"
 #include "hal.h"
@@ -86,7 +87,8 @@ static void buscar_en_fondo(void)
 
 static void ajustar_alto_lista(void)
 {
-    lv_obj_set_height(lista, PANTALLA_ALTO - ALTO_CABECERA - (teclado_visible ? ALTO_TECLADO : 0));
+    /* El teclado sube sobre el icono de batería, si lo hay */
+    lv_obj_set_height(lista, PANTALLA_ALTO - ALTO_CABECERA - bateria_reserva() - (teclado_visible ? ALTO_TECLADO : 0));
 }
 
 static void mostrar_teclado(bool visible)

@@ -201,3 +201,15 @@ uint8_t audio_nivel(void);
 /* Título de lo que suena (metadatos ICY), en UTF-8; "" si la emisora no
  * lo envía o aún no ha llegado */
 const char *audio_titulo(void);
+
+/* Enum to track the current state for hysteresis */
+enum BatteryLevel {
+    BAT_LEVEL_EMPTY,
+    BAT_LEVEL_1,
+    BAT_LEVEL_2,
+    BAT_LEVEL_3,
+    BAT_LEVEL_FULL
+};
+
+/* Get battery level with hysteresis */
+BatteryLevel getBatteryLevel();

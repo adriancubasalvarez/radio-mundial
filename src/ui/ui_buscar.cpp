@@ -10,6 +10,7 @@
  */
 #include "nav.h"
 #include "comun.h"
+#include "bateria.h"
 #include "hal.h"
 #include "idioma.h"
 
@@ -77,7 +78,9 @@ static void al_elegir_fila(uint16_t fila)
 
 static void ajustar_alto_lista(void)
 {
-    lv_obj_set_height(lista_buscar, PANTALLA_ALTO - ALTO_CABECERA - (teclado_visible ? ALTO_TECLADO : 0));
+    /* El teclado sube sobre el icono de batería, si lo hay */
+    lv_obj_set_height(lista_buscar,
+                      PANTALLA_ALTO - ALTO_CABECERA - bateria_reserva() - (teclado_visible ? ALTO_TECLADO : 0));
 }
 
 /* Crea la lista de nuevo (vacía) debajo del teclado */
