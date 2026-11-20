@@ -12,6 +12,7 @@
 #include "ui.h"
 #include "nav.h"
 #include "comun.h"
+#include "bateria.h"
 #include "mapa.h"
 #include "ajustes.h"
 #include "hal.h"
@@ -29,6 +30,9 @@ static lv_obj_t *etiqueta_pie;
 static lv_timer_t *temporizador_pie;
 static bool tocando;  /* mientras se toca el mapa, el pie muestra la región */
 static char ultimo_pie[200];
+static int pie_y;               /* fila donde empieza el hueco del pie */
+static lv_coord_t pie_reserva;  /* reserva de batería ya aplicada al pie */
+static bool pie_colocado;       /* false si faltan los mapas: el pie es un aviso */
 
 static void poner_pie(const char *texto, uint32_t color)
 {
@@ -66,9 +70,30 @@ static void pie_por_defecto(void)
     }
 }
 
+/* Vuelve a medir y colocar el pie según el icono de batería. El nivel
+ * puede cambiar con la pantalla ya construida (de llena a media, o al
+ * revés) y el texto tiene que arrancar a la derecha del icono, no pasar
+ * por debajo. Si la reserva no cambió no se toca nada: reasignar el
+ * tamaño relanzaría el desplazamiento del texto */
+static void recolocar_pie(void)
+{
+    if (!pie_colocado) {
+        return;
+    }
+    lv_coord_t reserva = bateria_reserva();
+    if (reserva == pie_reserva) {
+        return;
+    }
+    pie_reserva = reserva;
+    lv_obj_set_size(etiqueta_pie, PANTALLA_ANCHO - 16 - reserva, LV_SIZE_CONTENT);
+    lv_obj_align(etiqueta_pie, LV_ALIGN_TOP_MID, reserva / 2,
+                 pie_y + (PANTALLA_ALTO - pie_y - 24) / 2);
+}
+
 static void al_refrescar_pie(lv_timer_t *t)
 {
     (void)t;
+    recolocar_pie();  /* por si el icono de batería acaba de aparecer o desaparecer */
     if (!tocando) {
         pie_por_defecto();
     }
@@ -189,6 +214,7 @@ lv_obj_t *pantalla_mundo(void)
 
     /* El pie se crea antes que el mapa por si falta el mapa */
     etiqueta_pie = lv_label_create(pantalla);
+    pie_colocado = false;
     ultimo_pie[0] = '\0';
     tocando = false;
     temporizador_pie = lv_timer_create(al_refrescar_pie, PERIODO_PIE, NULL);
@@ -205,13 +231,16 @@ lv_obj_t *pantalla_mundo(void)
     lv_obj_add_flag(img_mundo, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(img_mundo, al_tocar_mapa, LV_EVENT_ALL, NULL);
 
-    /* Pie: ocupa todo el hueco bajo el mapa para que sea fácil de tocar */
-    int y_pie = ALTO_CABECERA + mapa_mundo.imagen.header.h;
+    /* Pie: ocupa todo el hueco bajo el mapa para que sea fácil de tocar.
+     * Siempre en el mismo sitio; solo arranca a la derecha del icono de
+     * batería (si lo hay) para que el texto no pase por encima */
+    pie_y = ALTO_CABECERA + mapa_mundo.imagen.header.h;
     lv_label_set_long_mode(etiqueta_pie, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_size(etiqueta_pie, PANTALLA_ANCHO - 16, LV_SIZE_CONTENT);
     lv_obj_set_style_text_font(etiqueta_pie, &radio_20, 0);
     lv_obj_set_style_text_align(etiqueta_pie, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(etiqueta_pie, LV_ALIGN_TOP_MID, 0, y_pie + (PANTALLA_ALTO - y_pie - 24) / 2);
+    pie_colocado = true;
+    pie_reserva = -1;  /* fuerza la primera colocación, aunque no cambie */
+    recolocar_pie();
     lv_obj_add_flag(etiqueta_pie, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_ext_click_area(etiqueta_pie, 16);
     lv_obj_add_event_cb(etiqueta_pie, al_tocar_pie, LV_EVENT_CLICKED, NULL);
@@ -227,6 +256,8 @@ void ui_inicio(void)
     lv_theme_t *tema = lv_theme_default_init(disp, lv_color_hex(0x2F6FA8), lv_color_hex(COLOR_ACENTO),
                                              true, &radio_14);
     lv_disp_set_theme(disp, tema);
+
+    bateria_iniciar();  /* icono de batería, encima de cualquier pantalla */
 
     ajustes_cargar();
     audio_volumen(ajustes.volumen);
