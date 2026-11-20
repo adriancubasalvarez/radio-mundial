@@ -31,6 +31,7 @@ From Chrome or Edge on a computer: plug the board in over USB, click "Install" a
 - About **3,700 tested stations** from 207 countries, tested the way the board requests them.
 - **Search** with an on-screen keyboard and **13 genres** (pop, rock, news, jazz, classical…).
 - **My stations**: add up to 20 stations of your own from the install page, over USB.
+- **Battery level**: if you fit a LiPo battery, an icon shows when it is getting low (no icon when it is full or there is no battery).
 - **Favorites**, **recent stations**, **random station from anywhere in the world** and the title of the song playing.
 - **Local time** of the station's country (the capital or main city in countries with several time zones).
 - **Alarms** that wake the radio from sleep: a station or a built-in tone, 10-minute snooze and an LED sunrise. **Sleep timer** too.
@@ -84,6 +85,9 @@ python tools/build_paquete.py
 - **Content** (manuals, 3D case, logo, images): **CC BY-NC-SA 4.0** — see [`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md).
 
 ## Credits
+
+**Contributors**
+- Jay ([@jsissom](https://github.com/jsissom)): battery level, external DAC fixes and macOS build.
 
 **Data**
 - Maps: [Natural Earth](https://www.naturalearthdata.com/) (public domain).

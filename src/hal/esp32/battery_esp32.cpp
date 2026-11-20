@@ -39,7 +39,7 @@ BatteryLevel getBatteryLevel() {
     static bool initialized = false;
 
     int vBat = readBatteryVoltageMV();
-    Serial.printf("Battery voltage: %d mV\n", vBat);
+    BatteryLevel previousLevel = currentLevel;
 
     // On first boot, snap directly to the closest level without hysteresis
     if (!initialized) {
@@ -75,6 +75,14 @@ BatteryLevel getBatteryLevel() {
                 if (vBat >= (THRESHOLD_1 + HYSTERESIS_MV))        currentLevel = BAT_LEVEL_1;
                 break;
         }
+    }
+
+    // Log only on the first reading and when the level changes, so the
+    // serial log isn't flooded every 5 seconds
+    static bool logged = false;
+    if (!logged || currentLevel != previousLevel) {
+        Serial.printf("[bateria] %d mV, nivel %d\n", vBat, (int)currentLevel);
+        logged = true;
     }
 
     return currentLevel;
