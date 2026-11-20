@@ -31,6 +31,7 @@ Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar�
 - Unas **3.700 emisoras comprobadas** de 207 países, probadas como las pide la placa.
 - **Buscador** con teclado en pantalla y **13 géneros** (pop, rock, noticias, jazz, clásica…).
 - **Mis emisoras**: añade hasta 20 emisoras propias desde la página de instalación, por USB.
+- **Nivel de batería**: si le pones una batería LiPo, un icono avisa cuando se va gastando (sin icono si está llena o no hay batería).
 - **Favoritos**, **recientes**, **emisora aleatoria del mundo** y título de la canción que suena.
 - **Hora local** del país de la emisora (la de la capital o ciudad principal en países con varias zonas).
 - **Alarmas** que despiertan a la radio: emisora o tono propio, posponer 10 minutos y amanecer con el LED. También **temporizador para dormir**.
@@ -82,6 +83,9 @@ python tools/build_paquete.py
 - **Contenido** (manuales, carcasa 3D, logotipo, imágenes): **CC BY-NC-SA 4.0** — ver [`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md).
 
 ## Créditos
+
+**Colaboradores**
+- Jay ([@jsissom](https://github.com/jsissom)): nivel de batería, arreglos del DAC externo y compilación en macOS.
 
 **Datos**
 - Mapas: [Natural Earth](https://www.naturalearthdata.com/) (dominio público).

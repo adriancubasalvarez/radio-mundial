@@ -4,6 +4,7 @@
  */
 #include "nav.h"
 #include "comun.h"
+#include "bateria.h"
 #include "hal.h"
 #include "idioma.h"
 
@@ -173,7 +174,10 @@ lv_obj_t *pantalla_actualizar(void)
 
     lv_obj_t *texto_volver;
     boton_accion = crear_boton(pantalla, COLOR_ACENTO, LV_ALIGN_BOTTOM_RIGHT, -12, al_pulsar_accion, &texto_accion);
-    boton_volver = crear_boton(pantalla, COLOR_LINEA, LV_ALIGN_BOTTOM_LEFT, 12, al_pulsar_volver, &texto_volver);
+    /* Apartado de la esquina, donde está el icono de batería, si lo hay */
+    boton_volver = crear_boton(pantalla, COLOR_LINEA, LV_ALIGN_BOTTOM_LEFT, 12 + bateria_reserva(), al_pulsar_volver,
+                               &texto_volver);
+    lv_obj_set_width(boton_volver, 140 - bateria_reserva());
     lv_label_set_text(texto_volver, TR("Back", "Volver"));
 
     visto = ACT_NADA;

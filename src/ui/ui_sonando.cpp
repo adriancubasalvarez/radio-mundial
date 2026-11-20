@@ -8,6 +8,7 @@
  */
 #include "nav.h"
 #include "comun.h"
+#include "bateria.h"
 #include "ajustes.h"
 #include "alarmas.h"
 #include "hal.h"
@@ -321,21 +322,22 @@ lv_obj_t *pantalla_sonando(void)
         lv_obj_align_to(otra, boton, LV_ALIGN_OUT_RIGHT_MID, 28, 0);
     }
 
-    /* Volumen */
+    /* Volumen. El icono va pegado a la barra (no en la esquina: abajo a la
+     * izquierda está el icono de batería, si hay batería) */
     lv_obj_t *icono_vol = lv_label_create(pantalla);
     lv_label_set_text(icono_vol, LV_SYMBOL_VOLUME_MID);
     lv_obj_set_style_text_font(icono_vol, &radio_20, 0);
     lv_obj_set_style_text_color(icono_vol, lv_color_hex(COLOR_SECUNDARIO), 0);
-    lv_obj_align(icono_vol, LV_ALIGN_BOTTOM_LEFT, 14, -14);
 
     lv_obj_t *barra = lv_slider_create(pantalla);
     lv_slider_set_range(barra, 0, 100);
     lv_slider_set_value(barra, ajustes.volumen, LV_ANIM_OFF);
-    lv_obj_set_width(barra, 210);
+    lv_obj_set_width(barra, 190);
     lv_obj_align(barra, LV_ALIGN_BOTTOM_MID, 0, -20);
     lv_obj_set_ext_click_area(barra, 12);
     lv_obj_add_event_cb(barra, al_mover_volumen, LV_EVENT_VALUE_CHANGED, NULL);
     lv_obj_add_event_cb(barra, al_mover_volumen, LV_EVENT_RELEASED, NULL);
+    lv_obj_align_to(icono_vol, barra, LV_ALIGN_OUT_LEFT_MID, -10, 0);
 
     etiqueta_volumen = lv_label_create(pantalla);
     lv_label_set_text_fmt(etiqueta_volumen, "%d", ajustes.volumen);

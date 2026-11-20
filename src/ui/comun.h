@@ -15,6 +15,7 @@
 #define COLOR_TEXTO      0xFFFFFF
 #define COLOR_SECUNDARIO 0x9FB3C8
 #define COLOR_ERROR      0xFF7A6B
+#define COLOR_VERDE      0x4CAF50  /* batería con carga */
 #define COLOR_LINEA      0x1E3A5C  /* separadores y fondo al pulsar */
 
 /* Símbolos propios añadidos a nuestras fuentes (tools/build_fonts.py) */
