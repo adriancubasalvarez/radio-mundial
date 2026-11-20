@@ -73,7 +73,7 @@ captura 12_buscar
 {ATRAS}
 {AJUSTES}
 captura 13_ajustes
-toca 252 62
+toca 196 64
 espera 1300
 captura 14_alarmas
 toca 160 70
@@ -86,13 +86,13 @@ captura 16_sonido
 {ATRAS}
 {ATRAS}
 {AJUSTES}
-toca 265 22
+toca 289 112
 espera 1500
 captura 17_actualizar
 toca 80 202
 espera 1500
 {AJUSTES}
-toca 90 110
+toca 68 112
 espera 2000
 captura 18_wifi
 salir

@@ -122,6 +122,35 @@ char *hal_ajustes_leer(void)
     return texto;
 }
 
+/* «Mis emisoras»: mis_emisoras.json junto a ajustes.json */
+char *hal_mis_emisoras_leer(void)
+{
+    FILE *f = fopen("mis_emisoras.json", "rb");
+    if (f == NULL) {
+        return NULL;
+    }
+    fseek(f, 0, SEEK_END);
+    long tam = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    char *texto = (char *)malloc(tam + 1);
+    if (texto != NULL) {
+        texto[fread(texto, 1, tam, f)] = '\0';
+    }
+    fclose(f);
+    return texto;
+}
+
+bool hal_mis_emisoras_guardar(const char *json)
+{
+    FILE *f = fopen("mis_emisoras.json", "wb");
+    if (f == NULL) {
+        return false;
+    }
+    bool ok = fputs(json, f) >= 0;
+    fclose(f);
+    return ok;
+}
+
 bool hal_ajustes_guardar(const char *json)
 {
     FILE *f = fopen(ruta_ajustes(), "wb");

@@ -116,14 +116,15 @@ int datos_buscar(const char *texto, char genero, Resultado *resultados, int max)
 /* Carga la emisora completa de un resultado de búsqueda */
 bool datos_emisora_de_resultado(const Resultado *resultado, Emisora *emisora, Pais *pais);
 
-/* ---------- Emisoras propias en la tarjeta SD ----------
- * Archivo mis_emisoras.csv en la raíz de la SD, una emisora por línea:
- *     nombre;url
- * Las líneas vacías y las que empiezan por # se ignoran. */
-#define ARCHIVO_MIS_EMISORAS "mis_emisoras.csv"
+/* ---------- Emisoras propias («Mis emisoras») ----------
+ * Las añade el usuario desde la página de instalación, por el USB, y se
+ * guardan aparte (hal_mis_emisoras_*), como JSON:
+ *     [{"n": "TSF Jazz", "u": "http://...", "c": "MP3", "b": 128}, ...]
+ * «c» y «b» son opcionales. */
+#define MAX_MIS_EMISORAS 20
 
-/* true si hay tarjeta con mis_emisoras.csv */
+/* true si hay alguna emisora propia */
 bool datos_hay_mis_emisoras(void);
 
-/* Lee mis_emisoras.csv. Devuelve false si no hay tarjeta o archivo. */
+/* Lee las emisoras propias. Devuelve false si no hay ninguna. */
 bool datos_cargar_mis_emisoras(ListaEmisoras *lista);

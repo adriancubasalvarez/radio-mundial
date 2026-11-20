@@ -24,6 +24,7 @@ static void informe_memoria(const char *paso)
 
 void setup()
 {
+    Serial.setRxBufferSize(1024);  /* una emisora de «Mis emisoras» por línea, con margen */
     Serial.begin(115200);
     delay(200);
     Serial.println();

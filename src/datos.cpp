@@ -492,63 +492,45 @@ bool datos_emisora_de_resultado(const Resultado *resultado, Emisora *emisora, Pa
     return ok;
 }
 
-/* ---------- Emisoras propias en la SD ---------- */
+/* ---------- Emisoras propias («Mis emisoras») ---------- */
 
 bool datos_hay_mis_emisoras(void)
 {
-    size_t tam = 0;
-    uint8_t *texto = hal_sd_leer(ARCHIVO_MIS_EMISORAS, &tam);
-    free(texto);
-    return texto != NULL;
+    ListaEmisoras lista;
+    bool hay = datos_cargar_mis_emisoras(&lista);
+    datos_liberar_emisoras(&lista);
+    return hay;
 }
 
 bool datos_cargar_mis_emisoras(ListaEmisoras *lista)
 {
     memset(lista, 0, sizeof(ListaEmisoras));
-    size_t tam = 0;
-    char *texto = (char *)hal_sd_leer(ARCHIVO_MIS_EMISORAS, &tam);
+    char *texto = hal_mis_emisoras_leer();
     if (texto == NULL) {
         return false;
     }
-
-    /* Primera pasada: contar líneas para reservar memoria */
-    size_t lineas = 1;
-    for (size_t i = 0; i < tam; i++) {
-        lineas += (texto[i] == '\n');
-    }
-    lista->emisoras = (Emisora *)calloc(lineas, sizeof(Emisora));
-    if (lista->emisoras == NULL) {
-        free(texto);
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, texto);
+    free(texto);
+    JsonArrayConst filas = doc.as<JsonArrayConst>();
+    if (error || filas.size() == 0) {
         return false;
     }
-
-    /* Segunda pasada: «nombre;url» en cada línea */
-    for (char *linea = strtok(texto, "\r\n"); linea; linea = strtok(NULL, "\r\n")) {
-        while (*linea == ' ') {
-            linea++;
-        }
-        char *separador = strchr(linea, ';');
-        if (*linea == '#' || separador == NULL) {
-            continue;
-        }
-        *separador = '\0';
-        const char *url = separador + 1;
-        while (*url == ' ') {
-            url++;
-        }
-        if (strncmp(url, "http://", 7) != 0 && strncmp(url, "https://", 8) != 0) {
+    lista->emisoras = (Emisora *)calloc(filas.size(), sizeof(Emisora));
+    if (lista->emisoras == NULL) {
+        return false;
+    }
+    for (JsonObjectConst f : filas) {
+        const char *url = f["u"] | "";
+        if (lista->num >= MAX_MIS_EMISORAS ||
+            (strncmp(url, "http://", 7) != 0 && strncmp(url, "https://", 8) != 0)) {
             continue;
         }
         Emisora *e = &lista->emisoras[lista->num++];
-        strncpy(e->nombre, linea, sizeof(e->nombre) - 1);
+        strncpy(e->nombre, f["n"] | "?", sizeof(e->nombre) - 1);  /* la página ya lo recorta */
         strncpy(e->url, url, sizeof(e->url) - 1);
-        /* La URL puede acabar en ;algo (columna extra): se corta ahí */
-        char *fin = strchr(e->url, ';');
-        if (fin) {
-            *fin = '\0';
-        }
-        strcpy(e->codec, "?");
+        strncpy(e->codec, f["c"] | "?", sizeof(e->codec) - 1);
+        e->bitrate = f["b"] | 0;
     }
-    free(texto);
-    return true;
+    return lista->num > 0;
 }

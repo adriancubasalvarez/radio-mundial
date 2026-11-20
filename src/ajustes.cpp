@@ -139,6 +139,14 @@ void ajustes_cargar(void)
         }
     }
 
+    if (doc["ubicacion"].is<JsonObjectConst>()) {
+        JsonObjectConst u = doc["ubicacion"];
+        copiar(ajustes.ciudad, sizeof(ajustes.ciudad), u["c"]);
+        ajustes.latitud = u["la"] | 0.0f;
+        ajustes.longitud = u["lo"] | 0.0f;
+        ajustes.ubicacion_fija = ajustes.ciudad[0] != '\0';
+    }
+
     if (de_la_sd) {
         printf("Ajustes recuperados de la tarjeta SD (%d favoritos)\n", ajustes.num_favoritos);
         ajustes_guardar(); /* pasarlos también a la memoria interna */
@@ -186,6 +194,13 @@ void ajustes_guardar(void)
         if (ajustes.alarmas[i].con_emisora) {
             a_json(o["e"].to<JsonObject>(), &ajustes.alarmas[i].emisora);
         }
+    }
+
+    if (ajustes.ubicacion_fija) {
+        JsonObject u = doc["ubicacion"].to<JsonObject>();
+        u["c"] = ajustes.ciudad;
+        u["la"] = ajustes.latitud;
+        u["lo"] = ajustes.longitud;
     }
 
     size_t tam = measureJsonPretty(doc) + 1;

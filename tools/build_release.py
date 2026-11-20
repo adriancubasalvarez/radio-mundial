@@ -3,12 +3,13 @@ build_release.py — Prepara el firmware para el instalador web.
 
 Para cada placa:
   1. compila el firmware y la imagen de datos (mapas y emisoras) con PlatformIO;
-  2. junta en UN solo archivo el arranque, la tabla de particiones, el
-     firmware y los datos (esptool merge-bin), para instalarlo de una vez;
+  2. copia por separado el arranque, la tabla de particiones, el
+     firmware y los datos, cada uno con su dirección, sin tocar la partición
+     «nvs» (así una reinstalación conserva los ajustes del usuario);
   3. escribe el manifest que lee ESP Web Tools.
 
 Salida (la publica GitHub Pages desde la carpeta docs/):
-  docs/firmware/radio-mundial-<placa>.bin
+  docs/firmware/radio-mundial-<placa>-<pieza>.bin
   docs/firmware/manifest-<placa>.json
 
 Requisitos: PlatformIO (pio) y esptool (python -m pip install esptool).
@@ -77,17 +78,39 @@ def preparar(placa, cfg, ver):
     pos_datos = tabla["spiffs"][0]
     pos_otadata = tabla["otadata"][0]
 
+    # Cada pieza va en su sitio y por separado. NO se junta todo en un solo
+    # archivo desde la dirección 0: ese archivo pasaría por encima de la
+    # partición «nvs» (rellena de 0xFF) y una reinstalación borraría los
+    # ajustes del usuario (favoritos, alarmas, idioma y la WiFi).
     SALIDA.mkdir(parents=True, exist_ok=True)
-    binario = SALIDA / f"radio-mundial-{placa}.bin"
-    ejecutar([sys.executable, "-m", "esptool", "--chip", cfg["chip"], "merge-bin",
-              "-o", binario,
-              "--flash-mode", cfg["modo_flash"], "--flash-freq", cfg["frec_flash"],
-              "--flash-size", cfg["tam_flash"],
-              hex(cfg["arranque"]), build / "bootloader.bin",
-              "0x8000", build / "partitions.bin",
-              hex(pos_otadata), BOOT_APP0,
-              hex(pos_app), build / "firmware.bin",
-              hex(pos_datos), build / "littlefs.bin"])
+    viejo = SALIDA / f"radio-mundial-{placa}.bin"  # formato antiguo, de un solo archivo
+    if viejo.exists():
+        viejo.unlink()
+    piezas = [
+        ("arranque", cfg["arranque"], build / "bootloader.bin"),
+        ("particiones", 0x8000, build / "partitions.bin"),
+        ("otadata", pos_otadata, BOOT_APP0),  # arrancar siempre desde app0
+        ("programa", pos_app, build / "firmware.bin"),
+        ("datos", pos_datos, build / "littlefs.bin"),
+    ]
+    partes = []
+    for nombre, posicion, origen in piezas:
+        destino = SALIDA / f"radio-mundial-{placa}-{nombre}.bin"
+        if nombre == "arranque":
+            # merge-bin con una sola pieza escribe en la cabecera del arranque
+            # el modo, la velocidad y el tamaño de la flash (y su resumen SHA),
+            # lo mismo que hace pio al flashear
+            ejecutar([sys.executable, "-m", "esptool", "--chip", cfg["chip"], "merge-bin", "-o", destino,
+                      "--flash-mode", cfg["modo_flash"], "--flash-freq", cfg["frec_flash"],
+                      "--flash-size", cfg["tam_flash"], hex(posicion), origen])
+        else:
+            destino.write_bytes(origen.read_bytes())
+        partes.append({"path": destino.name, "offset": posicion})
+        print(f"  {hex(posicion):>9}  {destino.name} ({destino.stat().st_size / 1024:.0f} KB)")
+
+    fin_nvs = tabla["nvs"][0] + tabla["nvs"][1]
+    assert all(not (p["offset"] < fin_nvs and p["offset"] + (SALIDA / p["path"]).stat().st_size > tabla["nvs"][0])
+               for p in partes), "una pieza pisa la partición nvs"
 
     # ESP Web Tools detecta Improv solo: tras instalar, si la radio responde,
     # ofrece configurar la WiFi. La radio tarda unos segundos en arrancar.
@@ -98,12 +121,11 @@ def preparar(placa, cfg, ver):
         "new_install_improv_wait_time": 15,
         "builds": [{
             "chipFamily": cfg["familia"],
-            "parts": [{"path": binario.name, "offset": 0}],
+            "parts": partes,
         }],
     }
     (SALIDA / f"manifest-{placa}.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False),
                                                     encoding="utf-8")
-    print(f"  -> {binario.relative_to(RAIZ)} ({binario.stat().st_size / 1024 / 1024:.1f} MB)")
 
 
 def main():

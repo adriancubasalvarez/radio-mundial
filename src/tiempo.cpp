@@ -1,6 +1,7 @@
 #include "tiempo.h"
 #include "hal.h"
 #include "idioma.h"
+#include "ajustes.h"
 
 #include <ArduinoJson.h>
 #include <math.h>
@@ -31,9 +32,11 @@ static int zona_segundos;          /* diferencia con la hora universal */
 static uint32_t proxima_ms;
 static bool primera = true;
 
-/* Ubicación por la IP (una vez por arranque: la radio no se mueve) */
+/* Ubicación por la IP (una vez por arranque: la radio no se mueve) o la
+ * ciudad elegida en Ajustes */
 static float latitud, longitud;
 static bool hay_ubicacion;
+static volatile bool reubicar;     /* cambió en Ajustes: volver a ubicar */
 
 static bool pedir_json(const char *url, JsonDocument &doc)
 {
@@ -48,6 +51,14 @@ static bool pedir_json(const char *url, JsonDocument &doc)
 
 static bool ubicar(void)
 {
+    if (ajustes.ubicacion_fija) {
+        latitud = ajustes.latitud;
+        longitud = ajustes.longitud;
+        strncpy(nuevo.ciudad, ajustes.ciudad, sizeof(nuevo.ciudad) - 1);
+        nuevo.ciudad[sizeof(nuevo.ciudad) - 1] = '\0';
+        hay_ubicacion = true;
+        return true;
+    }
     JsonDocument doc;
     if (!pedir_json("http://ip-api.com/json/?fields=status,city,lat,lon", doc) ||
         strcmp(doc["status"] | "", "success") != 0) {
@@ -127,6 +138,10 @@ static void medir_aire(void)
 static void descargar(void)
 {
     nuevo = actual;
+    if (reubicar) {
+        reubicar = false;
+        hay_ubicacion = false;
+    }
     bool ok = (hay_ubicacion || ubicar()) && prever();
     if (ok) {
         medir_aire();
@@ -156,6 +171,12 @@ void tiempo_atender(void)
         descargando = true;
         hal_segundo_plano(descargar);
     }
+}
+
+void tiempo_reubicar(void)
+{
+    reubicar = true;
+    primera = true;  /* descargar ya, sin esperar los 30 minutos */
 }
 
 const Tiempo *tiempo_actual(void)

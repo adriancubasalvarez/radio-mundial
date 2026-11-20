@@ -235,3 +235,34 @@ bool hal_ajustes_guardar(const char *json)
     preferencias.end();
     return escritos > 0;
 }
+
+/* «Mis emisoras», en la partición NVS «usuario» (ver particiones_16mb.csv).
+ * En una radio con la tabla de particiones antigua no existe: begin()
+ * falla y no hay emisoras propias, sin más. */
+char *hal_mis_emisoras_leer(void)
+{
+    if (!preferencias.begin("mis", true, "usuario")) {
+        return NULL;
+    }
+    size_t tam = preferencias.getBytesLength("lista");
+    char *texto = NULL;
+    if (tam > 0) {
+        texto = (char *)malloc(tam + 1);
+        if (texto != NULL) {
+            preferencias.getBytes("lista", texto, tam);
+            texto[tam] = '\0';
+        }
+    }
+    preferencias.end();
+    return texto;
+}
+
+bool hal_mis_emisoras_guardar(const char *json)
+{
+    if (!preferencias.begin("mis", false, "usuario")) {
+        return false;
+    }
+    size_t escritos = preferencias.putBytes("lista", json, strlen(json));
+    preferencias.end();
+    return escritos > 0;
+}

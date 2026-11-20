@@ -1,8 +1,13 @@
 /**
  * Menú de ajustes rápido: se abre manteniendo pulsado el título del
- * mapamundi. Permite cambiar el idioma, la red WiFi y la luz, y apagar la
- * radio.
+ * mapamundi. Permite cambiar el idioma, la red WiFi, la luz y la ubicación
+ * del tiempo, y apagar la radio.
  * Se dibuja en la capa superior de LVGL, encima del mapamundi.
+ *
+ * Distribución (320x240): título arriba; botones grandes en dos columnas a
+ * la izquierda (cuatro filas: idioma y alarmas, WiFi y luz, deslizador de
+ * apagado, brillo y Cerrar) y una columna de iconos a la derecha, uno por
+ * fila (ubicación, actualizar emisoras, salida de audio).
  */
 #include "ui.h"
 #include "nav.h"
@@ -14,6 +19,15 @@
 #include "luz.h"
 
 #include <lvgl.h>
+#include <string.h>
+
+#define X_IZQUIERDA    8
+#define ANCHO_BOTON    120
+#define SEPARACION     8
+#define ANCHO_IZQUIERDA (2 * ANCHO_BOTON + SEPARACION)    /* 248 */
+#define X_ICONOS       (PANTALLA_ANCHO - 8 - ANCHO_ICONO)  /* 266 */
+#define ANCHO_ICONO    46
+#define Y_FILA(n)      (44 + (n) * 48)                     /* 44, 92, 140, 188 */
 
 static lv_obj_t *capa;
 
@@ -54,6 +68,13 @@ static void al_actualizar(lv_event_t *e)
     (void)e;
     cerrar();
     nav_ir(PANT_ACTUALIZAR);
+}
+
+static void al_ubicacion(lv_event_t *e)
+{
+    (void)e;
+    cerrar();
+    nav_ir(PANT_UBICACION);
 }
 
 static void al_wifi(lv_event_t *e)
@@ -102,7 +123,7 @@ static void al_brillo(lv_event_t *e)
  * amplificador. Si suena una emisora, sigue sonando por la nueva salida. */
 static const char *texto_salida(void)
 {
-    return ajustes.salida_externa ? LV_SYMBOL_AUDIO " DAC" : LV_SYMBOL_VOLUME_MAX;
+    return ajustes.salida_externa ? "DAC" : LV_SYMBOL_VOLUME_MAX;
 }
 
 static void al_salida(lv_event_t *e)
@@ -116,6 +137,7 @@ static void al_salida(lv_event_t *e)
     lv_obj_set_style_bg_color(b, lv_color_hex(ajustes.salida_externa ? COLOR_ACENTO : COLOR_LINEA), 0);
     lv_obj_set_style_text_color(etiqueta, lv_color_hex(ajustes.salida_externa ? COLOR_FONDO : COLOR_TEXTO), 0);
     lv_label_set_text(etiqueta, texto_salida());
+    lv_obj_set_style_text_font(etiqueta, ajustes.salida_externa ? &radio_14 : &radio_20, 0);
 }
 
 /* El deslizador vale si el dedo empieza en su mitad izquierda y llega cerca
@@ -148,7 +170,8 @@ static void al_deslizar(lv_event_t *e)
 static void deslizador_apagar(lv_obj_t *padre)
 {
     lv_obj_t *d = lv_slider_create(padre);
-    lv_obj_set_size(d, 260 - 40, 40);  /* el botón sobresale media altura a cada lado */
+    lv_obj_set_size(d, ANCHO_IZQUIERDA - 40, 40);  /* el botón sobresale media altura a cada lado */
+    lv_obj_set_pos(d, X_IZQUIERDA + 20, Y_FILA(2));
     lv_slider_set_range(d, 0, 100);
     lv_obj_set_ext_click_area(d, 8);
     lv_obj_set_style_radius(d, 20, LV_PART_MAIN);
@@ -179,7 +202,20 @@ static lv_obj_t *boton(lv_obj_t *padre, const char *texto, bool marcado, lv_even
     lv_label_set_text(etiqueta, texto);
     lv_obj_set_style_text_font(etiqueta, &radio_20, 0);
     lv_obj_set_style_text_color(etiqueta, lv_color_hex(marcado ? COLOR_FONDO : COLOR_TEXTO), 0);
+    /* Si el texto no cabe (p. ej. «Light: beat» en un botón estrecho), letra pequeña */
+    if (lv_txt_get_width(texto, strlen(texto), &radio_20, 0, LV_TEXT_FLAG_NONE) > ancho - 12) {
+        lv_obj_set_style_text_font(etiqueta, &radio_14, 0);
+    }
     lv_obj_center(etiqueta);
+    return b;
+}
+
+/* Botón en una posición fija de la pantalla */
+static lv_obj_t *boton_en(lv_coord_t x, lv_coord_t y, lv_coord_t ancho, const char *texto, bool marcado,
+                          lv_event_cb_t accion, void *dato = NULL)
+{
+    lv_obj_t *b = boton(capa, texto, marcado, accion, dato, ancho);
+    lv_obj_set_pos(b, x, y);
     return b;
 }
 
@@ -194,55 +230,36 @@ void ui_ajustes_abrir(void)
     lv_obj_set_style_bg_color(capa, lv_color_hex(COLOR_FONDO), 0);
     lv_obj_set_style_bg_opa(capa, LV_OPA_COVER, 0);
     lv_obj_add_flag(capa, LV_OBJ_FLAG_CLICKABLE);  /* que no pasen toques debajo */
-    lv_obj_set_flex_flow(capa, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(capa, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_top(capa, 10, 0);
-    lv_obj_set_style_pad_row(capa, 8, 0);
+    lv_obj_clear_flag(capa, LV_OBJ_FLAG_SCROLLABLE);  /* que nada lo desplace */
 
+    /* Título arriba, solo, sobre los botones grandes */
     lv_obj_t *titulo = lv_label_create(capa);
     lv_label_set_text(titulo, TR(LV_SYMBOL_SETTINGS "  Settings", LV_SYMBOL_SETTINGS "  Ajustes"));
     lv_obj_set_style_text_font(titulo, &radio_20, 0);
     lv_obj_set_style_text_color(titulo, lv_color_hex(COLOR_ACENTO), 0);
+    lv_obj_set_pos(titulo, X_IZQUIERDA + 4, 12);
 
-    /* Actualizar emisoras: en la esquina, que el menú ya va lleno */
-    lv_obj_t *actualizar = boton(capa, LV_SYMBOL_DOWNLOAD, false, al_actualizar, NULL, 46);
-    lv_obj_add_flag(actualizar, LV_OBJ_FLAG_IGNORE_LAYOUT);
-    lv_obj_set_height(actualizar, 32);
-    lv_obj_align(actualizar, LV_ALIGN_TOP_RIGHT, -30, 6);
-
-    /* Salida de audio, en la otra esquina: altavoz (integrado) o DAC (externo) */
-    lv_obj_t *salida = boton(capa, texto_salida(), ajustes.salida_externa, al_salida, NULL, 64);
-    lv_obj_add_flag(salida, LV_OBJ_FLAG_IGNORE_LAYOUT);
-    lv_obj_set_height(salida, 32);
-    lv_obj_set_style_text_font(lv_obj_get_child(salida, 0), &radio_14, 0);
-    lv_obj_align(salida, LV_ALIGN_TOP_LEFT, 30, 6);
-
-    /* Idioma (el botón ofrece el otro) y alarmas, en una fila */
-    lv_obj_t *fila = lv_obj_create(capa);
-    lv_obj_remove_style_all(fila);
-    lv_obj_set_size(fila, 260, LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(fila, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(fila, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    boton(fila, ajustes.espanol ? "English" : "Español", false, al_elegir_idioma, (void *)(uintptr_t)!ajustes.espanol, 126);
-    boton(fila, TR(LV_SYMBOL_BELL " Alarms", LV_SYMBOL_BELL " Alarmas"), false, al_alarmas, NULL, 126);
-
-    /* Red WiFi y luz, en otra fila */
-    fila = lv_obj_create(capa);
-    lv_obj_remove_style_all(fila);
-    lv_obj_set_size(fila, 260, LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(fila, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(fila, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    boton(fila, TR(LV_SYMBOL_WIFI " Wi-Fi", LV_SYMBOL_WIFI " Red WiFi"), false, al_wifi, NULL, 126);
-    boton(fila, texto_luz(), false, al_luz, NULL, 126);
+    /* Botones grandes, a la izquierda, en dos columnas */
+    const lv_coord_t x1 = X_IZQUIERDA, x2 = X_IZQUIERDA + ANCHO_BOTON + SEPARACION;
+    boton_en(x1, Y_FILA(0), ANCHO_BOTON, ajustes.espanol ? "English" : "Español", false, al_elegir_idioma,
+             (void *)(uintptr_t)!ajustes.espanol);
+    boton_en(x2, Y_FILA(0), ANCHO_BOTON, TR(LV_SYMBOL_BELL " Alarms", LV_SYMBOL_BELL " Alarmas"), false,
+             al_alarmas);
+    boton_en(x1, Y_FILA(1), ANCHO_BOTON, TR(LV_SYMBOL_WIFI " Wi-Fi", LV_SYMBOL_WIFI " WiFi"), false,
+             al_wifi);
+    boton_en(x2, Y_FILA(1), ANCHO_BOTON, texto_luz(), false, al_luz);
     deslizador_apagar(capa);
+    boton_en(x1, Y_FILA(3), ANCHO_BOTON, texto_brillo(), false, al_brillo);
+    boton_en(x2, Y_FILA(3), ANCHO_BOTON, TR("Close", "Cerrar"), false, al_cerrar);
 
-    /* Intensidad de la luz y Cerrar, en la última fila */
-    fila = lv_obj_create(capa);
-    lv_obj_remove_style_all(fila);
-    lv_obj_set_size(fila, 260, LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(fila, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(fila, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_t *brillo = boton(fila, texto_brillo(), false, al_brillo, NULL, 126);
-    lv_obj_set_style_text_font(lv_obj_get_child(brillo, 0), &radio_14, 0);  /* texto largo */
-    boton(fila, TR("Close", "Cerrar"), false, al_cerrar, NULL, 126);
+    /* Columna de iconos a la derecha, uno por fila: ubicación del tiempo y la
+     * hora, actualizar emisoras y salida de audio. Amarillos si están activos
+     * (ciudad elegida a mano, DAC externo). */
+    boton_en(X_ICONOS, Y_FILA(0), ANCHO_ICONO, "\xEF\x8F\x85", ajustes.ubicacion_fija, al_ubicacion);
+    boton_en(X_ICONOS, Y_FILA(1), ANCHO_ICONO, LV_SYMBOL_DOWNLOAD, false, al_actualizar);
+    lv_obj_t *salida = boton_en(X_ICONOS, Y_FILA(2), ANCHO_ICONO, texto_salida(), ajustes.salida_externa,
+                                al_salida);
+    if (ajustes.salida_externa) {
+        lv_obj_set_style_text_font(lv_obj_get_child(salida, 0), &radio_14, 0);
+    }
 }

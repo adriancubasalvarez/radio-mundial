@@ -130,6 +130,13 @@ char *hal_ajustes_leer(void);
 /* Guarda los ajustes (texto JSON) */
 bool hal_ajustes_guardar(const char *json);
 
+/* Emisoras propias («Mis emisoras», texto JSON). Van aparte de los ajustes
+ * (en la placa, en su propia partición «usuario»): las escribe la página de
+ * instalación por el USB y no se borran al reinstalar. NULL si no hay;
+ * liberar con free(). */
+char *hal_mis_emisoras_leer(void);
+bool hal_mis_emisoras_guardar(const char *json);
+
 /* ---------- Archivos de datos ----------
  * Las rutas son relativas a la carpeta de datos (p. ej. "mapas/mundo.bin").
  * Si hay tarjeta SD y el archivo existe en su carpeta radio/, se usa el de

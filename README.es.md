@@ -30,6 +30,7 @@ Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar�
 - Mapamundi y 9 regiones con zonas táctiles grandes (pensadas para el dedo).
 - Unas **3.700 emisoras comprobadas** de 207 países, probadas como las pide la placa.
 - **Buscador** con teclado en pantalla y **13 géneros** (pop, rock, noticias, jazz, clásica…).
+- **Mis emisoras**: añade hasta 20 emisoras propias desde la página de instalación, por USB.
 - **Favoritos**, **recientes**, **emisora aleatoria del mundo** y título de la canción que suena.
 - **Hora local** del país de la emisora (la de la capital o ciudad principal en países con varias zonas).
 - **Alarmas** que despiertan a la radio: emisora o tono propio, posponer 10 minutos y amanecer con el LED. También **temporizador para dormir**.
@@ -85,7 +86,7 @@ python tools/build_paquete.py
 **Datos**
 - Mapas: [Natural Earth](https://www.naturalearthdata.com/) (dominio público).
 - Emisoras: [radio-browser.info](https://www.radio-browser.info/), base de datos comunitaria y gratuita.
-- Tiempo y calidad del aire: [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0). Ubicación por la conexión a Internet: [ip-api.com](https://ip-api.com/). Los dos, gratis para uso no comercial y sin claves.
+- Tiempo y calidad del aire: [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0). Ubicación por la conexión a Internet: [ip-api.com](https://ip-api.com/), o la ciudad elegida en Ajustes con el [geocodificador de Open-Meteo](https://open-meteo.com/en/docs/geocoding-api). Los dos, gratis para uso no comercial y sin claves.
 
 **Fuentes**
 - [Montserrat](https://github.com/JulietaUla/Montserrat) — SIL Open Font License 1.1.

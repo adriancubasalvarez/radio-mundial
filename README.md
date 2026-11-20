@@ -30,6 +30,7 @@ From Chrome or Edge on a computer: plug the board in over USB, click "Install" a
 - World map and 9 regions with large touch zones (made for fingers).
 - About **3,700 tested stations** from 207 countries, tested the way the board requests them.
 - **Search** with an on-screen keyboard and **13 genres** (pop, rock, news, jazz, classical…).
+- **My stations**: add up to 20 stations of your own from the install page, over USB.
 - **Favorites**, **recent stations**, **random station from anywhere in the world** and the title of the song playing.
 - **Local time** of the station's country (the capital or main city in countries with several time zones).
 - **Alarms** that wake the radio from sleep: a station or a built-in tone, 10-minute snooze and an LED sunrise. **Sleep timer** too.
@@ -87,7 +88,7 @@ python tools/build_paquete.py
 **Data**
 - Maps: [Natural Earth](https://www.naturalearthdata.com/) (public domain).
 - Stations: [radio-browser.info](https://www.radio-browser.info/), a free community database.
-- Weather and air quality: [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0). Location from the internet connection: [ip-api.com](https://ip-api.com/). Both free for non-commercial use, without keys.
+- Weather and air quality: [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0). Location from the internet connection: [ip-api.com](https://ip-api.com/), or a city chosen in Settings with the [Open-Meteo geocoding API](https://open-meteo.com/en/docs/geocoding-api). Both free for non-commercial use, without keys.
 
 **Fonts**
 - [Montserrat](https://github.com/JulietaUla/Montserrat) — SIL Open Font License 1.1.

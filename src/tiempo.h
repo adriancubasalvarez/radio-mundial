@@ -2,7 +2,9 @@
  * El tiempo, la calidad del aire y la ubicación, para la pantalla de reposo.
  *
  * Sin claves ni servidores propios:
- *   - ubicación por la IP con ip-api.com (gratis para uso no comercial);
+ *   - ubicación por la IP con ip-api.com (gratis para uso no comercial),
+ *     o la ciudad elegida en Ajustes (buscada con el geocodificador de
+ *     Open-Meteo, ver ubicacion.h);
  *   - previsión y calidad del aire con Open-Meteo (open-meteo.com, gratis
  *     para uso no comercial; datos con licencia CC BY 4.0).
  * Se descarga en segundo plano cada 30 minutos, sin parar la música.
@@ -39,6 +41,10 @@ const Tiempo *tiempo_actual(void);
 /* Llamarlo en cada vuelta del bucle: lanza la descarga cuando toca y
  * recoge el resultado cuando llega */
 void tiempo_atender(void);
+
+/* La ubicación cambió en Ajustes: olvida la anterior y descarga el tiempo
+ * de la nueva en cuanto se pueda */
+void tiempo_reubicar(void);
 
 /* Símbolo (de la fuente de iconos) y texto corto para un código WMO */
 const char *tiempo_icono(int codigo, bool de_dia);
