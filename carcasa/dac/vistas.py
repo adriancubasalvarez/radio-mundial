@@ -5,7 +5,7 @@ Vistas en PNG de la mochila para revisarla sin abrir un programa de CAD
   img/mochila_con_bateria.png  igual, con la batería (azul) y el DAC (morado)
   img/conjunto.png             frontal + mochila montados
   img/mochila_fondo.png        la mochila por fuera (rejilla, cajeados, patas)
-  img/jack.png                 el lateral derecho, con el agujero del jack
+  img/jack.png                 el lateral del USB-C, con el agujero del jack
 
 Uso:  python vistas.py
 """
@@ -78,4 +78,5 @@ if __name__ == "__main__":
          "mochila_con_bateria.png")
     foto([(frontal, AMARILLO), (mochila, OCRE)], (160, -170, 90), "conjunto.png")
     foto([(mochila, AMARILLO)], (220, 60, -80), "mochila_fondo.png")
-    foto([(mochila, AMARILLO)], (40, 220, 10), "jack.png")
+    # el jack está en la pared -Y (lado del USB-C): la cámara va por ese lado
+    foto([(mochila, AMARILLO)], (40, -220, 10), "jack.png")
