@@ -1,6 +1,8 @@
 """Genera CONEXIONADO_FNK0104_DAC.pdf: cómo conectar la Freenove FNK0104
-(2,8") al DAC PCM5102A (WCMCU-5102) y al amplificador, y cómo comprobar
-los cables con los firmwares del kit.
+(2,8") al DAC PCM5102A (WCMCU-5102) con salida de línea por jack (para un
+amplificador, altavoces con AUX o auriculares), alimentado desde el 3V3 del
+conector IIC (P4) para que funcione igual con batería, y cómo comprobar los
+cables con los firmwares del kit.
 
 Uso:  python conexionado_fnk.py      (necesita matplotlib)
 """
@@ -55,7 +57,7 @@ def pagina_esquema(pdf):
     ax.set_xlim(0, 200)
     ax.set_ylim(0, 125)
     ax.axis("off")
-    fig.text(0.03, 0.955, "Radio Mundial Boombox — FNK0104 → DAC PCM5102A → amplificador",
+    fig.text(0.03, 0.955, "Radio Mundial — FNK0104 → DAC PCM5102A → salida de línea (jack)",
              fontsize=15, weight="bold", color=TITULO)
     fig.text(0.03, 0.925, "Vista de los conectores tal como los rotula la serigrafía de la placa. "
              "El orden real de los colores del cable se comprueba con el firmware «identificar».",
@@ -67,45 +69,47 @@ def pagina_esquema(pdf):
     ax.text(40, 56, "ESP32-S3, pantalla 2,8\" (vista por detrás)", ha="center", fontsize=8,
             color="#444")
     xs_io = conector(ax, 30, 95, "«I/O pin port» (P3)", ["IO2", "IO3", "IO14", "IO21"])
-    xs_ua = conector(ax, 30, 25, "«Serial port» UART (P2)", ["5V", "GND", "TXD", "RXD"],
-                     arriba=False)
-    ax.text(8, 45, "USB-C: alimentación (powerbank en las pruebas)", fontsize=7.5, ha="left",
+    xs_iic = conector(ax, 30, 25, "«IIC» (P4)", ["3V3", "GND", "SCL", "SDA"], arriba=False)
+    ax.text(8, 47, "USB-C o batería (BAT): una celda de litio,\n"
+            "o varias 18650 EN PARALELO (1S), nunca en serie", fontsize=7.5, ha="left",
             va="center", color="#444")
 
     # DAC
     caja(ax, 100, 20, 42, 80, "DAC PCM5102A", "WCMCU-5102 (puentes ya soldados)")
-    pines_dac = ["LCK", "DIN", "BCK", "GND", "VCC"]
+    pines_dac = ["LCK", "DIN", "BCK", "GND", "3.3V"]
     ys_dac = {}
     for i, p in enumerate(pines_dac):
         y = 82 - i * 11
         ax.plot(100, y, "o", ms=6, mfc="white", mec="#333", zorder=5)
         ax.text(103, y, p, va="center", fontsize=9, family="monospace")
         ys_dac[p] = y
-    ax.text(121, 30, "SCK → GND (obligatorio)\nFLT, DEMP, FMT → GND · XSMT → 3,3 V", fontsize=7,
-            ha="center", color="#444")
-    ax.text(121, 23, "VCC a 5 V solo si el DAC lleva regulador;\nsi es de 3,3 V: 3V3 del conector IIC (P4)",
-            fontsize=6.5, ha="center", color=ROJO)
+    ax.text(121, 30, "SCK («SCL» en la WCMCU) → GND (obligatorio)\nFLT, DMP, FMT → GND · XMT → 3.3V",
+            fontsize=6.5, ha="center", color="#444")
+    ax.text(121, 23, "VCC del DAC: SIN CONECTAR\n(se alimenta por su pin 3.3V)", fontsize=6.5,
+            ha="center", color=ROJO)
 
     # Cables de señal
     io2, io3, io14, io21 = xs_io
     cable(ax, [(io2, 97), (io2, 118), (90, 118), (90, ys_dac["DIN"]), (100, ys_dac["DIN"])], NARANJA)
     cable(ax, [(io14, 97), (io14, 115), (93, 115), (93, ys_dac["BCK"]), (100, ys_dac["BCK"])], AZUL)
     cable(ax, [(io21, 97), (io21, 112), (96, 112), (96, ys_dac["LCK"]), (100, ys_dac["LCK"])], VERDE)
-    # Alimentación
-    v5, gnd, tx, rx = xs_ua
-    cable(ax, [(v5, 23), (v5, 8), (84, 8), (84, ys_dac["VCC"]), (100, ys_dac["VCC"])], ROJO)
+    # Alimentación: 3V3 regulado de la placa, estable también solo con batería
+    v33, gnd, scl, sda = xs_iic
+    cable(ax, [(v33, 23), (v33, 8), (84, 8), (84, ys_dac["3.3V"]), (100, ys_dac["3.3V"])], ROJO)
     cable(ax, [(gnd, 23), (gnd, 5), (87, 5), (87, ys_dac["GND"]), (100, ys_dac["GND"])], NEGRO)
 
-    # Amplificador
-    caja(ax, 160, 45, 36, 30, "Amplificador", "TPA3116D2 · 12 V", color="#f3eee2")
+    # Salida: jack de panel hacia cualquier equipo con entrada AUX
+    caja(ax, 160, 45, 36, 30, "Jack 3,5 mm", "de panel, en la carcasa", color="#f3eee2")
     cable(ax, [(142, 60), (160, 60)], GRIS, lw=3)
-    ax.text(151, 63, "jack o L/G/R\n(como ahora)", ha="center", fontsize=7)
-    ax.text(178, 40, "→ cápsulas", ha="center", fontsize=8)
+    ax.text(151, 66, "L · G · R\n(pads de abajo\ndel DAC)", ha="center", fontsize=6.5)
+    ax.text(178, 38, "L → punta · R → anillo\nG → manga", ha="center", fontsize=7)
+    ax.text(178, 28, "→ AUX de un amplificador,\naltavoces o auriculares\n(volumen bajo al empezar)",
+            ha="center", fontsize=7, color="#444")
 
     # Leyenda
     ley = [(NARANJA, "IO2 → DIN (datos)"), (AZUL, "IO14 → BCK (reloj de bit)"),
-           (VERDE, "IO21 → LCK (izquierda/derecha)"), (ROJO, "5V → VCC (o 3V3 del P4)"), (NEGRO, "GND → GND"),
-           ("white", "IO3, TXD y RXD: sin conectar")]
+           (VERDE, "IO21 → LCK (izquierda/derecha)"), (ROJO, "3V3 (P4) → 3.3V del DAC"),
+           (NEGRO, "GND (P4) → GND"), ("white", "IO3, SCL y SDA: sin conectar (aislar)")]
     for i, (c, t) in enumerate(ley):
         ax.plot([150, 158], [108 - i * 5] * 2, color=c, lw=3)
         ax.text(160, 108 - i * 5, t, va="center", fontsize=8)
@@ -137,23 +141,30 @@ def main():
         pagina_esquema(pdf)
         pagina_texto(pdf, "Paso a paso", [
             ("0. Antes de empezar: mira tu placa DAC", [
-                "• SCK debe ir a GND: con un cable al GND o con el puente de soldadura que hay",
-                "   junto al pin SCK. Sin esto el DAC no suena (o suena mal).",
-                "• Alimentación: las placas moradas (WCMCU-5102, HENGBIRD) llevan regulador y",
-                "   aceptan 5 V del P2. Otras placas PCM5102A solo admiten 3,3 V: aliméntalas",
-                "   desde el conector IIC (P4): pin 1 = 3V3, pin 2 = GND. Si dudas, usa 3,3 V.",
+                "• SCK a GND (en la WCMCU-5102 se llama «SCL»): con un cable o con el estaño",
+                "   que lo une a GND. Sin esto el DAC no suena (o suena mal).",
+                "• FLT, DMP y FMT a GND, y XMT al pin 3.3V del propio DAC.",
+                "• Alimentación por el pin «3.3V» del DAC, desde el 3V3 del conector IIC (P4):",
+                "   es la tensión regulada de la placa y no cambia aunque la batería baje.",
+                "   El pin VCC del DAC queda SIN CONECTAR (nunca 3.3V y VCC a la vez).",
+                "• Si tu DAC no tiene pin 3.3V: VCC al «5V» del conector UART (P2). Ojo: solo",
+                "   con batería ese «5V» da la tensión de la batería (3,5-4,2 V).",
             ]),
             ("Material", [
-                "• FNK0104 de 2,8\" con táctil, el DAC PCM5102A (WCMCU-5102), el amplificador.",
+                "• FNK0104 de 2,8\" con táctil, el DAC PCM5102A (WCMCU-5102) y un jack de",
+                "   3,5 mm de panel. Opcional: batería de litio de una celda (o 18650 en",
+                "   PARALELO, con protección) en el conector BAT de la placa.",
                 "• DOS cables de 1,25 mm de 4 pines a Dupont: el kit trae uno; hace falta otro.",
-                "• Polímetro. Powerbank para alimentar la FNK0104 en las pruebas.",
+                "• Polímetro.",
             ]),
-            ("1. Identificar el cable del «Serial port» (UART)", [
-                "1. Enchufa un cable en el «Serial port» (abajo, serigrafía UART).",
+            ("1. Identificar el cable del conector «IIC» (P4)", [
+                "1. Enchufa un cable en el conector IIC (pines 3V3, GND, SCL, SDA).",
                 "2. Con la placa APAGADA, polímetro en continuidad: el cable que pita con la",
                 "   carcasa metálica del USB-C es GND. Márcalo con cinta negra.",
-                "3. Enciende la placa (USB-C). En tensión continua, negro en GND: el cable que",
-                "   da ~5 V es 5V. Márcalo con cinta roja. TXD y RXD no se usan: aíslalos.",
+                "3. Enciende la placa. En tensión continua, negro en GND: el cable que da",
+                "   ~3,3 V es 3V3. Márcalo con cinta roja.",
+                "4. SCL y SDA son el bus del táctil y del audio: AÍSLALOS BIEN. Si tocan algo,",
+                "   la pantalla dejará de responder.",
             ]),
             ("2. Identificar los cables del «I/O pin port»", [
                 "1. Enchufa el otro cable en el «I/O pin port» (arriba, serigrafía IO2 IO3 IO14 IO21).",
@@ -166,10 +177,13 @@ def main():
                 "   El cuarto cable (IO3) no da nunca 3,3 V: aíslalo, no se usa.",
                 "4. Marca cada cable (cinta o rotulador).",
             ]),
+        ])
+        pagina_texto(pdf, "Paso a paso (continuación)", [
             ("3. Conectar el DAC (con todo APAGADO)", [
-                "IO2 → DIN   IO14 → BCK   IO21 → LCK   5V (o 3V3) → VCC   GND → GND   SCK → GND",
-                "La salida del DAC (jack o L/G/R) al amplificador, como en la prueba Bluetooth.",
-                "Antes de encender: mando del amplificador BAJO.",
+                "IO2 → DIN   IO14 → BCK   IO21 → LCK   3V3 (P4) → 3.3V   GND (P4) → GND",
+                "Jack de panel a los pads L, G, R de abajo del DAC:",
+                "   L → punta   R → anillo   G → manga (el jack de la propia placa sigue valiendo).",
+                "Antes de encender: volumen del equipo conectado BAJO.",
             ]),
             ("4. Tono de prueba", [
                 "$ pio run -e tono -t upload",
@@ -178,17 +192,17 @@ def main():
                 "Si los tres suenan donde deben, los cables están bien.",
             ]),
             ("5. La radio", [
-                "Flashea el firmware del boombox (rama boombox, entorno fnk0104) y en",
-                "Ajustes pulsa el botón «DAC» (Fase 7): la radio sonará por el amplificador.",
+                "Flashea el firmware de la rama boombox (entorno fnk0104). En Ajustes, el icono",
+                "del altavoz (columna de la derecha) pasa a «DAC»: la radio suena por el jack.",
+                "Con auriculares, empieza con el volumen bajo: el DAC da salida de línea.",
             ]),
         ])
         pagina_texto(pdf, "Si algo no va", [
             ("No suena nada con el tono", [
                 "• ¿GND conectado? Sin GND común el DAC no recibe nada. Es lo primero.",
                 "• ¿SCK a GND? Si queda al aire, el DAC no saca sonido o hace ruido.",
-                "• ¿Llega tensión al DAC? Entre VCC y GND: ~5 V (o ~3,3 V si es de 3,3 V);",
-                "   en las placas con regulador, entre 3.3V y GND: ~3,3 V.",
-                "• ¿Amplificador encendido, cápsula conectada, mando subido?",
+                "• ¿Llega tensión al DAC? Entre su pin 3.3V y GND: ~3,3 V.",
+                "• ¿En Ajustes está elegido «DAC»? ¿El equipo conectado, encendido y en AUX?",
                 "• Cambia IO2 (DIN) y IO21 (LCK) de sitio si dudas: es el error más típico.",
             ]),
             ("Suena distorsionado, como «robótico» o a medias", [
@@ -196,11 +210,14 @@ def main():
                 "• Algún cable Dupont flojo: aprieta o cambia el cable.",
             ]),
             ("Izquierdo y derecho cambiados", [
-                "• Cambia los cables de las cápsulas en el amplificador (no los del DAC).",
+                "• Revisa el jack de panel: L a la punta y R al anillo.",
             ]),
             ("Zumbido o ruido de fondo agudo", [
-                "• Es el ruido de masa que ya conocemos: alimenta la FNK0104 con el powerbank.",
-                "   Para el montaje final: convertidor CC-CC aislado de 12 V a 5 V.",
+                "• Ruido de masa entre la radio y el equipo: prueba solo con batería (sin USB).",
+                "   Si así desaparece, un aislador de masa en el cable de audio lo quita.",
+            ]),
+            ("La pantalla no responde al tacto tras conectar el DAC", [
+                "• SCL o SDA del conector IIC tocan algo: aíslalos bien.",
             ]),
             ("La placa no arranca tras conectar el DAC", [
                 "• Revisa que el cable de IO3 esté libre (no conectado a nada).",

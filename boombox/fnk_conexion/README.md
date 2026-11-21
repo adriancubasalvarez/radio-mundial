@@ -3,7 +3,9 @@
 *English first — versión en español más abajo.*
 
 Everything needed to connect the Freenove FNK0104 (2.8") to a PCM5102A I2S DAC
-(WCMCU-5102) and check the wires **before** using the radio firmware.
+(WCMCU-5102) with a **3.5 mm line-out jack**, so the radio can play through any
+amplifier, speakers with an AUX input or headphones, and check the wires
+**before** using the radio firmware. It works on USB or on battery alone.
 
 | File | What it does |
 |---|---|
@@ -16,29 +18,44 @@ pio run -e identificar -t upload
 pio run -e tono -t upload
 ```
 
-| FNK0104 connector (silkscreen) | Pin | DAC |
+| FNK0104 connector (silkscreen) | Pin | DAC (WCMCU-5102) |
 |---|---|---|
 | I/O pin port (P3) | IO2 | DIN |
 | I/O pin port (P3) | IO14 | BCK |
 | I/O pin port (P3) | IO21 | LCK |
-| I/O pin port (P3) | IO3 | not connected |
-| Serial port / UART (P2) | 5V | VCC (only if the DAC board has a regulator, like the purple WCMCU-5102) |
-| Serial port / UART (P2) | GND | GND |
-| Serial port / UART (P2) | TXD, RXD | not connected |
-| IIC (P4) | 3V3, GND | VCC and GND instead, for DAC boards that only take 3.3 V |
-| — | — | **SCK → GND** (wire or solder bridge): required |
+| I/O pin port (P3) | IO3 | not connected (boot strapping pin) |
+| IIC (P4) | pin 1, 3V3 | **3.3V** pin (regulated, stable on battery too) |
+| IIC (P4) | pin 2, GND | GND |
+| IIC (P4) | SCL, SDA | not connected: **insulate them** (touch and audio bus) |
+| — | — | VCC: **not connected** (never 3.3V and VCC at the same time) |
+| — | — | **SCK → GND** (labelled «SCL» on the WCMCU-5102; wire or solder bridge): required |
+| — | — | FLT, DMP, FMT → GND · XMT → 3.3V |
+| DAC L · G · R pads | → | panel jack: L → tip, R → ring, G → sleeve |
 
 Two 1.25 mm 4-pin cables are needed (the kit includes one).
 
-**Check your DAC board first:** SCK must be tied to GND, and some PCM5102A boards only take 3.3 V (power them from P4). Thanks to Jay (@jsissom) for spotting both.
+**If your DAC board has no 3.3V pin**, power its VCC from the 5V pin of the
+Serial port (P2) instead. On battery alone that pin carries the battery
+voltage (3.5–4.2 V), not 5 V.
+
+**Battery:** one lithium cell, or several 18650 cells **in parallel (1S)** with a
+protection board, on the BAT connector. Never in series. The board charges at
+about 300 mA, so big packs take many hours to charge.
+
+**Headphones:** the PCM5102A is a line output. It works with headphones, but
+start with the volume low.
+
+Thanks to Jay (@jsissom) for spotting the SCK and 3.3 V details.
 
 ---
 
 ## En español
 
 Todo lo necesario para conectar la Freenove FNK0104 (2,8") a un DAC I2S
-PCM5102A (WCMCU-5102) y comprobar los cables **antes** de usar el firmware de
-la radio.
+PCM5102A (WCMCU-5102) con **salida de línea por jack de 3,5 mm**, para que la
+radio suene por cualquier amplificador, altavoces con entrada AUX o
+auriculares, y comprobar los cables **antes** de usar el firmware de la radio.
+Funciona con USB o solo con batería.
 
 | Archivo | Qué hace |
 |---|---|
@@ -46,9 +63,21 @@ la radio.
 | `src/identificar.cpp` | Pone a 3,3 V IO2, IO14 e IO21 por turnos (LED rojo, verde, azul) para saber, con el polímetro, qué color de cable es cada uno. |
 | `src/tono.cpp` | Toca 440 Hz por el canal izquierdo, 660 Hz por el derecho y 550 Hz por los dos a través del DAC. Si suenan bien, los cables están bien. |
 
-La tabla de conexiones es la misma de arriba. Hacen falta dos cables de
-1,25 mm y 4 pines (el kit trae uno).
+La tabla de conexiones es la misma de arriba: señales por el P3,
+alimentación por el P4 (3V3 al pin **3.3V** del DAC y GND), **VCC del DAC sin
+conectar**, SCK («SCL» en la WCMCU-5102) a GND y el jack de panel a los pads
+L, G y R. **Aísla bien SCL y SDA del P4**: son el bus del táctil y del audio.
+Hacen falta dos cables de 1,25 mm y 4 pines (el kit trae uno).
 
-**Antes de nada, mira tu placa DAC:** SCK tiene que ir a GND, y algunas placas
-PCM5102A solo admiten 3,3 V (aliméntalas desde el P4). Gracias a Jay (@jsissom)
-por avisar de las dos cosas.
+**Si tu DAC no tiene pin 3.3V**, alimenta su VCC desde el 5V del conector
+serie (P2). Solo con batería, ese pin da la tensión de la batería (3,5-4,2 V),
+no 5 V.
+
+**Batería:** una celda de litio, o varias 18650 **en paralelo (1S)** con placa
+de protección, en el conector BAT. Nunca en serie. La placa carga a unos
+300 mA: una batería grande tarda muchas horas en cargarse.
+
+**Auriculares:** el PCM5102A da salida de línea. Funciona con auriculares,
+pero empieza con el volumen bajo.
+
+Gracias a Jay (@jsissom) por avisar de lo del SCK y los 3,3 V.
