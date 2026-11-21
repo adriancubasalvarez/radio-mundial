@@ -165,7 +165,12 @@ def torres(pieza):
     for y, z in TORNILLOS:
         paso = cq.Workplane("YZ", origin=(X0, y, z)).circle(D_PASO / 2).extrude(FONDO)
         cajeado = cq.Workplane("YZ", origin=(X0 + CARNE, y, z)).circle(D_CAJEADO / 2).extrude(FONDO)
-        pieza = pieza.cut(paso).cut(cajeado)
+        # el cajeado queda a ~0,25 mm del contorno: esa lámina el laminador la
+        # ignora, así que se abre el cajeado hacia la esquina (muesca limpia)
+        sy, sz = (1 if y > 0 else -1), (1 if z > 0 else -1)
+        muesca = (cq.Workplane("YZ", origin=(X0 + CARNE, y + sy * 5, z + sz * 5))
+                  .rect(10, 10).extrude(FONDO))
+        pieza = pieza.cut(paso).cut(cajeado).cut(muesca)
     return pieza
 
 

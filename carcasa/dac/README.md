@@ -26,7 +26,7 @@ replaces the flat back cover and uses the same 4 screw holes.
 
 **Holding the parts:** **two zip ties** (up to 4.8 mm wide) around the battery: each one goes under a small bridge on each side of the battery (4 bridges inside, nothing shows outside). The DAC: a few dots of hot glue on the long edges of the board, not on the jack or the pins. No hot glue on the battery.
 
-**Screws:** 4 × M3 × 10 mm from the back, in counterbores (5 mm of the screw goes into the front).
+**Screws:** 4 × M3 × 10 mm from the back, in counterbores open towards the corner (5 mm of the screw goes into the front).
 
 **Print:** PETG, bottom of the backpack on the bed, open side up, no supports.
 
@@ -66,7 +66,7 @@ mochila sustituye a la tapa plana y usa los mismos 4 tornillos.
 
 **Sujeción:** **dos bridas** (de hasta 4,8 mm de ancho) alrededor de la batería: cada una pasa por debajo de un puentecito a cada lado (4 puentes por dentro, no se ve nada por fuera). El DAC, con unos puntos de pegamento caliente en los bordes largos de la placa, sin tocar el jack ni los pines. Nada de pegamento caliente en la batería.
 
-**Tornillos:** 4 × M3 × 10 mm por detrás, en cajeados (entran 5 mm en el frontal).
+**Tornillos:** 4 × M3 × 10 mm por detrás, en cajeados abiertos hacia la esquina (entran 5 mm en el frontal).
 
 **Impresión:** PETG, el fondo de la mochila sobre la cama, abierta hacia arriba, sin soportes.
 
