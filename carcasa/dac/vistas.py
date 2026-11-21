@@ -66,17 +66,20 @@ def foto(piezas, camara, nombre, arriba=(0, 0, 1), ancho=1100, alto=760):
 if __name__ == "__main__":
     mochila = m.mochila()
     frontal = cq.importers.importStep(str(AQUI.parent / "pequena" / "front.step"))
-    bateria = (cq.Workplane("YZ", origin=(m.X_SUELO - m.BAT_H, m.BAT_Y, m.BAT_Z))
-               .rect(m.BAT_L, m.BAT_A).extrude(m.BAT_H))
+    # batería y DAC se colocan en los ejes locales y se pasan a los del frontal
+    bateria = m.a_montaje(cq.Workplane("YZ", origin=(m.X_SUELO - m.BAT_H, m.BAT_Y, m.BAT_Z))
+                          .rect(m.BAT_L, m.BAT_A).extrude(m.BAT_H))
     cy = m.dac_centro_y()
-    dac = cq.Workplane("YZ", origin=(m.X_SUELO - 7, cy, m.DAC_Z)).rect(m.DAC_A, m.DAC_L).extrude(7)
+    dac = m.a_montaje(cq.Workplane("YZ", origin=(m.X_SUELO - 7, cy, m.DAC_Z))
+                      .rect(m.DAC_A, m.DAC_L).extrude(7))
 
     AMARILLO, OCRE = "#f2c230", "#d9a400"
-    # por dentro: cámara del lado del frontal (-X), algo por arriba
-    foto([(mochila, AMARILLO)], (-200, -60, 90), "mochila_interior.png")
-    foto([(mochila, AMARILLO), (bateria, "#3a7bd5"), (dac, "#8e44ad")], (-200, -60, 90),
+    # por dentro: cámara del lado del frontal (+X), algo por arriba
+    foto([(mochila, AMARILLO)], (200, -60, 90), "mochila_interior.png")
+    foto([(mochila, AMARILLO), (bateria, "#3a7bd5"), (dac, "#8e44ad")], (200, -60, 90),
          "mochila_con_bateria.png")
-    foto([(frontal, AMARILLO), (mochila, OCRE)], (160, -170, 90), "conjunto.png")
-    foto([(mochila, AMARILLO)], (220, 60, -80), "mochila_fondo.png")
+    # el conjunto, visto desde atrás y del lado del USB-C
+    foto([(frontal, AMARILLO), (mochila, OCRE)], (-160, -170, 90), "conjunto.png")
+    foto([(mochila, AMARILLO)], (-220, 60, -80), "mochila_fondo.png")
     # el jack está en la pared -Y (lado del USB-C): la cámara va por ese lado
-    foto([(mochila, AMARILLO)], (40, -220, 10), "jack.png")
+    foto([(mochila, AMARILLO)], (-40, -220, 10), "jack.png")

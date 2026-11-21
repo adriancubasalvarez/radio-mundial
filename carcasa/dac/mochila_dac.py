@@ -12,12 +12,18 @@ Dentro lleva, de izquierda a derecha mirando por detrás desde el USB-C:
     el LED se sigue viendo por detrás;
   - la batería (2 x 18650 en paralelo, 68 x 38 x 22 mm) tumbada a lo largo,
     entre el tubo y la pared del lado del altavoz, en una cuna de esquinas;
-  - ranuras de ventilación sobre la batería y dos patas traseras para que la
-    radio apoye nivelada sobre la mesa.
+  - el mismo borde de centrado de la tapa original, que entra en el frontal,
+    y dos patas traseras en el plano de apoyo de las delanteras (5°).
 
-Ejes (los del STEP del frontal): X = fondo (0 en la pantalla, 18 en la cara
-trasera del frontal), Y = ancho (-65..65; USB-C en -Y, altavoz en +Y),
-Z = alto (-32,5..32,5; patas hacia -Z).
+Ejes (los del STEP del frontal): X = fondo (17 en la cara de la pantalla,
+0 en el borde abierto donde apoya la tapa; la mochila va de 0 a -27,5),
+Y = ancho (-65..65; USB-C en -Y, altavoz en +Y), Z = alto (-32,5..32,5;
+patas hacia -Z, abajo).
+
+Construcción: el interior se dibuja en unos ejes «locales» con la boca en
+X = X0 y el fondo en X = X0 + FONDO, y al final se refleja (x -> X0 - x)
+para ponerlo detrás del frontal. Después se añaden el borde y las patas, ya
+en los ejes del frontal.
 
 Uso (con CadQuery instalado):   python mochila_dac.py
 Salida en esta carpeta: mochila_dac.step / .stl / .3mf (ya orientados para
@@ -33,7 +39,7 @@ AQUI = pathlib.Path(__file__).resolve().parent
 # ---------------------------------------------------------------- medidas
 # Contorno (el de la tapa plana original)
 ANCHO, ALTO, RADIO_ESQ = 130.0, 65.0, 4.0
-X0 = 18.0                  # cara trasera del frontal: aquí apoya la mochila
+X0 = 18.0                  # boca de la mochila en los ejes locales (ver arriba)
 FONDO = 27.5               # fondo total: batería (22) + brida por encima + holgura al frontal
 PARED = 2.0                # paredes laterales
 SUELO = 2.0                # pared del fondo (la que va sobre la cama)
@@ -83,13 +89,17 @@ TECHO = 1.6                # grosor del techo del puente
 PUENTE_GRUESO = 3.0        # a lo largo de Z
 PUENTE_LARGO = TUNEL_ANCHO + 2 * 1.6
 
-# DAC: 32,5 (a lo largo de Z) x 24 (a lo largo de Y), jack hacia +Y
+# DAC: 32,5 (a lo largo de Z) x 24 (a lo largo de Y), con el jack en el
+# extremo de arriba (+Z) y su boca contra la pared del lado del USB-C.
+# Medido en la primera impresión (21-nov): el centro del jack queda a unos
+# 20 mm de la cara interior de arriba y a 4 mm de la cara de abajo del PCB.
 DAC_L, DAC_A = 32.5, 24.0
 DAC_HOLGURA = 0.5
-DAC_Z = 0.0                # centro del DAC en Z
-JACK_DESDE_BORDE = 5.0     # centro del jack desde el borde «derecho» de la placa
-JACK_ALTURA = 4.0          # centro del jack sobre la cara de abajo del PCB (ajustable)
-JACK_D = 8.0               # agujero para el cable
+JACK_DESDE_BORDE = 5.0     # centro del jack desde el extremo de la placa
+JACK_Z = (ALTO / 2 - PARED) - 20.0    # = 10,5: centro del jack en Z
+DAC_Z = JACK_Z - (DAC_L / 2 - JACK_DESDE_BORDE)   # centro del DAC en Z
+JACK_ALTURA = 4.0          # centro del jack sobre la cara de abajo del PCB
+JACK_D = 6.0               # agujero redondo para la clavija
 ALTO_MARCO_DAC = 2.0       # marco bajo alrededor del DAC
 
 # Ranuras de ventilación sobre la batería: quitadas (0). La batería apenas se
@@ -98,10 +108,16 @@ ALTO_MARCO_DAC = 2.0       # marco bajo alrededor del DAC
 RANURAS = 0
 RANURA_L, RANURA_A = 44.0, 2.5
 
+# Borde de centrado: el mismo marco de la tapa original (back_cover.step),
+# 2 mm de alto, que entra en el frontal por dentro de las torres de los tornillos
+TAPA_ORIGINAL = AQUI.parent / "pequena" / "back_cover.step"
+
 # Patas traseras: siguen el plano de apoyo de las patas del frontal, que están
 # inclinadas 5° (Z = -35,1 en X = 0,9 y Z = -36,3 en X = 14,8, medido en
-# front.step). Así la radio se echa 5° hacia atrás, como la carcasa original,
-# y las cuatro patas apoyan con toda la cara.
+# front.step; la parte baja, junto a la pantalla). Así la radio se echa 5°
+# hacia atrás, como la carcasa original, y las cuatro patas apoyan con toda
+# la cara. Detrás, el plano queda solo entre 0,1 y 1 mm por debajo del fondo
+# de la mochila: las patas son tacos bajos en cuña.
 PATA_ANGULO = 5.0                    # grados
 PATA_REF_X, PATA_REF_Z = 14.8, -36.3  # un punto del plano de apoyo
 PATA_Y = 40.0              # centradas a lo ancho con las patas del frontal
@@ -220,10 +236,9 @@ def dac(pieza):
              .rect(ly, lz).extrude(ALTO_MARCO_DAC + 1))
     pieza = pieza.union(marco).cut(hueco)
     # jack: el PCB apoya en el fondo con los componentes hacia el frontal
-    x_jack = X_SUELO - JACK_ALTURA
-    z_jack = DAC_Z - (DAC_L / 2 - JACK_DESDE_BORDE)
-    agujero = (cq.Workplane("XZ", origin=(0, Y_PARED_IZDA + 1, 0)).center(x_jack, z_jack)
-               .slot2D(JACK_D + 2, JACK_D, angle=0).extrude(PARED + 3))
+    agujero = (cq.Workplane("XZ", origin=(0, Y_PARED_IZDA + 1, 0))
+               .center(X_SUELO - JACK_ALTURA, JACK_Z)
+               .circle(JACK_D / 2).extrude(PARED + 3))
     return pieza.cut(agujero)
 
 
@@ -242,10 +257,25 @@ def tubo_luz(pieza):
     return pieza.cut(agujeros)
 
 
+def a_montaje(wp):
+    """De los ejes locales a los del frontal: refleja x -> X0 - x."""
+    return wp.mirror("YZ", basePointVector=(X0 / 2, 0, 0))
+
+
+def borde_centrado(pieza):
+    """El marco de la tapa original: la parte de back_cover.step que queda por
+    debajo de su placa (x < 0 en su STEP), girada para que entre en el frontal
+    (x de 0 a 2)."""
+    tapa = cq.importers.importStep(str(TAPA_ORIGINAL))
+    corte = cq.Workplane("YZ", origin=(-5, 0, 0)).rect(200, 200).extrude(5)
+    marco = tapa.intersect(corte).mirror("YZ")
+    return pieza.union(marco)
+
+
 def patas(pieza):
-    # perfil lateral (X, Z): arriba se mete 1 mm en la pared de abajo y la
-    # cara de apoyo sigue el plano inclinado
-    xa, xb = X1 - PATA_LARGO, X1
+    # perfil lateral (X, Z), ya en los ejes del frontal: arriba se mete 1 mm
+    # en la pared de abajo y la cara de apoyo sigue el plano inclinado
+    xa, xb = -FONDO, -FONDO + PATA_LARGO
     arriba = -ALTO / 2 + 1
     perfil = [(xa, arriba), (xb, arriba), (xb, pata_z(xb)), (xa, pata_z(xa))]
     for y in (-PATA_Y, PATA_Y):
@@ -264,13 +294,16 @@ def mochila():
     p = ventilacion(p)
     p = dac(p)
     p = tubo_luz(p)
+    p = a_montaje(p)
+    p = borde_centrado(p)
     p = patas(p)
     return p
 
 
 def para_imprimir(p):
-    """Fondo sobre la cama (Z = 0), abierto hacia arriba."""
-    return p.rotate((0, 0, 0), (0, 1, 0), -90).translate((0, 0, 0))
+    """Fondo sobre la cama (Z = 0), abierto hacia arriba con el borde arriba:
+    el fondo (x = -27,5) pasa a ser la Z más baja."""
+    return p.rotate((0, 0, 0), (0, 1, 0), -90)
 
 
 if __name__ == "__main__":
