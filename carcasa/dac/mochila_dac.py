@@ -90,14 +90,15 @@ PUENTE_GRUESO = 3.0        # a lo largo de Z
 PUENTE_LARGO = TUNEL_ANCHO + 2 * 1.6
 
 # DAC: 32,5 (a lo largo de Z) x 24 (a lo largo de Y), con el jack en el
-# extremo de arriba (+Z) y su boca contra la pared del lado del USB-C.
-# Medido en la primera impresión (21-nov): el centro del jack queda a unos
-# 20 mm de la cara interior de arriba y a 4 mm de la cara de abajo del PCB.
+# extremo de abajo (-Z, el lado de las patas) y su boca contra la pared del
+# lado del USB-C. Medido en la primera impresión (21-nov, que iba montada con
+# las patas arriba): el centro del jack queda a unos 20 mm de la cara interior
+# de la pared de las patas y a 4 mm de la cara de abajo del PCB.
 DAC_L, DAC_A = 32.5, 24.0
 DAC_HOLGURA = 0.5
 JACK_DESDE_BORDE = 5.0     # centro del jack desde el extremo de la placa
-JACK_Z = (ALTO / 2 - PARED) - 20.0    # = 10,5: centro del jack en Z
-DAC_Z = JACK_Z - (DAC_L / 2 - JACK_DESDE_BORDE)   # centro del DAC en Z
+JACK_Z = -(ALTO / 2 - PARED) + 20.0   # = -10,5: centro del jack en Z
+DAC_Z = JACK_Z + (DAC_L / 2 - JACK_DESDE_BORDE)   # centro del DAC en Z
 JACK_ALTURA = 4.0          # centro del jack sobre la cara de abajo del PCB
 JACK_D = 6.0               # agujero redondo para la clavija
 ALTO_MARCO_DAC = 2.0       # marco bajo alrededor del DAC
