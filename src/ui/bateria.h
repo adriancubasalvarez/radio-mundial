@@ -11,6 +11,10 @@
  * antes de construir la primera pantalla) */
 void bateria_iniciar(void);
 
+/* true si hay batería conectada (interruptor encendido), según la última
+ * lectura */
+bool bateria_conectada(void);
+
 /* true si se ve algún icono (batería o WiFi) */
 bool bateria_hay(void);
 

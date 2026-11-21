@@ -48,6 +48,8 @@ typedef struct {
     uint8_t luz;              /* ModoLuz (luz.h): apagada, estado o al ritmo */
     uint8_t luz_brillo;       /* intensidad del LED: 0 baja, 1 media, 2 alta */
     bool salida_externa;      /* audio por un DAC externo (I2S) en lugar del altavoz */
+    bool bateria_vista;       /* alguna vez hubo batería conectada: solo entonces se
+                                 avisa de que el interruptor está apagado */
     bool hay_ultima;
     EmisoraGuardada ultima;
     EmisoraGuardada favoritos[MAX_FAVORITOS];

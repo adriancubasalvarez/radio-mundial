@@ -244,3 +244,10 @@ enum BatteryLevel {
 
 /* Get battery level with hysteresis */
 BatteryLevel getBatteryLevel();
+
+/* true si hay una batería conectada (interruptor encendido). Se sabe por el
+ * rizado de la tensión en la entrada de batería: sin batería, el cargador deja
+ * un rizado grande (~17 mV); con batería, casi nada (~2 mV). En una radio
+ * que nunca ha tenido batería devuelve siempre false. Tarda ~40 ms.
+ * En el simulador, true salvo con RADIO_BATERIA=x (interruptor apagado). */
+bool hal_bateria_conectada(void);

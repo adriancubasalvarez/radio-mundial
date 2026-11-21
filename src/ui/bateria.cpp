@@ -5,6 +5,10 @@
  *   - Batería: getBatteryLevel() (el ADC (Analog-to-Digital Converter) de la
  *     placa). Si hay batería y no está llena, se muestra su icono; sin
  *     batería o llena, no.
+ *   - Interruptor de la batería: hal_bateria_conectada(). Si la radio ha
+ *     tenido alguna vez batería (ajustes.bateria_vista) y ahora no la ve, el
+ *     interruptor está apagado: batería gris con una ✕ (va solo con el USB, la
+ *     batería ni se carga ni se usa). En una radio sin batería nunca sale.
  *   - WiFi: hal_red_senal(), la señal en dBm. Con buena señal no se muestra
  *     nada; débil, el icono en amarillo; sin conexión, en rojo. Así se ve si
  *     la radio pierde la WiFi por estar lejos del router.
@@ -26,6 +30,7 @@
 #include "bateria.h"
 #include "comun.h"
 #include "hal.h"
+#include "ajustes.h"
 
 #include <lvgl.h>
 #include <stdio.h>
@@ -53,6 +58,8 @@ typedef enum { WIFI_BIEN, WIFI_DEBIL, WIFI_SIN } NivelWifi;
 static lv_obj_t *icono;       /* batería */
 static lv_obj_t *icono_wifi;
 static BatteryLevel nivel = BAT_LEVEL_FULL;  /* nivel actual, para no actualizar si no cambia */
+static bool conectada = true;           /* hay batería (interruptor encendido) */
+static bool interruptor_apagado = false; /* se ve la batería con la ✕ */
 static NivelWifi nivel_wifi = WIFI_BIEN;
 static lv_coord_t ancho_reserva = 0;
 
@@ -67,6 +74,13 @@ static const char *simbolo(BatteryLevel n)
     }
 }
 
+/* Texto del icono de batería: su nivel o, con el interruptor apagado,
+ * la batería vacía con una ✕ */
+static const char *texto_bateria(void)
+{
+    return interruptor_apagado ? LV_SYMBOL_BATTERY_EMPTY LV_SYMBOL_CLOSE : simbolo(nivel);
+}
+
 static lv_coord_t ancho_texto(const char *texto)
 {
     return lv_txt_get_width(texto, strlen(texto), &radio_20, 0, LV_TEXT_FLAG_NONE);
@@ -76,16 +90,18 @@ static lv_coord_t ancho_texto(const char *texto)
  * ancho que deben reservar las pantallas */
 static void colocar(void)
 {
-    bool hay_bateria = nivel != BAT_LEVEL_FULL;
+    bool hay_bateria = nivel != BAT_LEVEL_FULL || interruptor_apagado;
     bool hay_wifi = nivel_wifi != WIFI_BIEN;
     lv_coord_t x_wifi = MARGEN_X;
     if (hay_bateria) {
-        x_wifi = MARGEN_X + ancho_texto(simbolo(nivel)) + ENTRE_ICONOS;
+        x_wifi = MARGEN_X + ancho_texto(texto_bateria()) + ENTRE_ICONOS;
     }
     lv_obj_align(icono_wifi, LV_ALIGN_BOTTOM_LEFT, x_wifi, -MARGEN_Y);
 
     if (hay_wifi) {
         ancho_reserva = x_wifi + ancho_texto(LV_SYMBOL_WIFI) + 2;
+    } else if (interruptor_apagado) {
+        ancho_reserva = MARGEN_X + ancho_texto(texto_bateria()) + 2;
     } else if (hay_bateria) {
         ancho_reserva = ALTO_RESERVA;  /* como antes, con solo la batería */
     } else {
@@ -95,11 +111,25 @@ static void colocar(void)
 
 static bool mirar_bateria(void)
 {
+    conectada = hal_bateria_conectada();
+    if (conectada && !ajustes.bateria_vista) {
+        ajustes.bateria_vista = true;  /* desde ahora, avisar si se apaga el interruptor */
+        ajustes_guardar();
+    }
+    bool apagado = !conectada && ajustes.bateria_vista;
     BatteryLevel nuevo = getBatteryLevel();
-    if (nuevo == nivel) {
+    if (nuevo == nivel && apagado == interruptor_apagado) {
         return false;
     }
     nivel = nuevo;
+    interruptor_apagado = apagado;
+
+    if (interruptor_apagado) {
+        lv_obj_clear_flag(icono, LV_OBJ_FLAG_HIDDEN);
+        lv_label_set_text(icono, texto_bateria());
+        lv_obj_set_style_text_color(icono, lv_color_hex(COLOR_SECUNDARIO), 0);
+        return true;
+    }
 
     /* sin batería, o cargada a tope: no se muestra nada */
     if (nivel == BAT_LEVEL_FULL) {
@@ -182,7 +212,12 @@ void bateria_iniciar(void)
 bool bateria_hay(void)
 {
     /* sin nada que avisar no hay icono que reservar */
-    return nivel != BAT_LEVEL_FULL || nivel_wifi != WIFI_BIEN;
+    return nivel != BAT_LEVEL_FULL || interruptor_apagado || nivel_wifi != WIFI_BIEN;
+}
+
+bool bateria_conectada(void)
+{
+    return conectada;
 }
 
 lv_coord_t bateria_reserva(void)

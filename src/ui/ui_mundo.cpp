@@ -257,9 +257,11 @@ void ui_inicio(void)
                                              true, &radio_14);
     lv_disp_set_theme(disp, tema);
 
-    bateria_iniciar();  /* icono de batería, encima de cualquier pantalla */
-
     ajustes_cargar();
+    /* Iconos de batería y WiFi, encima de cualquier pantalla. DESPUÉS de
+     * cargar los ajustes: la batería puede guardarlos (bateria_vista) y,
+     * antes de cargarlos, se guardarían vacíos y se perdería todo */
+    bateria_iniciar();
     audio_salida(ajustes.salida_externa);
     audio_volumen(ajustes.volumen);
 

@@ -96,6 +96,7 @@ void ajustes_cargar(void)
         ajustes.luz_brillo = 0;
     }
     ajustes.salida_externa = doc["salida_externa"] | false;
+    ajustes.bateria_vista = doc["bateria_vista"] | false;
     /* Idioma: "en" o "es"; si no está, el primer arranque lo pregunta */
     const char *idioma = doc["idioma"] | "";
     ajustes.idioma_elegido = idioma[0] != '\0';
@@ -165,6 +166,7 @@ void ajustes_guardar(void)
     doc["luz"] = ajustes.luz;
     doc["luz_brillo"] = ajustes.luz_brillo;
     doc["salida_externa"] = ajustes.salida_externa;
+    doc["bateria_vista"] = ajustes.bateria_vista;
     if (ajustes.idioma_elegido) {
         doc["idioma"] = ajustes.espanol ? "es" : "en";
     }

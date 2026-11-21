@@ -13,6 +13,7 @@
 #include "nav.h"
 #include "comun.h"
 #include "ajustes.h"
+#include "bateria.h"
 #include "alarmas.h"
 #include "hal.h"
 #include "idioma.h"
@@ -245,6 +246,10 @@ static void al_tocar_diag(lv_event_t *e)
     quitar_temporizador_borrar();
     hal_reinicios_borrar();
     hal_red_cortes_borrar();
+    /* y se olvida la batería: si sigue conectada, se vuelve a ver en 5 s;
+     * si se quitó para siempre, ya no sale la batería con la ✕ */
+    ajustes.bateria_vista = false;
+    ajustes_guardar();
     /* se oculta en vez de borrarlo: estamos dentro de su propio evento */
     lv_obj_add_flag(etiqueta_diag, LV_OBJ_FLAG_HIDDEN);
 }
@@ -268,7 +273,15 @@ static void diagnostico(lv_obj_t *padre)
     if (cortes > 0) {
         size_t usado = strlen(texto);
         snprintf(texto + usado, tam - usado, "%s%s %u", usado > 0 ? "\n" : "",
-                 TR("Wi-Fi drops:", "Cortes de WiFi:"), (unsigned)cortes);
+                 TR("Wi-Fi drops:", "Cortes WiFi:"), (unsigned)cortes);
+    }
+    /* Interruptor de la batería, si la radio ha tenido batería alguna vez:
+     * en la misma línea que los cortes (o en una nueva) */
+    if (ajustes.bateria_vista) {
+        size_t usado = strlen(texto);
+        const char *separador = cortes > 0 ? " · " : (usado > 0 ? "\n" : "");
+        snprintf(texto + usado, tam - usado, "%s%s", separador,
+                 bateria_conectada() ? LV_SYMBOL_BATTERY_FULL " ON" : LV_SYMBOL_BATTERY_EMPTY " OFF");
     }
     if (texto[0] == '\0') {
         return;
