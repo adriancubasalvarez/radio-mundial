@@ -166,10 +166,14 @@ def torres(pieza):
         paso = cq.Workplane("YZ", origin=(X0, y, z)).circle(D_PASO / 2).extrude(FONDO)
         cajeado = cq.Workplane("YZ", origin=(X0 + CARNE, y, z)).circle(D_CAJEADO / 2).extrude(FONDO)
         # el cajeado queda a ~0,25 mm del contorno: esa lámina el laminador la
-        # ignora, así que se abre el cajeado hacia la esquina (muesca limpia)
+        # ignora, así que se abre hacia la esquina con un rebaje de lados
+        # rectos tangentes al cajeado (sin filos donde corta la esquina)
         sy, sz = (1 if y > 0 else -1), (1 if z > 0 else -1)
-        muesca = (cq.Workplane("YZ", origin=(X0 + CARNE, y + sy * 5, z + sz * 5))
-                  .rect(10, 10).extrude(FONDO))
+        r = D_CAJEADO / 2
+        muesca = (cq.Workplane("YZ", origin=(X0 + CARNE, y + sy * (10 - r) / 2, z + sz * 5))
+                  .rect(10 + r, 10).extrude(FONDO)
+                  .union(cq.Workplane("YZ", origin=(X0 + CARNE, y + sy * 5, z + sz * (10 - r) / 2))
+                         .rect(10, 10 + r).extrude(FONDO)))
         pieza = pieza.cut(paso).cut(cajeado).cut(muesca)
     return pieza
 
