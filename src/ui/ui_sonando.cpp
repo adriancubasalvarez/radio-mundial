@@ -111,6 +111,7 @@ static void empezar(void)
 static void parar(void)
 {
     audio_parar();
+    ajustes_recordar_parada();  /* parada a propósito: que no vuelva a sonar sola */
     nav.hay_sonando = false;
     lv_label_set_text(icono_boton, LV_SYMBOL_PLAY);
     mostrar_estado(TR("Stopped", "Parado"), COLOR_SECUNDARIO);

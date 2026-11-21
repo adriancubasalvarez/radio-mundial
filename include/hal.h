@@ -88,6 +88,18 @@ void hal_apagar(uint32_t segundos);
 /* true si esta vez ha despertado el temporizador de una alarma, no un toque */
 bool hal_despertado_por_alarma(void);
 
+/* Reinicios inesperados (fallo del programa, perro guardián o bajada de
+ * tensión), guardados en la memoria permanente para saber si la radio se
+ * reinicia sola y por qué. minuto_del_dia: hora aproximada del último
+ * (hora * 60 + minuto), o -1 si no se sabía la hora. En el simulador, 0. */
+typedef struct {
+    uint16_t veces;
+    char motivo[12];
+    int minuto_del_dia;
+} Reinicios;
+
+void hal_reinicios(Reinicios *r);
+
 /* LED RGB de la placa, 0..255 por color (en placas sin LED no hace nada) */
 void hal_led(uint8_t r, uint8_t g, uint8_t b);
 

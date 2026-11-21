@@ -19,6 +19,7 @@
 #include "luz.h"
 
 #include <lvgl.h>
+#include <stdio.h>
 #include <string.h>
 
 #define X_IZQUIERDA    8
@@ -190,6 +191,30 @@ static void deslizador_apagar(lv_obj_t *padre)
     lv_obj_center(etiqueta);
 }
 
+/* Arriba a la derecha, en pequeño, los reinicios inesperados (si los hay):
+ * cuántos, por qué el último y a qué hora más o menos. Para saber si la radio
+ * se reinicia sola, por ejemplo de noche */
+static void reinicios(lv_obj_t *padre)
+{
+    Reinicios r;
+    hal_reinicios(&r);
+    if (r.veces == 0) {
+        return;
+    }
+    char texto[48];
+    if (r.minuto_del_dia >= 0) {
+        snprintf(texto, sizeof(texto), LV_SYMBOL_REFRESH " %u · %s · %02d:%02d", (unsigned)r.veces, r.motivo,
+                 r.minuto_del_dia / 60, r.minuto_del_dia % 60);
+    } else {
+        snprintf(texto, sizeof(texto), LV_SYMBOL_REFRESH " %u · %s", (unsigned)r.veces, r.motivo);
+    }
+    lv_obj_t *etiqueta = lv_label_create(padre);
+    lv_label_set_text(etiqueta, texto);
+    lv_obj_set_style_text_font(etiqueta, &radio_14, 0);
+    lv_obj_set_style_text_color(etiqueta, lv_color_hex(COLOR_SECUNDARIO), 0);
+    lv_obj_align(etiqueta, LV_ALIGN_TOP_RIGHT, -8, 16);
+}
+
 static lv_obj_t *boton(lv_obj_t *padre, const char *texto, bool marcado, lv_event_cb_t accion, void *dato,
                        lv_coord_t ancho = 260)
 {
@@ -238,6 +263,7 @@ void ui_ajustes_abrir(void)
     lv_obj_set_style_text_font(titulo, &radio_20, 0);
     lv_obj_set_style_text_color(titulo, lv_color_hex(COLOR_ACENTO), 0);
     lv_obj_set_pos(titulo, X_IZQUIERDA + 4, 12);
+    reinicios(capa);
 
     /* Botones grandes, a la izquierda, en dos columnas */
     const lv_coord_t x1 = X_IZQUIERDA, x2 = X_IZQUIERDA + ANCHO_BOTON + SEPARACION;

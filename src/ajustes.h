@@ -41,6 +41,8 @@ typedef struct {
     uint8_t volumen;          /* 0..100 */
     uint16_t reposo_s;        /* segundos sin tocar hasta el reposo (0 = nunca) */
     bool reanudar;            /* al arrancar, volver a poner la última emisora */
+    bool sonaba;              /* la última vez sonaba: si el usuario la paró, al
+                                 arrancar (o tras un reinicio) no vuelve a sonar */
     bool idioma_elegido;      /* false: el primer arranque pregunta el idioma */
     bool espanol;             /* idioma: true español, false inglés */
     uint8_t luz;              /* ModoLuz (luz.h): apagada, estado o al ritmo */
@@ -77,6 +79,9 @@ void ajustes_poner_idioma(bool espanol);
 
 /* Recuerda la emisora que está sonando y guarda */
 void ajustes_recordar_ultima(const Emisora *emisora, const Pais *pais);
+
+/* El usuario ha parado la radio: al arrancar no vuelve a sonar sola */
+void ajustes_recordar_parada(void);
 
 /* Una emisora no llegó a sonar (con la WiFi bien): se anota y se guarda */
 void ajustes_anotar_fallo(const char *url);

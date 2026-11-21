@@ -11,6 +11,8 @@ bool archivos_iniciar(void);
 void red_iniciar(void);
 void red_atender(void);
 void audio_iniciar(void);
+void reinicios_iniciar(void);
+void reinicios_atender(void);
 
 /* Informe de memoria por el puerto serie cada cierto tiempo */
 #define PERIODO_INFORME 10000
@@ -31,6 +33,7 @@ void setup()
     Serial.println("=== Radio Mundial ===");
     Serial.printf("Motivo de arranque: reinicio %d, despertar %d\n", (int)esp_reset_reason(),
                   (int)esp_sleep_get_wakeup_cause());
+    reinicios_iniciar();
     Serial.printf("Memoria libre al arrancar: %u bytes (bloque mayor %u)\n",
                   (unsigned)ESP.getFreeHeap(), (unsigned)ESP.getMaxAllocHeap());
     Serial.printf("PSRAM: %u bytes (libres %u)\n", (unsigned)ESP.getPsramSize(), (unsigned)ESP.getFreePsram());
@@ -52,6 +55,7 @@ void loop()
 {
     app_bucle();
     red_atender();
+    reinicios_atender();
 
     static uint32_t ultimo = 0;
     if (millis() - ultimo > PERIODO_INFORME) {

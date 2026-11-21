@@ -61,6 +61,7 @@ void ajustes_cargar(void)
     ajustes.volumen = 70;
     ajustes.reposo_s = 120;
     ajustes.reanudar = true;
+    ajustes.sonaba = true;
     ajustes.luz = LUZ_RITMO;
     ajustes.luz_brillo = 0;
 
@@ -85,6 +86,7 @@ void ajustes_cargar(void)
     ajustes.volumen = doc["volumen"] | ajustes.volumen;
     ajustes.reposo_s = doc["reposo"] | ajustes.reposo_s;
     ajustes.reanudar = doc["reanudar"] | ajustes.reanudar;
+    ajustes.sonaba = doc["sonaba"] | ajustes.sonaba;
     ajustes.luz = doc["luz"] | ajustes.luz;
     if (ajustes.luz >= NUM_MODOS_LUZ) {
         ajustes.luz = LUZ_RITMO;
@@ -159,6 +161,7 @@ void ajustes_guardar(void)
     doc["volumen"] = ajustes.volumen;
     doc["reposo"] = ajustes.reposo_s;
     doc["reanudar"] = ajustes.reanudar;
+    doc["sonaba"] = ajustes.sonaba;
     doc["luz"] = ajustes.luz;
     doc["luz_brillo"] = ajustes.luz_brillo;
     doc["salida_externa"] = ajustes.salida_externa;
@@ -248,8 +251,17 @@ void ajustes_recordar_ultima(const Emisora *emisora, const Pais *pais)
 {
     guardada(&ajustes.ultima, emisora, pais);
     ajustes.hay_ultima = true;
+    ajustes.sonaba = true;
     recordar_reciente(&ajustes.ultima);
     ajustes_guardar();
+}
+
+void ajustes_recordar_parada(void)
+{
+    if (ajustes.sonaba) {
+        ajustes.sonaba = false;
+        ajustes_guardar();
+    }
 }
 
 #define FALLOS_PARA_BAJAR 2

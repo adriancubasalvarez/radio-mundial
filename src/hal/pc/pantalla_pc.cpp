@@ -169,6 +169,12 @@ bool hal_despertado_por_alarma(void)
     return false;
 }
 
+/* El simulador no se reinicia solo: sin reinicios que contar */
+void hal_reinicios(Reinicios *r)
+{
+    memset(r, 0, sizeof(*r));
+}
+
 void hal_apagar(uint32_t segundos)
 {
     printf("Apagada (simulador): se cierra la ventana; despertaría en %u s\n", (unsigned)segundos);
