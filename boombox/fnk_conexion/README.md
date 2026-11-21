@@ -35,6 +35,15 @@ pio run -e tono -t upload
 
 Two 1.25 mm 4-pin cables are needed (the kit includes one).
 
+**Usual wire colours of the kit cable** (red, black, yellow, green; pin 1 is
+marked with a small triangle on the left of the connector). **Always check
+them** with a multimeter and the `identificar` firmware:
+
+| Connector | Red | Black | Yellow | Green |
+|---|---|---|---|---|
+| I2C | 3.3V | GND | SCL (insulate) | SDA (insulate) |
+| IO2 IO3 IO14 IO21 | IO2 → DIN | **IO3 (insulate: not ground!)** | IO14 → BCK | IO21 → LCK |
+
 **If your DAC board has no 3.3V pin**, power its VCC from the 5V pin of the
 UART connector (P2) instead. On battery alone that pin carries the battery
 voltage (3.5–4.2 V), not 5 V.
@@ -77,6 +86,15 @@ los conectores se llaman así:
 panel a los pads L, G y R. **Aísla bien SCL y SDA del I2C**: son el bus del
 táctil y del audio. Hacen falta dos cables de 1,25 mm y 4 pines (el kit trae
 uno).
+
+**Colores habituales del cable del kit** (rojo, negro, amarillo y verde; el pin
+1 lleva un triángulo pequeño a la izquierda del conector). **Compruébalos
+siempre** con el polímetro y el firmware `identificar`:
+
+| Conector | Rojo | Negro | Amarillo | Verde |
+|---|---|---|---|---|
+| I2C | 3.3V | GND | SCL (aislar) | SDA (aislar) |
+| IO2 IO3 IO14 IO21 | IO2 → DIN | **IO3 (aislar: ¡no es masa!)** | IO14 → BCK | IO21 → LCK |
 
 **Si tu DAC no tiene pin 3.3V**, alimenta su VCC desde el 5V del conector
 UART (P2). Solo con batería, ese pin da la tensión de la batería (3,5-4,2 V),
