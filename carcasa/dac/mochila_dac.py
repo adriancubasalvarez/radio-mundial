@@ -269,7 +269,26 @@ def borde_centrado(pieza):
     tapa = cq.importers.importStep(str(TAPA_ORIGINAL))
     corte = cq.Workplane("YZ", origin=(-5, 0, 0)).rect(200, 200).extrude(5)
     marco = tapa.intersect(corte).mirror("YZ")
-    return pieza.union(marco)
+    # En la tapa original el marco se apoyaba en su placa; aquí la boca está
+    # abierta y quedaría flotando a 1,7 mm de las paredes. Repisa que lo une a
+    # las paredes: plana en la boca (x = 0) desde la pared hasta el borde
+    # interior del marco, y en chaflán de 45° por debajo (sin soportes al
+    # imprimir con la boca hacia arriba).
+    hueco = marco.faces("<X").val().innerWires()[0].BoundingBox()
+    iy, iz = hueco.ylen, hueco.zlen                       # 119,6 x 54,6
+    py, pz = ANCHO - 2 * PARED, ALTO - 2 * PARED          # 126 x 61
+    vuelo = (py - iy) / 2
+    repisa = (cq.Workplane("YZ", origin=(-vuelo, 0, 0)).rect(py, pz)
+              .extrude(vuelo))
+    chaflan = (cq.Workplane("YZ", origin=(0, 0, 0)).rect(iy, iz)
+               .workplane(offset=-vuelo - 0.01).rect(py, pz).loft())
+    repisa = repisa.cut(chaflan)
+    pieza = pieza.union(repisa).union(marco)
+    # vuelve a abrir el paso de los tornillos a través de la repisa
+    for y, z in TORNILLOS:
+        paso = cq.Workplane("YZ", origin=(-vuelo - 1, y, z)).circle(D_PASO / 2).extrude(vuelo + 4)
+        pieza = pieza.cut(paso)
+    return pieza
 
 
 def patas(pieza):
