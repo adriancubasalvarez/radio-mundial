@@ -100,7 +100,7 @@ JACK_DESDE_BORDE = 5.0     # centro del jack desde el extremo de la placa
 JACK_Z = -(ALTO / 2 - PARED) + 20.0   # = -10,5: centro del jack en Z
 DAC_Z = JACK_Z + (DAC_L / 2 - JACK_DESDE_BORDE)   # centro del DAC en Z
 JACK_ALTURA = 4.0          # centro del jack sobre la cara de abajo del PCB
-JACK_D = 6.0               # agujero redondo para la clavija
+JACK_D = 10.0              # agujero redondo: deja entrar la goma de la clavija (8 mm)
 ALTO_MARCO_DAC = 2.0       # marco bajo alrededor del DAC
 
 # Ranuras de ventilación sobre la batería: quitadas (0). La batería apenas se

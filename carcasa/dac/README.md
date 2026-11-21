@@ -16,7 +16,7 @@ replaces the flat back cover and uses the same 4 screw holes.
 | `vistas.py` | Renders the views in `img/` |
 
 **Inside** (from the USB-C side):
-- **DAC:** WCMCU-5102 (32.5 × 24 mm) in a low frame, with its jack at the bottom end (the feet side), flush against the wall on the USB-C side, so every cable comes out on the same side. Round **6 mm** hole for the plug, centred 20 mm above the inside of the bottom wall and 4 mm above the bottom of the board (measured on the first print).
+- **DAC:** WCMCU-5102 (32.5 × 24 mm) in a low frame, with its jack at the bottom end (the feet side), flush against the wall on the USB-C side, so every cable comes out on the same side. Round **10 mm** hole, so the plug's 8 mm rubber body goes in, centred 20 mm above the inside of the bottom wall and 4 mm above the bottom of the board (measured on the first print).
 - **Round light tube** (Ø30 mm) behind the board's RGB LED (46 mm from the USB-C edge of the board), with **19 holes of 4 mm** in rings (like the original back cover, but fewer and bigger), all inside the tube: the LED still shows through the back.
 - **Battery:** 2 × 18650 **in parallel** (1S, 68 × 38 × 22 mm, with 1 mm clearance), lying between the light tube and the speaker-side wall. The tube and the side wall stop it lengthwise, and small stops above and below keep it in place.
 - **Battery switch:** a small rocker switch (body 20 × 13 mm, 23 mm deep) lying sideways in the back, above the light tube. It cuts the battery's + wire: switched off, nothing drains the battery, but USB-C cannot charge it either. Snap-in, 20.4 × 13.4 mm hole. If it has a light, leave its third pin unconnected.
@@ -57,7 +57,7 @@ mochila sustituye a la tapa plana y usa los mismos 4 tornillos.
 | `vistas.py` | Genera las vistas de `img/` |
 
 **Dentro** (desde el lado del USB-C):
-- **DAC:** WCMCU-5102 (32,5 × 24 mm) en un marco bajo, con el jack en el extremo de abajo (el lado de las patas), a ras de la pared del lado del USB-C: todos los cables salen por el mismo lado. Agujero **redondo de 6 mm** para la clavija, con el centro a 20 mm de la cara interior de abajo y a 4 mm de la cara de abajo de la placa (medido en la primera impresión).
+- **DAC:** WCMCU-5102 (32,5 × 24 mm) en un marco bajo, con el jack en el extremo de abajo (el lado de las patas), a ras de la pared del lado del USB-C: todos los cables salen por el mismo lado. Agujero **redondo de 10 mm**, para que entre la goma de 8 mm de la clavija, con el centro a 20 mm de la cara interior de abajo y a 4 mm de la cara de abajo de la placa (medido en la primera impresión).
 - **Tubo de luz redondo** (Ø30 mm) detrás del LED RGB de la placa (a 46 mm del borde del USB-C), con **19 agujeros de 4 mm** en anillos (como la tapa original, pero menos y más grandes), todos dentro del tubo: el LED se sigue viendo por detrás.
 - **Batería:** 2 × 18650 **en paralelo** (1S, 68 × 38 × 22 mm, con 1 mm de holgura), tumbada entre el tubo de luz y la pared del lado del altavoz. El tubo y la pared la frenan a lo largo, y unos topes arriba y abajo la sujetan.
 - **Interruptor de la batería:** un basculante pequeño (cuerpo de 20 × 13 mm y 23 mm de fondo) tumbado en el fondo, encima del tubo de luz. Corta el cable + de la batería: apagado no gasta nada, pero tampoco carga por USB-C. Va a presión en un agujero de 20,4 × 13,4 mm. Si tiene luz, la tercera pata se deja sin conectar.
