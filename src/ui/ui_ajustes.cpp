@@ -32,8 +32,23 @@
 
 static lv_obj_t *capa;
 
+/* Texto de diagnóstico (reinicios y cortes) y el plazo para confirmar su borrado */
+static lv_obj_t *etiqueta_diag;
+static char texto_diag[96];
+static lv_timer_t *temporizador_borrar;
+
+static void quitar_temporizador_borrar(void)
+{
+    if (temporizador_borrar != NULL) {
+        lv_timer_del(temporizador_borrar);
+        temporizador_borrar = NULL;
+    }
+}
+
 static void cerrar(void)
 {
+    quitar_temporizador_borrar();
+    etiqueta_diag = NULL;
     if (capa != NULL) {
         lv_obj_del_async(capa);
         capa = NULL;
@@ -191,28 +206,80 @@ static void deslizador_apagar(lv_obj_t *padre)
     lv_obj_center(etiqueta);
 }
 
-/* Arriba a la derecha, en pequeño, los reinicios inesperados (si los hay):
- * cuántos, por qué el último y a qué hora más o menos. Para saber si la radio
- * se reinicia sola, por ejemplo de noche */
-static void reinicios(lv_obj_t *padre)
+/* Arriba a la derecha, en pequeño, lo que ayuda a saber si algo va mal (solo
+ * si lo hay):
+ *   - reinicios inesperados: cuántos, por qué el último y a qué hora más o
+ *     menos (por ejemplo, si la radio se reinicia sola de noche);
+ *   - cortes de la WiFi desde que se encendió (si está lejos del router).
+ * Para borrarlos, se toca el texto: pide confirmación («¿Borrar? Toca otra
+ * vez») y, si se vuelve a tocar antes de TIEMPO_BORRAR, se borran; si no,
+ * vuelve a como estaba. Así no se borran por un toque sin querer. */
+#define TIEMPO_BORRAR 3000  /* ms para confirmar */
+
+static void mostrar_diag(const char *texto, uint32_t color)
 {
-    Reinicios r;
-    hal_reinicios(&r);
-    if (r.veces == 0) {
+    lv_label_set_text(etiqueta_diag, texto);
+    lv_obj_set_style_text_color(etiqueta_diag, lv_color_hex(color), 0);
+    /* una línea, a la altura del título; dos, una encima y otra debajo */
+    lv_obj_align(etiqueta_diag, LV_ALIGN_TOP_RIGHT, -8, strchr(texto, '\n') != NULL ? 6 : 16);
+}
+
+static void al_caducar_borrar(lv_timer_t *t)
+{
+    (void)t;
+    temporizador_borrar = NULL;  /* de una sola vez: LVGL lo borra al acabar */
+    if (etiqueta_diag != NULL) {
+        mostrar_diag(texto_diag, COLOR_SECUNDARIO);
+    }
+}
+
+static void al_tocar_diag(lv_event_t *e)
+{
+    (void)e;
+    if (temporizador_borrar == NULL) {
+        mostrar_diag(TR("Clear? Tap again", "¿Borrar? Toca otra vez"), COLOR_ACENTO);
+        temporizador_borrar = lv_timer_create(al_caducar_borrar, TIEMPO_BORRAR, NULL);
+        lv_timer_set_repeat_count(temporizador_borrar, 1);
         return;
     }
-    char texto[48];
-    if (r.minuto_del_dia >= 0) {
-        snprintf(texto, sizeof(texto), LV_SYMBOL_REFRESH " %u · %s · %02d:%02d", (unsigned)r.veces, r.motivo,
-                 r.minuto_del_dia / 60, r.minuto_del_dia % 60);
-    } else {
-        snprintf(texto, sizeof(texto), LV_SYMBOL_REFRESH " %u · %s", (unsigned)r.veces, r.motivo);
+    quitar_temporizador_borrar();
+    hal_reinicios_borrar();
+    hal_red_cortes_borrar();
+    /* se oculta en vez de borrarlo: estamos dentro de su propio evento */
+    lv_obj_add_flag(etiqueta_diag, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void diagnostico(lv_obj_t *padre)
+{
+    char *texto = texto_diag;
+    texto[0] = '\0';
+    size_t tam = sizeof(texto_diag);
+    Reinicios r;
+    hal_reinicios(&r);
+    if (r.veces > 0) {
+        if (r.minuto_del_dia >= 0) {
+            snprintf(texto, tam, LV_SYMBOL_REFRESH " %u · %s · %02d:%02d", (unsigned)r.veces, r.motivo,
+                     r.minuto_del_dia / 60, r.minuto_del_dia % 60);
+        } else {
+            snprintf(texto, tam, LV_SYMBOL_REFRESH " %u · %s", (unsigned)r.veces, r.motivo);
+        }
     }
-    lv_obj_t *etiqueta = lv_label_create(padre);
-    lv_label_set_text(etiqueta, texto);
-    lv_obj_set_style_text_font(etiqueta, &radio_14, 0);
-    lv_obj_set_style_text_color(etiqueta, lv_color_hex(COLOR_SECUNDARIO), 0);
-    lv_obj_align(etiqueta, LV_ALIGN_TOP_RIGHT, -8, 16);
+    uint16_t cortes = hal_red_cortes();
+    if (cortes > 0) {
+        size_t usado = strlen(texto);
+        snprintf(texto + usado, tam - usado, "%s%s %u", usado > 0 ? "\n" : "",
+                 TR("Wi-Fi drops:", "Cortes de WiFi:"), (unsigned)cortes);
+    }
+    if (texto[0] == '\0') {
+        return;
+    }
+    etiqueta_diag = lv_label_create(padre);
+    lv_obj_set_style_text_font(etiqueta_diag, &radio_14, 0);
+    lv_obj_set_style_text_align(etiqueta_diag, LV_TEXT_ALIGN_RIGHT, 0);
+    lv_obj_add_flag(etiqueta_diag, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(etiqueta_diag, 10);  /* texto pequeño: algo más de margen para el dedo */
+    lv_obj_add_event_cb(etiqueta_diag, al_tocar_diag, LV_EVENT_CLICKED, NULL);
+    mostrar_diag(texto, COLOR_SECUNDARIO);
 }
 
 static lv_obj_t *boton(lv_obj_t *padre, const char *texto, bool marcado, lv_event_cb_t accion, void *dato,
@@ -263,7 +330,7 @@ void ui_ajustes_abrir(void)
     lv_obj_set_style_text_font(titulo, &radio_20, 0);
     lv_obj_set_style_text_color(titulo, lv_color_hex(COLOR_ACENTO), 0);
     lv_obj_set_pos(titulo, X_IZQUIERDA + 4, 12);
-    reinicios(capa);
+    diagnostico(capa);
 
     /* Botones grandes, a la izquierda, en dos columnas */
     const lv_coord_t x1 = X_IZQUIERDA, x2 = X_IZQUIERDA + ANCHO_BOTON + SEPARACION;
@@ -271,8 +338,15 @@ void ui_ajustes_abrir(void)
              (void *)(uintptr_t)!ajustes.espanol);
     boton_en(x2, Y_FILA(0), ANCHO_BOTON, TR(LV_SYMBOL_BELL " Alarms", LV_SYMBOL_BELL " Alarmas"), false,
              al_alarmas);
-    boton_en(x1, Y_FILA(1), ANCHO_BOTON, TR(LV_SYMBOL_WIFI " Wi-Fi", LV_SYMBOL_WIFI " WiFi"), false,
-             al_wifi);
+    /* El botón de la WiFi dice la señal (dBm) si está conectada */
+    char texto_wifi[24];
+    int senal = hal_red_senal();
+    if (senal != 0) {
+        snprintf(texto_wifi, sizeof(texto_wifi), LV_SYMBOL_WIFI " %d dBm", senal);
+    } else {
+        snprintf(texto_wifi, sizeof(texto_wifi), "%s", TR(LV_SYMBOL_WIFI " Wi-Fi", LV_SYMBOL_WIFI " WiFi"));
+    }
+    boton_en(x1, Y_FILA(1), ANCHO_BOTON, texto_wifi, false, al_wifi);
     boton_en(x2, Y_FILA(1), ANCHO_BOTON, texto_luz(), false, al_luz);
     deslizador_apagar(capa);
     boton_en(x1, Y_FILA(3), ANCHO_BOTON, texto_brillo(), false, al_brillo);

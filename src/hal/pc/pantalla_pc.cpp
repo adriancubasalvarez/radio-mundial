@@ -169,10 +169,24 @@ bool hal_despertado_por_alarma(void)
     return false;
 }
 
-/* El simulador no se reinicia solo: sin reinicios que contar */
+/* El simulador no se reinicia solo: sin reinicios que contar. Para probar
+ * cómo se ven en Ajustes, RADIO_REINICIOS=1 finge uno («panic» a las 03:14) */
+static bool reinicios_borrados = false;
+
 void hal_reinicios(Reinicios *r)
 {
     memset(r, 0, sizeof(*r));
+    const char *valor = getenv("RADIO_REINICIOS");
+    if (!reinicios_borrados && valor != NULL && valor[0] == '1') {
+        r->veces = 1;
+        strcpy(r->motivo, "panic");
+        r->minuto_del_dia = 3 * 60 + 14;
+    }
+}
+
+void hal_reinicios_borrar(void)
+{
+    reinicios_borrados = true;
 }
 
 void hal_apagar(uint32_t segundos)

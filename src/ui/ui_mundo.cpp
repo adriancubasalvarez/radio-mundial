@@ -70,7 +70,7 @@ static void pie_por_defecto(void)
     }
 }
 
-/* Vuelve a medir y colocar el pie según el icono de batería. El nivel
+/* Vuelve a medir y colocar el pie según los iconos de batería y WiFi. El nivel
  * puede cambiar con la pantalla ya construida (de llena a media, o al
  * revés) y el texto tiene que arrancar a la derecha del icono, no pasar
  * por debajo. Si la reserva no cambió no se toca nada: reasignar el
@@ -80,7 +80,7 @@ static void recolocar_pie(void)
     if (!pie_colocado) {
         return;
     }
-    lv_coord_t reserva = bateria_reserva();
+    lv_coord_t reserva = bateria_reserva_ancho();
     if (reserva == pie_reserva) {
         return;
     }

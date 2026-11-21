@@ -97,3 +97,15 @@ void hal_reinicios(Reinicios *r)
 {
     *r = datos;
 }
+
+void hal_reinicios_borrar(void)
+{
+    Preferences nvs;
+    nvs.begin("reinicios", false);
+    nvs.clear();
+    nvs.end();
+    datos.veces = 0;
+    datos.motivo[0] = '\0';
+    datos.minuto_del_dia = -1;
+    Serial.println("[reinicio] registro borrado");
+}

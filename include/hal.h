@@ -100,6 +100,9 @@ typedef struct {
 
 void hal_reinicios(Reinicios *r);
 
+/* Pone a cero el registro de reinicios inesperados */
+void hal_reinicios_borrar(void);
+
 /* LED RGB de la placa, 0..255 por color (en placas sin LED no hace nada) */
 void hal_led(uint8_t r, uint8_t g, uint8_t b);
 
@@ -116,6 +119,17 @@ typedef enum {
 } EstadoRed;
 
 EstadoRed hal_red_estado(void);
+
+/* Intensidad de la señal WiFi en dBm (p. ej. -60: buena; -80: mala), o 0 si
+ * no hay conexión. En el simulador, -50 o lo que diga la variable de entorno
+ * RADIO_WIFI (0: sin conexión). */
+int hal_red_senal(void);
+
+/* Veces que se ha perdido la WiFi desde que se encendió la radio */
+uint16_t hal_red_cortes(void);
+
+/* Pone a cero la cuenta de cortes */
+void hal_red_cortes_borrar(void);
 
 /* Nombre de la red que crea la radio cuando el portal está abierto */
 const char *hal_red_portal(void);
