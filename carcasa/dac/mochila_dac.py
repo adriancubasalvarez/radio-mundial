@@ -23,6 +23,7 @@ Uso (con CadQuery instalado):   python mochila_dac.py
 Salida en esta carpeta: mochila_dac.step / .stl / .3mf (ya orientados para
 imprimir: el fondo sobre la cama) y vistas en img/.
 """
+import math
 import pathlib
 
 import cadquery as cq
@@ -97,10 +98,19 @@ ALTO_MARCO_DAC = 2.0       # marco bajo alrededor del DAC
 RANURAS = 0
 RANURA_L, RANURA_A = 44.0, 2.5
 
-# Patas traseras: llegan a la misma altura que las del frontal (Z = -36,3)
-PATA_Z = -36.3
-PATA_Y = 35.0              # mismas posiciones que las patas del frontal
+# Patas traseras: siguen el plano de apoyo de las patas del frontal, que están
+# inclinadas 5° (Z = -35,1 en X = 0,9 y Z = -36,3 en X = 14,8, medido en
+# front.step). Así la radio se echa 5° hacia atrás, como la carcasa original,
+# y las cuatro patas apoyan con toda la cara.
+PATA_ANGULO = 5.0                    # grados
+PATA_REF_X, PATA_REF_Z = 14.8, -36.3  # un punto del plano de apoyo
+PATA_Y = 40.0              # centradas a lo ancho con las patas del frontal
 PATA_ANCHO, PATA_LARGO = 8.0, 10.0
+
+
+def pata_z(x):
+    """Altura del plano de apoyo en la coordenada X."""
+    return PATA_REF_Z - math.tan(math.radians(PATA_ANGULO)) * (x - PATA_REF_X)
 
 X1 = X0 + FONDO            # cara exterior del fondo
 X_SUELO = X1 - SUELO       # cara interior del fondo
@@ -233,9 +243,14 @@ def tubo_luz(pieza):
 
 
 def patas(pieza):
+    # perfil lateral (X, Z): arriba se mete 1 mm en la pared de abajo y la
+    # cara de apoyo sigue el plano inclinado
+    xa, xb = X1 - PATA_LARGO, X1
+    arriba = -ALTO / 2 + 1
+    perfil = [(xa, arriba), (xb, arriba), (xb, pata_z(xb)), (xa, pata_z(xa))]
     for y in (-PATA_Y, PATA_Y):
-        p = (cq.Workplane("XY", origin=(X1 - PATA_LARGO / 2, y, PATA_Z))
-             .rect(PATA_LARGO, PATA_ANCHO).extrude(-PATA_Z - ALTO / 2 + 1)
+        p = (cq.Workplane("XZ", origin=(0, y, 0)).polyline(perfil).close()
+             .extrude(PATA_ANCHO / 2, both=True)
              .edges("|Z").fillet(1.5))
         pieza = pieza.union(p)
     return pieza
