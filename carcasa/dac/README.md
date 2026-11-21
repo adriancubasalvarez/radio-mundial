@@ -15,9 +15,10 @@ replaces the flat back cover and uses the same 4 screw holes.
 | `mochila_dac.py` | Parametric model (CadQuery): every size is a variable at the top |
 | `vistas.py` | Renders the views in `img/` |
 
-**Inside:**
-- **Battery:** 2 × 18650 **in parallel** (1S, 68 × 38 × 22 mm, with 1 mm clearance), lying behind the board in a cradle of four corner brackets. Vent slots above it.
-- **DAC:** WCMCU-5102 (32.5 × 24 mm) in a low frame, with its jack flush against the right-hand wall and an 8 mm hole for the cable.
+**Inside** (from the USB-C side):
+- **DAC:** WCMCU-5102 (32.5 × 24 mm) in a low frame, with its jack flush against the wall on the USB-C side, so every cable comes out on the same side.
+- **Light tube** behind the board's RGB LED (46 mm from the USB-C edge of the board), with the **same round grille as the original back cover**: the LED still shows through the back.
+- **Battery:** 2 × 18650 **in parallel** (1S, 68 × 38 × 22 mm, with 1 mm clearance), lying between the light tube and the speaker-side wall, in a cradle of corner brackets. Vent slots above it.
 - **Two rear feet** at the same height as the front's feet, so the radio stands level. Centre of gravity checked: it does not tip over.
 
 **Size:** the whole radio is about 130 × 69 × 44 mm (front 18 mm + backpack 26 mm).
@@ -51,9 +52,10 @@ mochila sustituye a la tapa plana y usa los mismos 4 tornillos.
 | `mochila_dac.py` | Modelo paramétrico (CadQuery): todas las medidas son variables al principio |
 | `vistas.py` | Genera las vistas de `img/` |
 
-**Dentro:**
-- **Batería:** 2 × 18650 **en paralelo** (1S, 68 × 38 × 22 mm, con 1 mm de holgura), tumbada detrás de la placa en una cuna de cuatro esquinas, con rejilla de ventilación encima.
-- **DAC:** WCMCU-5102 (32,5 × 24 mm) en un marco bajo, con el jack a ras de la pared derecha y un agujero de 8 mm para el cable.
+**Dentro** (desde el lado del USB-C):
+- **DAC:** WCMCU-5102 (32,5 × 24 mm) en un marco bajo, con el jack a ras de la pared del lado del USB-C: todos los cables salen por el mismo lado.
+- **Tubo de luz** detrás del LED RGB de la placa (a 46 mm del borde del USB-C), con la **misma rejilla redonda de la tapa original**: el LED se sigue viendo por detrás.
+- **Batería:** 2 × 18650 **en paralelo** (1S, 68 × 38 × 22 mm, con 1 mm de holgura), tumbada entre el tubo de luz y la pared del lado del altavoz, en una cuna de esquinas, con ranuras de ventilación encima.
 - **Dos patas traseras** a la misma altura que las del frontal: la radio apoya nivelada. Centro de gravedad comprobado: no se vuelca.
 
 **Tamaño:** la radio entera mide unos 130 × 69 × 44 mm (frontal de 18 mm + mochila de 26 mm).

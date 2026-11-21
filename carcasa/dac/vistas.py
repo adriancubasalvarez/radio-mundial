@@ -68,7 +68,7 @@ if __name__ == "__main__":
     frontal = cq.importers.importStep(str(AQUI.parent / "pequena" / "front.step"))
     bateria = (cq.Workplane("YZ", origin=(m.X_SUELO - m.BAT_H, m.BAT_Y, m.BAT_Z))
                .rect(m.BAT_L, m.BAT_A).extrude(m.BAT_H))
-    cy = m.Y_PARED_DCHA - (m.DAC_A + 2 * m.DAC_HOLGURA) / 2
+    cy = m.dac_centro_y()
     dac = cq.Workplane("YZ", origin=(m.X_SUELO - 7, cy, m.DAC_Z)).rect(m.DAC_A, m.DAC_L).extrude(7)
 
     AMARILLO, OCRE = "#f2c230", "#d9a400"
