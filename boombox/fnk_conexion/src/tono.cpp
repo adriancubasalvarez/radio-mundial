@@ -1,7 +1,7 @@
 // =====================================================================
 // Kit de conexión FNK0104 -> DAC: TONO DE PRUEBA
 //
-// Manda audio por I2S (Inter-IC Sound) por el conector «I/O pin port»
+// Manda audio por I2S (Inter-IC Sound) por el conector «IO2 IO3 IO14 IO21»
 // al DAC externo, sin WiFi ni radio: solo comprueba los cables.
 // Secuencia que se repite:
 //   3 s  440 Hz solo por el canal IZQUIERDO   (LED rojo)

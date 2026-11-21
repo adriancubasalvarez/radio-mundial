@@ -9,8 +9,9 @@
 //   BLANCO tenue -> todos a 0 V (pausa de 3 s)
 //
 // Con el polímetro en tensión continua: punta negra en el cable GND del
-// conector «Serial port» (UART) y punta roja en cada cable del conector
-// «I/O pin port». El que marca ~3,3 V es el del color del LED.
+// conector «I2C» (o del «UART», es la misma masa) y punta roja en cada
+// cable del conector «IO2 IO3 IO14 IO21». El que marca ~3,3 V es el del
+// color del LED.
 // =====================================================================
 #include "comun.h"
 
@@ -38,7 +39,7 @@ void setup() {
   todosAbajo();
   delay(1500);
   Serial.println("\nKit de conexión FNK0104 -> DAC: identificar los cables");
-  Serial.println("Polímetro: negro en GND (conector UART), rojo en cada cable del «I/O pin port».");
+  Serial.println("Polímetro: negro en GND (conector I2C), rojo en cada cable del conector IO2 IO3 IO14 IO21.");
 }
 
 void loop() {

@@ -190,7 +190,8 @@ def main():
         pagina_texto(pdf, "Paso a paso (continuación)", [
             ("Colores habituales del cable del kit (COMPRUÉBALOS siempre)", [
                 "Con el cable de 1,25 mm del kit (rojo, negro, amarillo, verde) y el pin 1",
-                "marcado con un triángulo a la izquierda del conector:",
+                "marcado con un triángulo a la izquierda del conector (comprobado con el",
+                "polímetro y «identificar» en la placa del autor):",
                 "   Conector I2C:   rojo = 3.3V   negro = GND   amarillo = SCL   verde = SDA",
                 "   Conector IO:    rojo = IO2    negro = IO3   amarillo = IO14  verde = IO21",
                 "OJO: en el conector IO el cable NEGRO NO ES MASA (es IO3: aislarlo) y el",
