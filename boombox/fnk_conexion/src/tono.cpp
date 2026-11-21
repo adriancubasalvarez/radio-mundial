@@ -3,11 +3,12 @@
 //
 // Manda audio por I2S (Inter-IC Sound) por el conector «IO2 IO3 IO14 IO21»
 // al DAC externo, sin WiFi ni radio: solo comprueba los cables.
-// Secuencia que se repite:
-//   3 s  440 Hz solo por el canal IZQUIERDO   (LED rojo)
-//   3 s  660 Hz solo por el canal DERECHO     (LED verde)
-//   3 s  550 Hz por los DOS canales           (LED azul)
-//   2 s  silencio                             (LED apagado)
+// Secuencia que se repite, con pitidos del mismo tono (660 Hz) para que se
+// distinga el canal contando pitidos, aunque los altavoces no se vean:
+//   1 pitido   solo por el canal IZQUIERDO   (LED rojo)
+//   2 pitidos  solo por el canal DERECHO     (LED verde)
+//   3 pitidos  por los DOS canales           (LED azul)
+//   y 2 s de silencio entre grupos           (LED apagado)
 // A -12 dBFS, con subida y bajada suaves para no dar golpes al altavoz.
 // =====================================================================
 #include <driver/i2s.h>
@@ -73,20 +74,34 @@ void setup() {
   iniciarI2S();
   delay(1500);
   Serial.println("\nKit de conexión FNK0104 -> DAC: tono de prueba");
-  Serial.println("IO2 -> DIN   IO14 -> BCK   IO21 -> LCK   5V -> VCC   GND -> GND");
+  Serial.println("IO2 -> DIN   IO14 -> BCK   IO21 -> LCK   3V3 (I2C) -> 3.3V   GND (I2C) -> GND");
+}
+
+// «veces» pitidos cortos del mismo tono por los canales indicados
+void pitidos(int veces, bool izq, bool der) {
+  for (int i = 0; i < veces; i++) {
+    tocar(660, izq, der, 0.25f);
+    tocar(0, true, true, 0.25f);
+  }
 }
 
 void loop() {
   led(40, 0, 0);
-  Serial.println("440 Hz por el canal IZQUIERDO");
-  tocar(440, true, false, 3);
+  Serial.println("1 pitido: canal IZQUIERDO");
+  pitidos(1, true, false);
+  led(0, 0, 0);
+  tocar(0, true, true, 2);
+
   led(0, 40, 0);
-  Serial.println("660 Hz por el canal DERECHO");
-  tocar(660, false, true, 3);
+  Serial.println("2 pitidos: canal DERECHO");
+  pitidos(2, false, true);
+  led(0, 0, 0);
+  tocar(0, true, true, 2);
+
   led(0, 0, 40);
-  Serial.println("550 Hz por los DOS canales");
-  tocar(550, true, true, 3);
+  Serial.println("3 pitidos: los DOS canales");
+  pitidos(3, true, true);
   led(0, 0, 0);
   Serial.println("Silencio\n");
-  tocar(0, true, true, 2);
+  tocar(0, true, true, 3);
 }
