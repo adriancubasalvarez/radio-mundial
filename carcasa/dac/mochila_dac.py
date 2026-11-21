@@ -59,10 +59,11 @@ TUBO_R = TUBO_D_EXT / 2 - TUBO_PARED                            # radio interior
 TUBO_Y = (_MARCO_DAC_DCHA + _BAT_IZQ) / 2                       # centro del tubo y de la rejilla
 assert (LED_Y - TUBO_Y) ** 2 + LED_Z ** 2 < (TUBO_R - 3) ** 2, "el LED tiene que quedar dentro del tubo"
 
-# Rejilla: el mismo dibujo de 55 agujeros de la tapa original, reducido para
-# que quepa entera dentro del tubo (agujeros más pequeños y más juntos)
-REJILLA_ESCALA = 0.76
-REJILLA_D = 2.0
+# Rejilla de salida de luz: pocos agujeros grandes en anillos, como la tapa
+# original pero menos densa: 1 en el centro, 6 en el primer anillo y 12 en el
+# segundo, todos dentro del tubo
+REJILLA_D = 4.0
+REJILLA_PASO = 5.5         # radio del primer anillo (el segundo, el doble)
 
 # Batería: 68 x 38 x 22, entre el tubo de luz y la pared del lado del altavoz
 BAT_L, BAT_A, BAT_H = 68.0, 38.0, 22.0
@@ -95,26 +96,16 @@ X_SUELO = X1 - SUELO       # cara interior del fondo
 Y_PARED_IZDA = -(ANCHO / 2 - PARED)   # cara interior de la pared del lado del USB-C
 
 
-# Centros de los 55 agujeros de la tapa original (leídos de back_cover.step),
-# respecto al centro de la rejilla. Es simétrica, así que vale en los dos sentidos.
-_REJILLA = [
-    (4.0, 0.0), (4.65, -4.51), (4.65, 4.51), (6.54, -8.65), (6.54, 8.65), (8.0, 0.0),
-    (8.91, -4.59), (8.91, 4.59), (9.52, -12.09), (9.52, 12.09), (11.51, -8.49), (11.51, 8.49),
-    (12.0, 0.0), (13.35, -14.55), (13.35, 14.55), (13.53, -4.7), (13.53, 4.7), (15.41, -11.09),
-    (15.41, 11.09), (16.0, 0.0), (17.53, -7.61), (17.53, 7.61), (17.72, -15.84), (17.72, 15.84),
-    (18.0, -3.46), (18.0, 3.46), (20.0, -12.0), (20.0, 0.0), (20.0, 12.0), (22.0, -3.46),
-    (22.0, 3.46), (22.28, -15.84), (22.28, 15.84), (22.47, -7.61), (22.47, 7.61), (24.0, 0.0),
-    (24.59, -11.09), (24.59, 11.09), (26.47, -4.7), (26.47, 4.7), (26.65, -14.55), (26.65, 14.55),
-    (28.0, 0.0), (28.49, -8.49), (28.49, 8.49), (30.48, -12.09), (30.48, 12.09), (31.09, -4.59),
-    (31.09, 4.59), (32.0, 0.0), (33.46, -8.65), (33.46, 8.65), (35.35, -4.51), (35.35, 4.51),
-    (36.0, 0.0),
-]
-
-
 def rejilla_original():
-    """Posiciones (dy, dz) de los agujeros respecto al centro de la rejilla,
-    con el dibujo de la tapa original reducido a REJILLA_ESCALA."""
-    return [((y - 20.0) * REJILLA_ESCALA, z * REJILLA_ESCALA) for y, z in _REJILLA]
+    """Posiciones (dy, dz) de los agujeros respecto al centro de la rejilla:
+    1 en el centro, 6 en un anillo de radio REJILLA_PASO y 12 en otro del doble."""
+    import math
+    pos = [(0.0, 0.0)]
+    for n, r in ((6, REJILLA_PASO), (12, 2 * REJILLA_PASO)):
+        for i in range(n):
+            a = 2 * math.pi * i / n + math.pi / 2   # un agujero arriba
+            pos.append((r * math.cos(a), r * math.sin(a)))
+    return pos
 
 
 def caja():

@@ -17,11 +17,13 @@ replaces the flat back cover and uses the same 4 screw holes.
 
 **Inside** (from the USB-C side):
 - **DAC:** WCMCU-5102 (32.5 × 24 mm) in a low frame, with its jack flush against the wall on the USB-C side, so every cable comes out on the same side.
-- **Round light tube** (Ø30 mm) behind the board's RGB LED (46 mm from the USB-C edge of the board), with the **same 55-hole pattern as the original back cover**, scaled down (2 mm holes) so every hole sits inside the tube: the LED still shows through the back.
+- **Round light tube** (Ø30 mm) behind the board's RGB LED (46 mm from the USB-C edge of the board), with **19 holes of 4 mm** in rings (like the original back cover, but fewer and bigger), all inside the tube: the LED still shows through the back.
 - **Battery:** 2 × 18650 **in parallel** (1S, 68 × 38 × 22 mm, with 1 mm clearance), lying between the light tube and the speaker-side wall. The tube and the side wall stop it lengthwise, and small stops above and below keep it in place. Vent slots above it.
 - **Two rear feet** at the same height as the front's feet, so the radio stands level. Centre of gravity checked: it does not tip over.
 
 **Size:** the whole radio is about 130 × 69 × 44 mm (front 18 mm + backpack 26 mm).
+
+**Holding the parts:** a 2–3 mm foam pad on top of the battery (the closed case presses it against the bottom) and a few dots of hot glue on the long edges of the DAC board, not on the jack or the pins. No hot glue on the battery.
 
 **Screws:** 4 × M3 × 10 mm from the back, in counterbores (5 mm of the screw goes into the front).
 
@@ -54,11 +56,13 @@ mochila sustituye a la tapa plana y usa los mismos 4 tornillos.
 
 **Dentro** (desde el lado del USB-C):
 - **DAC:** WCMCU-5102 (32,5 × 24 mm) en un marco bajo, con el jack a ras de la pared del lado del USB-C: todos los cables salen por el mismo lado.
-- **Tubo de luz redondo** (Ø30 mm) detrás del LED RGB de la placa (a 46 mm del borde del USB-C), con el **mismo dibujo de 55 agujeros de la tapa original**, reducido (agujeros de 2 mm) para que todos queden dentro del tubo: el LED se sigue viendo por detrás.
+- **Tubo de luz redondo** (Ø30 mm) detrás del LED RGB de la placa (a 46 mm del borde del USB-C), con **19 agujeros de 4 mm** en anillos (como la tapa original, pero menos y más grandes), todos dentro del tubo: el LED se sigue viendo por detrás.
 - **Batería:** 2 × 18650 **en paralelo** (1S, 68 × 38 × 22 mm, con 1 mm de holgura), tumbada entre el tubo de luz y la pared del lado del altavoz. El tubo y la pared la frenan a lo largo, y unos topes arriba y abajo la sujetan, con ranuras de ventilación encima.
 - **Dos patas traseras** a la misma altura que las del frontal: la radio apoya nivelada. Centro de gravedad comprobado: no se vuelca.
 
 **Tamaño:** la radio entera mide unos 130 × 69 × 44 mm (frontal de 18 mm + mochila de 26 mm).
+
+**Sujeción:** una almohadilla de foam de 2–3 mm encima de la batería (al cerrar, la tapa la aprieta contra el fondo) y unos puntos de pegamento caliente en los bordes largos del DAC, sin tocar el jack ni los pines. Nada de pegamento caliente en la batería.
 
 **Tornillos:** 4 × M3 × 10 mm por detrás, en cajeados (entran 5 mm en el frontal).
 
