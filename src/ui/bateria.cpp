@@ -62,6 +62,7 @@ static bool conectada = true;           /* hay batería (interruptor encendido) 
 static bool interruptor_apagado = false; /* se ve la batería con la ✕ */
 static NivelWifi nivel_wifi = WIFI_BIEN;
 static lv_coord_t ancho_reserva = 0;
+static void (*aviso_cambio)(void) = NULL;
 
 static const char *simbolo(BatteryLevel n)
 {
@@ -187,6 +188,9 @@ static void mirar(lv_timer_t *t)
     cambio = mirar_wifi() || cambio;
     if (cambio) {
         colocar();
+        if (aviso_cambio != NULL) {
+            aviso_cambio();
+        }
     }
 }
 
@@ -228,4 +232,9 @@ lv_coord_t bateria_reserva(void)
 lv_coord_t bateria_reserva_ancho(void)
 {
     return ancho_reserva;
+}
+
+void bateria_al_cambiar(void (*aviso)(void))
+{
+    aviso_cambio = aviso;
 }

@@ -63,7 +63,8 @@ static void pie_por_defecto(void)
         }
         nav.hay_sonando = false;
         if (hal_red_estado() == RED_CONECTANDO) {
-            poner_pie(TR(LV_SYMBOL_WIFI "  Connecting to Wi-Fi...", LV_SYMBOL_WIFI "  Conectando a la WiFi..."), COLOR_SECUNDARIO);
+            /* sin icono: ya está el rojo de la esquina (bateria.cpp) */
+            poner_pie(TR("Connecting to Wi-Fi...", "Conectando a la WiFi..."), COLOR_SECUNDARIO);
         } else {
             poner_pie(TR("Tap a region", "Toca una región"), COLOR_SECUNDARIO);
         }
@@ -193,6 +194,8 @@ static void al_borrar(lv_event_t *e)
     (void)e;
     lv_timer_del(temporizador_pie);
     temporizador_pie = NULL;
+    pie_colocado = false;
+    bateria_al_cambiar(NULL);
     mapa_liberar(&mapa_mundo);
 }
 
@@ -241,6 +244,9 @@ lv_obj_t *pantalla_mundo(void)
     pie_colocado = true;
     pie_reserva = -1;  /* fuerza la primera colocación, aunque no cambie */
     recolocar_pie();
+    /* y en cuanto aparezca o desaparezca un icono de la esquina, al momento:
+     * esperando al refresco del pie, el icono pisaba el texto un instante */
+    bateria_al_cambiar(recolocar_pie);
     lv_obj_add_flag(etiqueta_pie, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_ext_click_area(etiqueta_pie, 16);
     lv_obj_add_event_cb(etiqueta_pie, al_tocar_pie, LV_EVENT_CLICKED, NULL);

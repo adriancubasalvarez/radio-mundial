@@ -25,3 +25,7 @@ lv_coord_t bateria_reserva(void);
 /* Ancho en píxeles que ocupan los iconos desde el borde izquierdo, para lo
  * que va a su derecha en la misma línea (0 si no se ve ninguno) */
 lv_coord_t bateria_reserva_ancho(void);
+
+/* Función a la que se avisa en cuanto los iconos cambian de tamaño (aparece
+ * o desaparece alguno), para recolocar lo que va a su lado. NULL: ninguna */
+void bateria_al_cambiar(void (*aviso)(void));
