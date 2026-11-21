@@ -20,13 +20,14 @@ pio run -e tono -t upload
 
 | FNK0104 connector (silkscreen) | Pin | DAC (WCMCU-5102) |
 |---|---|---|
-| I/O pin port (P3) | IO2 | DIN |
-| I/O pin port (P3) | IO14 | BCK |
-| I/O pin port (P3) | IO21 | LCK |
-| I/O pin port (P3) | IO3 | not connected (boot strapping pin) |
-| IIC (P4) | pin 1, 3V3 | **3.3V** pin (regulated, stable on battery too) |
-| IIC (P4) | pin 2, GND | GND |
-| IIC (P4) | SCL, SDA | not connected: **insulate them** (touch and audio bus) |
+| IO2 IO3 IO14 IO21 (P3) | IO2 | DIN |
+| IO2 IO3 IO14 IO21 (P3) | IO14 | BCK |
+| IO2 IO3 IO14 IO21 (P3) | IO21 | LCK |
+| IO2 IO3 IO14 IO21 (P3) | IO3 | not connected (boot strapping pin) |
+| I2C (P4) | pin 1, 3V3 | **3.3V** pin (regulated, stable on battery too) |
+| I2C (P4) | pin 2, GND | GND |
+| I2C (P4) | SCL, SDA | not connected: **insulate them** (touch and audio bus) |
+| UART (P2) | — | not used in this build |
 | — | — | VCC: **not connected** (never 3.3V and VCC at the same time) |
 | — | — | **SCK → GND** (labelled «SCL» on the WCMCU-5102; wire or solder bridge): required |
 | — | — | FLT, DMP, FMT → GND · XMT → 3.3V |
@@ -35,7 +36,7 @@ pio run -e tono -t upload
 Two 1.25 mm 4-pin cables are needed (the kit includes one).
 
 **If your DAC board has no 3.3V pin**, power its VCC from the 5V pin of the
-Serial port (P2) instead. On battery alone that pin carries the battery
+UART connector (P2) instead. On battery alone that pin carries the battery
 voltage (3.5–4.2 V), not 5 V.
 
 **Battery:** one lithium cell, or several 18650 cells **in parallel (1S)** with a
@@ -63,14 +64,22 @@ Funciona con USB o solo con batería.
 | `src/identificar.cpp` | Pone a 3,3 V IO2, IO14 e IO21 por turnos (LED rojo, verde, azul) para saber, con el polímetro, qué color de cable es cada uno. |
 | `src/tono.cpp` | Toca 440 Hz por el canal izquierdo, 660 Hz por el derecho y 550 Hz por los dos a través del DAC. Si suenan bien, los cables están bien. |
 
-La tabla de conexiones es la misma de arriba: señales por el P3,
-alimentación por el P4 (3V3 al pin **3.3V** del DAC y GND), **VCC del DAC sin
-conectar**, SCK («SCL» en la WCMCU-5102) a GND y el jack de panel a los pads
-L, G y R. **Aísla bien SCL y SDA del P4**: son el bus del táctil y del audio.
-Hacen falta dos cables de 1,25 mm y 4 pines (el kit trae uno).
+La tabla de conexiones es la misma de arriba. En la serigrafía de la placa
+los conectores se llaman así:
+
+| Serigrafía | En la guía | Uso en este montaje |
+|---|---|---|
+| **IO2 IO3 IO14 IO21** | P3 | señales de audio al DAC (IO3 sin conectar) |
+| **I2C** | P4 | alimentación del DAC: 3V3 al pin **3.3V** y GND; SCL y SDA aislados |
+| **UART** | P2 | no se usa |
+
+**VCC del DAC sin conectar**, SCK («SCL» en la WCMCU-5102) a GND y el jack de
+panel a los pads L, G y R. **Aísla bien SCL y SDA del I2C**: son el bus del
+táctil y del audio. Hacen falta dos cables de 1,25 mm y 4 pines (el kit trae
+uno).
 
 **Si tu DAC no tiene pin 3.3V**, alimenta su VCC desde el 5V del conector
-serie (P2). Solo con batería, ese pin da la tensión de la batería (3,5-4,2 V),
+UART (P2). Solo con batería, ese pin da la tensión de la batería (3,5-4,2 V),
 no 5 V.
 
 **Batería:** una celda de litio, o varias 18650 **en paralelo (1S)** con placa

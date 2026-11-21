@@ -1,7 +1,7 @@
 """Genera CONEXIONADO_FNK0104_DAC.pdf: cómo conectar la Freenove FNK0104
 (2,8") al DAC PCM5102A (WCMCU-5102) con salida de línea por jack (para un
 amplificador, altavoces con AUX o auriculares), alimentado desde el 3V3 del
-conector IIC (P4) para que funcione igual con batería, y cómo comprobar los
+conector I2C (P4) para que funcione igual con batería, y cómo comprobar los
 cables con los firmwares del kit.
 
 Uso:  python conexionado_fnk.py      (necesita matplotlib)
@@ -68,8 +68,8 @@ def pagina_esquema(pdf):
     ax.text(40, 62, "Freenove FNK0104", ha="center", fontsize=12, weight="bold")
     ax.text(40, 56, "ESP32-S3, pantalla 2,8\" (vista por detrás)", ha="center", fontsize=8,
             color="#444")
-    xs_io = conector(ax, 30, 95, "«I/O pin port» (P3)", ["IO2", "IO3", "IO14", "IO21"])
-    xs_iic = conector(ax, 30, 25, "«IIC» (P4)", ["3V3", "GND", "SCL", "SDA"], arriba=False)
+    xs_io = conector(ax, 30, 95, "«IO2 IO3 IO14 IO21» (P3)", ["IO2", "IO3", "IO14", "IO21"])
+    xs_iic = conector(ax, 30, 25, "«I2C» (P4)", ["3V3", "GND", "SCL", "SDA"], arriba=False)
     ax.text(8, 47, "USB-C o batería (BAT): una celda de litio,\n"
             "o varias 18650 EN PARALELO (1S), nunca en serie", fontsize=7.5, ha="left",
             va="center", color="#444")
@@ -105,6 +105,14 @@ def pagina_esquema(pdf):
     ax.text(178, 38, "L → punta · R → anillo\nG → manga", ha="center", fontsize=7)
     ax.text(178, 28, "→ AUX de un amplificador,\naltavoces o auriculares\n(volumen bajo al empezar)",
             ha="center", fontsize=7, color="#444")
+
+    # Equivalencia entre la serigrafía de la placa y los nombres de la guía
+    ax.text(40, 75, "Serigrafía de la placa → nombre en esta guía:\n"
+            "«IO2 IO3 IO14 IO21» = P3 (señales de audio)\n"
+            "«I2C» = P4 (alimentación del DAC)\n"
+            "«UART» = P2 (no se usa en este montaje)",
+            ha="center", va="center", fontsize=7, color="#1f4e79",
+            bbox=dict(boxstyle="round,pad=0.4", fc="white", ec="#9ab"))
 
     # Leyenda
     ley = [(NARANJA, "IO2 → DIN (datos)"), (AZUL, "IO14 → BCK (reloj de bit)"),
@@ -144,11 +152,12 @@ def main():
                 "• SCK a GND (en la WCMCU-5102 se llama «SCL»): con un cable o con el estaño",
                 "   que lo une a GND. Sin esto el DAC no suena (o suena mal).",
                 "• FLT, DMP y FMT a GND, y XMT al pin 3.3V del propio DAC.",
-                "• Alimentación por el pin «3.3V» del DAC, desde el 3V3 del conector IIC (P4):",
+                "• Alimentación por el pin «3.3V» del DAC, desde el 3V3 del conector I2C (P4):",
                 "   es la tensión regulada de la placa y no cambia aunque la batería baje.",
                 "   El pin VCC del DAC queda SIN CONECTAR (nunca 3.3V y VCC a la vez).",
-                "• Si tu DAC no tiene pin 3.3V: VCC al «5V» del conector UART (P2). Ojo: solo",
-                "   con batería ese «5V» da la tensión de la batería (3,5-4,2 V).",
+                "• Si tu DAC no tiene pin 3.3V: VCC al «5V» del conector UART (P2), que en este",
+                "   montaje no se usa. Ojo: solo con batería ese «5V» da la tensión de la batería",
+                "   (3,5-4,2 V), no 5 V.",
             ]),
             ("Material", [
                 "• FNK0104 de 2,8\" con táctil, el DAC PCM5102A (WCMCU-5102) y un jack de",
@@ -157,8 +166,8 @@ def main():
                 "• DOS cables de 1,25 mm de 4 pines a Dupont: el kit trae uno; hace falta otro.",
                 "• Polímetro.",
             ]),
-            ("1. Identificar el cable del conector «IIC» (P4)", [
-                "1. Enchufa un cable en el conector IIC (pines 3V3, GND, SCL, SDA).",
+            ("1. Identificar el cable del conector «I2C» (P4)", [
+                "1. Enchufa un cable en el conector I2C (pines 3V3, GND, SCL, SDA).",
                 "2. Con la placa APAGADA, polímetro en continuidad: el cable que pita con la",
                 "   carcasa metálica del USB-C es GND. Márcalo con cinta negra.",
                 "3. Enciende la placa. En tensión continua, negro en GND: el cable que da",
@@ -166,8 +175,8 @@ def main():
                 "4. SCL y SDA son el bus del táctil y del audio: AÍSLALOS BIEN. Si tocan algo,",
                 "   la pantalla dejará de responder.",
             ]),
-            ("2. Identificar los cables del «I/O pin port»", [
-                "1. Enchufa el otro cable en el «I/O pin port» (arriba, serigrafía IO2 IO3 IO14 IO21).",
+            ("2. Identificar los cables del conector de los IO (P3)", [
+                "1. Enchufa el otro cable en el conector de serigrafía IO2 IO3 IO14 IO21.",
                 "2. Flashea el firmware «identificar» (desde boombox/fnk_conexion):",
                 "$ pio run -e identificar -t upload",
                 "3. Polímetro en tensión continua, negro en el GND del paso 1. Prueba cada cable:",
@@ -217,7 +226,7 @@ def main():
                 "   Si así desaparece, un aislador de masa en el cable de audio lo quita.",
             ]),
             ("La pantalla no responde al tacto tras conectar el DAC", [
-                "• SCL o SDA del conector IIC tocan algo: aíslalos bien.",
+                "• SCL o SDA del conector I2C tocan algo: aíslalos bien.",
             ]),
             ("La placa no arranca tras conectar el DAC", [
                 "• Revisa que el cable de IO3 esté libre (no conectado a nada).",
