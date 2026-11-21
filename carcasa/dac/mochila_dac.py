@@ -46,26 +46,31 @@ CARNE = 5.0                # material bajo la cabeza: con M3 x 10 entran 5 mm en
 
 # LED RGB de la placa (por detrás): 46 mm del borde del USB-C (la placa va de
 # Y = -61 a +25) y 4 mm descentrado en vertical (no sabemos si hacia arriba o
-# hacia abajo: el tubo es ovalado y cubre los dos casos)
+# hacia abajo: el tubo es lo bastante grande para los dos casos)
 LED_Y, LED_Z = -61.0 + 46.0, 0.0
-# Tubo de luz: aprovecha todo el hueco entre el marco del DAC y la batería para
-# que la luz llene casi toda la rejilla (el LED queda dentro, algo descentrado)
-TUBO_PARED = 1.2
-TUBO_IZQ, TUBO_DCHA = -33.5, -9.0    # bordes interiores en Y
-TUBO_ALTO = 34.0                     # alto interior (Z)
-TUBO_ANCHO = TUBO_DCHA - TUBO_IZQ
-TUBO_Y = (TUBO_IZQ + TUBO_DCHA) / 2  # centro del tubo y de la rejilla
-assert TUBO_IZQ + 2 < LED_Y < TUBO_DCHA - 2, "el LED tiene que quedar dentro del tubo"
-# Rejilla de la tapa original: 55 agujeros de 3 mm en un círculo de 32 mm
-REJILLA_D = 3.0
 
-# Batería: 68 x 38 x 22 + holgura, entre el tubo de luz y la pared derecha
+# Tubo de luz REDONDO, del tamaño de la rejilla, entre el marco del DAC y la
+# batería. Hace también de tope izquierdo de la batería.
+TUBO_PARED = 1.2
+_MARCO_DAC_DCHA = -(130.0 / 2 - 2.0) + 24.0 + 2 * 0.5 + 2.0   # borde del marco del DAC
+_BAT_IZQ = 130.0 / 2 - 2.0 - (68.0 + 1.0)                      # donde empieza la batería
+TUBO_D_EXT = _BAT_IZQ - _MARCO_DAC_DCHA                         # diámetro exterior del tubo
+TUBO_R = TUBO_D_EXT / 2 - TUBO_PARED                            # radio interior
+TUBO_Y = (_MARCO_DAC_DCHA + _BAT_IZQ) / 2                       # centro del tubo y de la rejilla
+assert (LED_Y - TUBO_Y) ** 2 + LED_Z ** 2 < (TUBO_R - 3) ** 2, "el LED tiene que quedar dentro del tubo"
+
+# Rejilla: el mismo dibujo de 55 agujeros de la tapa original, reducido para
+# que quepa entera dentro del tubo (agujeros más pequeños y más juntos)
+REJILLA_ESCALA = 0.76
+REJILLA_D = 2.0
+
+# Batería: 68 x 38 x 22, entre el tubo de luz y la pared del lado del altavoz
 BAT_L, BAT_A, BAT_H = 68.0, 38.0, 22.0
-HOLGURA = 1.0
-BAT_Y = (TUBO_DCHA + TUBO_PARED + (ANCHO / 2 - PARED)) / 2   # centro del hueco
+HOLGURA = 0.5              # por cada lado
+BAT_Y = (_BAT_IZQ + (ANCHO / 2 - PARED)) / 2
 BAT_Z = 0.0
-ALTO_CUNA = 8.0            # esquinas de la cuna
-PATA_CUNA = 10.0           # largo de cada brazo de las esquinas
+ALTO_CUNA = 8.0            # topes de la cuna
+PATA_CUNA = 10.0           # largo de cada brazo de los topes
 
 # DAC: 32,5 (a lo largo de Z) x 24 (a lo largo de Y), jack hacia +Y
 DAC_L, DAC_A = 32.5, 24.0
@@ -107,8 +112,9 @@ _REJILLA = [
 
 
 def rejilla_original():
-    """Posiciones (dy, dz) de los agujeros respecto al centro de la rejilla."""
-    return [(y - 20.0, z) for y, z in _REJILLA]
+    """Posiciones (dy, dz) de los agujeros respecto al centro de la rejilla,
+    con el dibujo de la tapa original reducido a REJILLA_ESCALA."""
+    return [((y - 20.0) * REJILLA_ESCALA, z * REJILLA_ESCALA) for y, z in _REJILLA]
 
 
 def caja():
@@ -136,20 +142,24 @@ def torres(pieza):
 
 
 def cuna_bateria(pieza):
-    """Cuatro esquinas en L sobre el fondo, alrededor de la batería."""
+    """Topes de la batería sobre el fondo. En el lado del altavoz, esquinas en L
+    (la pared lateral hace de tope). En el lado del tubo de luz, el propio tubo
+    hace de tope y solo hay dos topes, arriba y abajo, fuera de la rejilla."""
     lx = BAT_L + 2 * HOLGURA
     lz = BAT_A + 2 * HOLGURA
-    for sy in (-1, 1):
-        for sz in (-1, 1):
-            ey = BAT_Y + sy * (lx / 2 + PARED / 2)
-            ez = BAT_Z + sz * (lz / 2 + PARED / 2)
-            # brazo a lo largo de Y y brazo a lo largo de Z
-            for (dy, dz) in ((PATA_CUNA, PARED), (PARED, PATA_CUNA)):
-                cy = ey - sy * (dy / 2 - PARED / 2)
-                cz = ez - sz * (dz / 2 - PARED / 2)
-                b = (cq.Workplane("YZ", origin=(X_SUELO - ALTO_CUNA, cy, cz))
-                     .rect(dy, dz).extrude(ALTO_CUNA))
-                pieza = pieza.union(b)
+
+    def tope(cy, cz, dy, dz):
+        return (cq.Workplane("YZ", origin=(X_SUELO - ALTO_CUNA, cy, cz))
+                .rect(dy, dz).extrude(ALTO_CUNA))
+
+    for sz in (-1, 1):
+        ez = BAT_Z + sz * (lz / 2 + PARED / 2)
+        # lado del altavoz: esquina en L (brazo en Y y brazo en Z)
+        ey = BAT_Y + (lx / 2 + PARED / 2)
+        pieza = pieza.union(tope(ey - (PATA_CUNA / 2 - PARED / 2), ez, PATA_CUNA, PARED))
+        pieza = pieza.union(tope(ey, ez - sz * (PATA_CUNA / 2 - PARED / 2), PARED, PATA_CUNA))
+        # lado del tubo: solo el brazo en Y (arriba y abajo de la batería)
+        pieza = pieza.union(tope(BAT_Y - lx / 2 + PATA_CUNA / 2, ez, PATA_CUNA, PARED))
     return pieza
 
 
@@ -187,14 +197,13 @@ def dac(pieza):
 
 
 def tubo_luz(pieza):
-    """Tubo ovalado del fondo al frontal, detrás del LED, y la rejilla original
-    en el fondo, centrada en el LED."""
+    """Tubo redondo del fondo al frontal, alrededor de la rejilla, y la rejilla
+    en el fondo: la luz del LED sale solo por sus agujeros, todos dentro del tubo."""
     exterior = (cq.Workplane("YZ", origin=(X0 + 0.5, TUBO_Y, LED_Z))
-                .rect(TUBO_ANCHO + 2 * TUBO_PARED, TUBO_ALTO + 2 * TUBO_PARED)
-                .extrude(X_SUELO - X0 - 0.5).edges("|X").fillet(TUBO_PARED + 2))
+                .circle(TUBO_R + TUBO_PARED).extrude(X_SUELO - X0 - 0.5))
     # el hueco se para en el fondo: la luz sale solo por los agujeros de la rejilla
-    interior = (cq.Workplane("YZ", origin=(X0, TUBO_Y, LED_Z)).rect(TUBO_ANCHO, TUBO_ALTO)
-                .extrude(X_SUELO - X0).edges("|X").fillet(2))
+    interior = (cq.Workplane("YZ", origin=(X0, TUBO_Y, LED_Z)).circle(TUBO_R)
+                .extrude(X_SUELO - X0))
     pieza = pieza.union(exterior).cut(interior)
     agujeros = (cq.Workplane("YZ", origin=(X_SUELO - 1, 0, 0))
                 .pushPoints([(TUBO_Y + dy, LED_Z + dz) for dy, dz in rejilla_original()])
