@@ -18,7 +18,7 @@ replaces the flat back cover and uses the same 4 screw holes.
 **Inside** (from the USB-C side):
 - **DAC:** WCMCU-5102 (32.5 × 24 mm) in a low frame, with its jack flush against the wall on the USB-C side, so every cable comes out on the same side.
 - **Round light tube** (Ø30 mm) behind the board's RGB LED (46 mm from the USB-C edge of the board), with **19 holes of 4 mm** in rings (like the original back cover, but fewer and bigger), all inside the tube: the LED still shows through the back.
-- **Battery:** 2 × 18650 **in parallel** (1S, 68 × 38 × 22 mm, with 1 mm clearance), lying between the light tube and the speaker-side wall. The tube and the side wall stop it lengthwise, and small stops above and below keep it in place. Vent slots above it.
+- **Battery:** 2 × 18650 **in parallel** (1S, 68 × 38 × 22 mm, with 1 mm clearance), lying between the light tube and the speaker-side wall. The tube and the side wall stop it lengthwise, and small stops above and below keep it in place.
 - **Two rear feet** at the same height as the front's feet, so the radio stands level. Centre of gravity checked: it does not tip over.
 
 **Size:** the whole radio is about 130 × 69 × 45.5 mm (front 18 mm + backpack 27.5 mm).
@@ -57,7 +57,7 @@ mochila sustituye a la tapa plana y usa los mismos 4 tornillos.
 **Dentro** (desde el lado del USB-C):
 - **DAC:** WCMCU-5102 (32,5 × 24 mm) en un marco bajo, con el jack a ras de la pared del lado del USB-C: todos los cables salen por el mismo lado.
 - **Tubo de luz redondo** (Ø30 mm) detrás del LED RGB de la placa (a 46 mm del borde del USB-C), con **19 agujeros de 4 mm** en anillos (como la tapa original, pero menos y más grandes), todos dentro del tubo: el LED se sigue viendo por detrás.
-- **Batería:** 2 × 18650 **en paralelo** (1S, 68 × 38 × 22 mm, con 1 mm de holgura), tumbada entre el tubo de luz y la pared del lado del altavoz. El tubo y la pared la frenan a lo largo, y unos topes arriba y abajo la sujetan, con ranuras de ventilación encima.
+- **Batería:** 2 × 18650 **en paralelo** (1S, 68 × 38 × 22 mm, con 1 mm de holgura), tumbada entre el tubo de luz y la pared del lado del altavoz. El tubo y la pared la frenan a lo largo, y unos topes arriba y abajo la sujetan.
 - **Dos patas traseras** a la misma altura que las del frontal: la radio apoya nivelada. Centro de gravedad comprobado: no se vuelca.
 
 **Tamaño:** la radio entera mide unos 130 × 69 × 45,5 mm (frontal de 18 mm + mochila de 27,5 mm).

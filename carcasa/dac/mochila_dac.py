@@ -91,8 +91,10 @@ JACK_ALTURA = 4.0          # centro del jack sobre la cara de abajo del PCB (aju
 JACK_D = 8.0               # agujero para el cable
 ALTO_MARCO_DAC = 2.0       # marco bajo alrededor del DAC
 
-# Ventilación sobre la batería
-RANURAS = 6
+# Ranuras de ventilación sobre la batería: quitadas (0). La batería apenas se
+# calienta (la placa carga a ~300 mA y la radio gasta ~200 mA) y la rejilla del
+# LED ya deja respirar el interior. Para volver a ponerlas: RANURAS = 6.
+RANURAS = 0
 RANURA_L, RANURA_A = 44.0, 2.5
 
 # Patas traseras: llegan a la misma altura que las del frontal (Z = -36,3)
@@ -181,6 +183,8 @@ def anclajes_bridas(pieza):
 
 
 def ventilacion(pieza):
+    if RANURAS < 2:
+        return pieza
     paso = (BAT_A - 8) / (RANURAS - 1)
     for i in range(RANURAS):
         z = BAT_Z - (BAT_A - 8) / 2 + i * paso
