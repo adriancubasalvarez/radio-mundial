@@ -21,9 +21,9 @@ replaces the flat back cover and uses the same 4 screw holes.
 - **Battery:** 2 × 18650 **in parallel** (1S, 68 × 38 × 22 mm, with 1 mm clearance), lying between the light tube and the speaker-side wall. The tube and the side wall stop it lengthwise, and small stops above and below keep it in place. Vent slots above it.
 - **Two rear feet** at the same height as the front's feet, so the radio stands level. Centre of gravity checked: it does not tip over.
 
-**Size:** the whole radio is about 130 × 69 × 44 mm (front 18 mm + backpack 26 mm).
+**Size:** the whole radio is about 130 × 69 × 45.5 mm (front 18 mm + backpack 27.5 mm).
 
-**Holding the parts:** a 2–3 mm foam pad on top of the battery (the closed case presses it against the bottom) and a few dots of hot glue on the long edges of the DAC board, not on the jack or the pins. No hot glue on the battery.
+**Holding the parts:** **two zip ties** (up to 4.8 mm wide) around the battery: each one goes under a small bridge on each side of the battery (4 bridges inside, nothing shows outside). The DAC: a few dots of hot glue on the long edges of the board, not on the jack or the pins. No hot glue on the battery.
 
 **Screws:** 4 × M3 × 10 mm from the back, in counterbores (5 mm of the screw goes into the front).
 
@@ -60,9 +60,9 @@ mochila sustituye a la tapa plana y usa los mismos 4 tornillos.
 - **Batería:** 2 × 18650 **en paralelo** (1S, 68 × 38 × 22 mm, con 1 mm de holgura), tumbada entre el tubo de luz y la pared del lado del altavoz. El tubo y la pared la frenan a lo largo, y unos topes arriba y abajo la sujetan, con ranuras de ventilación encima.
 - **Dos patas traseras** a la misma altura que las del frontal: la radio apoya nivelada. Centro de gravedad comprobado: no se vuelca.
 
-**Tamaño:** la radio entera mide unos 130 × 69 × 44 mm (frontal de 18 mm + mochila de 26 mm).
+**Tamaño:** la radio entera mide unos 130 × 69 × 45,5 mm (frontal de 18 mm + mochila de 27,5 mm).
 
-**Sujeción:** una almohadilla de foam de 2–3 mm encima de la batería (al cerrar, la tapa la aprieta contra el fondo) y unos puntos de pegamento caliente en los bordes largos del DAC, sin tocar el jack ni los pines. Nada de pegamento caliente en la batería.
+**Sujeción:** **dos bridas** (de hasta 4,8 mm de ancho) alrededor de la batería: cada una pasa por debajo de un puentecito a cada lado (4 puentes por dentro, no se ve nada por fuera). El DAC, con unos puntos de pegamento caliente en los bordes largos de la placa, sin tocar el jack ni los pines. Nada de pegamento caliente en la batería.
 
 **Tornillos:** 4 × M3 × 10 mm por detrás, en cajeados (entran 5 mm en el frontal).
 

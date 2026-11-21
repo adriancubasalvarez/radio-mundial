@@ -33,7 +33,7 @@ AQUI = pathlib.Path(__file__).resolve().parent
 # Contorno (el de la tapa plana original)
 ANCHO, ALTO, RADIO_ESQ = 130.0, 65.0, 4.0
 X0 = 18.0                  # cara trasera del frontal: aquí apoya la mochila
-FONDO = 26.0               # fondo total de la mochila
+FONDO = 27.5               # fondo total: batería (22) + brida por encima + holgura al frontal
 PARED = 2.0                # paredes laterales
 SUELO = 2.0                # pared del fondo (la que va sobre la cama)
 
@@ -72,6 +72,15 @@ BAT_Y = (_BAT_IZQ + (ANCHO / 2 - PARED)) / 2
 BAT_Z = 0.0
 ALTO_CUNA = 8.0            # topes de la cuna
 PATA_CUNA = 10.0           # largo de cada brazo de los topes
+
+# Anclajes de las bridas: un puente a cada lado de la batería por cada brida.
+# La brida rodea la batería por encima y pasa por debajo de los dos puentes.
+BRIDAS_Y = (-18.0, 18.0)   # posición de cada brida respecto al centro de la batería
+TUNEL_ANCHO = 5.5          # a lo largo de Y: bridas de hasta 4,8 mm
+TUNEL_ALTO = 2.0           # hueco bajo el techo del puente
+TECHO = 1.6                # grosor del techo del puente
+PUENTE_GRUESO = 3.0        # a lo largo de Z
+PUENTE_LARGO = TUNEL_ANCHO + 2 * 1.6
 
 # DAC: 32,5 (a lo largo de Z) x 24 (a lo largo de Y), jack hacia +Y
 DAC_L, DAC_A = 32.5, 24.0
@@ -154,6 +163,23 @@ def cuna_bateria(pieza):
     return pieza
 
 
+def anclajes_bridas(pieza):
+    """Puentes sobre el fondo a ambos lados de la batería: la brida pasa por
+    debajo del techo de cada puente (túnel a lo largo de Z) y rodea la batería
+    por encima. Así no se ve nada por fuera."""
+    lz = BAT_A + 2 * HOLGURA
+    alto = TUNEL_ALTO + TECHO
+    for dy in BRIDAS_Y:
+        for sz in (-1, 1):
+            cz = BAT_Z + sz * (lz / 2 + 0.5 + PUENTE_GRUESO / 2)
+            bloque = (cq.Workplane("YZ", origin=(X_SUELO - alto, BAT_Y + dy, cz))
+                      .rect(PUENTE_LARGO, PUENTE_GRUESO).extrude(alto))
+            tunel = (cq.Workplane("YZ", origin=(X_SUELO - TUNEL_ALTO, BAT_Y + dy, cz))
+                     .rect(TUNEL_ANCHO, PUENTE_GRUESO + 2).extrude(TUNEL_ALTO + 0.01))
+            pieza = pieza.union(bloque).cut(tunel)
+    return pieza
+
+
 def ventilacion(pieza):
     paso = (BAT_A - 8) / (RANURAS - 1)
     for i in range(RANURAS):
@@ -215,6 +241,7 @@ def mochila():
     p = caja()
     p = torres(p)
     p = cuna_bateria(p)
+    p = anclajes_bridas(p)
     p = ventilacion(p)
     p = dac(p)
     p = tubo_luz(p)
