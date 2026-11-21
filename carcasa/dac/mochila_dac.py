@@ -108,6 +108,17 @@ ALTO_MARCO_DAC = 2.0       # marco bajo alrededor del DAC
 RANURAS = 0
 RANURA_L, RANURA_A = 44.0, 2.5
 
+# Interruptor de la batería (basculante con luz, 3 patas; cuerpo 20 x 13 mm y
+# 23 mm de fondo con las patas): corta el + de la batería. Va tumbado en el
+# fondo, encima del tubo de luz, a 1 mm de la pared de arriba. Se sujeta a
+# presión con sus pestañas en la pared de 2 mm.
+INTERRUPTOR_ANCHO, INTERRUPTOR_ALTO = 20.0, 13.0   # a lo largo de Y y de Z
+INTERRUPTOR_FONDO = 23.0
+INTERRUPTOR_HOLGURA = 0.2                         # por cada lado
+INTERRUPTOR_Y = TUBO_Y
+INTERRUPTOR_Z = (ALTO / 2 - PARED) - 1.0 - (INTERRUPTOR_ALTO / 2 + INTERRUPTOR_HOLGURA)
+assert INTERRUPTOR_Z - INTERRUPTOR_ALTO / 2 > TUBO_R + TUBO_PARED + 0.5, "el interruptor toca el tubo"
+
 # Borde de centrado: el mismo marco de la tapa original (back_cover.step),
 # 2 mm de alto, que entra en el frontal por dentro de las torres de los tornillos
 TAPA_ORIGINAL = AQUI.parent / "pequena" / "back_cover.step"
@@ -266,6 +277,14 @@ def tubo_luz(pieza):
     return pieza.cut(agujeros)
 
 
+def interruptor(pieza):
+    """Agujero rectangular en el fondo para el interruptor de la batería."""
+    h = 2 * INTERRUPTOR_HOLGURA
+    agujero = (cq.Workplane("YZ", origin=(X_SUELO - 1, INTERRUPTOR_Y, INTERRUPTOR_Z))
+               .rect(INTERRUPTOR_ANCHO + h, INTERRUPTOR_ALTO + h).extrude(SUELO + 2))
+    return pieza.cut(agujero)
+
+
 def a_montaje(wp):
     """De los ejes locales a los del frontal: refleja x -> X0 - x."""
     return wp.mirror("YZ", basePointVector=(X0 / 2, 0, 0))
@@ -322,6 +341,7 @@ def mochila():
     p = ventilacion(p)
     p = dac(p)
     p = tubo_luz(p)
+    p = interruptor(p)
     p = a_montaje(p)
     p = borde_centrado(p)
     p = patas(p)
