@@ -51,7 +51,9 @@ void reinicios_iniciar(void)
     Preferences nvs;
     nvs.begin("reinicios", false);
     datos.veces = nvs.getUShort("veces", 0);
-    nvs.getString("motivo", datos.motivo, sizeof(datos.motivo));
+    if (nvs.isKey("motivo")) {  /* sin comprobar, la primera vez avisa de un error */
+        nvs.getString("motivo", datos.motivo, sizeof(datos.motivo));
+    }
     datos.minuto_del_dia = nvs.getInt("minuto", -1);
 
     const char *motivo = motivo_inesperado(esp_reset_reason());
