@@ -31,3 +31,6 @@ RADIO MUNDIAL SMALL/
 RADIO MUNDIAL BOOMBOX/
 REORGANIZACION_*.txt
 mis_emisoras.json
+
+# Resto que deja la exportación a 3MF de CadQuery (carcasa/dac/mochila_dac.py)
+carcasa/dac/Open CASCADE STEP translator*
