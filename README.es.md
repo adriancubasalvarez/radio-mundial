@@ -18,6 +18,17 @@ Radio por Internet de escritorio con **mapamundi táctil**: tocas una región, e
 
 Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar» y, al terminar, conecta la radio a tu WiFi desde la misma página (o después, desde el móvil, con el código QR que muestra la pantalla). Para publicar una versión nueva: `python tools/build_release.py`.
 
+## Elige tu montaje
+
+El firmware es el mismo para los dos: se instala una vez y se adapta a lo que conectes.
+
+| | **Básico** | **Con mochila** (opcional) |
+|---|---|---|
+| Qué necesitas | Solo el kit de Freenove (y la carcasa impresa) | El básico más un DAC PCM5102A, 2 celdas 18650 en paralelo, un interruptor pequeño y una tapa trasera más profunda |
+| Sonido | Altavoz integrado | Altavoz integrado o salida de línea (jack de 3,5 mm) a un amplificador, altavoces con entrada AUX o auriculares |
+| Alimentación | USB-C | USB-C o batería, con interruptor |
+| Guía | [Manual](https://adriancubasalvarez.github.io/radio-mundial/manual/es/) | [Montaje con mochila](https://adriancubasalvarez.github.io/radio-mundial/manual/es/mochila.html) · archivos en [`carcasa/dac`](carcasa/dac) y [`kit_dac`](kit_dac) |
+
 ## Dónde comprar la placa
 
 **Freenove FNK0104, versión «2.8 Inch IPS Touch»** (la radio no funciona en la versión sin táctil):
@@ -31,7 +42,10 @@ Desde Chrome o Edge en un ordenador: conecta la placa por USB, pulsa «Instalar�
 - Unas **3.700 emisoras comprobadas** de 207 países, probadas como las pide la placa.
 - **Buscador** con teclado en pantalla y **13 géneros** (pop, rock, noticias, jazz, clásica…).
 - **Mis emisoras**: añade hasta 20 emisoras propias desde la página de instalación, por USB.
-- **Nivel de batería**: si le pones una batería LiPo, un icono avisa cuando se va gastando (sin icono si está llena o no hay batería).
+- **Nivel de batería**: si le pones una batería, un icono avisa cuando se va gastando (sin icono si está llena o no hay batería), y una batería gris con una ✕ cuando su interruptor está apagado.
+- **Salida por DAC externo** (opcional): salida de línea con una placa PCM5102A, que se elige en Ajustes.
+- **Icono de WiFi** cuando la señal es débil o se pierde, y la señal en Ajustes.
+- Si la paraste, la radio **se queda callada** tras un reinicio; los reinicios inesperados y los cortes de WiFi se ven en Ajustes.
 - **Favoritos**, **recientes**, **emisora aleatoria del mundo** y título de la canción que suena.
 - **Hora local** del país de la emisora (la de la capital o ciudad principal en países con varias zonas).
 - **Alarmas** que despiertan a la radio: emisora o tono propio, posponer 10 minutos y amanecer con el LED. También **temporizador para dormir**.

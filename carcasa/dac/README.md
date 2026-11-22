@@ -1,6 +1,6 @@
 # Radio Mundial — case with DAC and battery («backpack»)
 
-*[Español más abajo](#español)* · **Work in progress: not printed or tested yet.**
+*[Español más abajo](#español)* · **Printed and tested.** Build guide: [backpack build](https://adriancubasalvarez.github.io/radio-mundial/manual/backpack.html).
 
 A deeper back cover for the [small case](../pequena/) that holds a **PCM5102A DAC
 with a line-out jack** and a **battery**. The front is **unchanged**: the backpack
@@ -31,9 +31,9 @@ replaces the flat back cover and uses the same 4 screw holes.
 
 **Print:** PETG, bottom of the backpack on the bed, open side up, no supports.
 
-**First print (21 Nov):** the backpack was modelled on the wrong side of the front (mirrored), so the feet and the jack hole came out wrong. Fixed in this version, which also adds the centring rim and the round jack hole. **To check on the next print:** the jack hole, the rim fit and how the radio stands.
+**History:** the first print (21 Nov) was mirrored; the second one fixed the feet, the jack hole and added the centring rim; the jack hole was then widened to 10 mm for thick plugs.
 
-Wiring: [`boombox/fnk_conexion`](../../boombox/fnk_conexion/) (PDF guide).
+Wiring: [`kit_dac`](../../kit_dac/) (PDF guide).
 
 Rebuild: `python mochila_dac.py` and `python vistas.py` (needs CadQuery).
 
@@ -43,7 +43,7 @@ License: **CC BY-NC-SA 4.0**.
 
 ## Español
 
-**En desarrollo: aún sin imprimir ni probar.**
+**Impresa y probada.** Guía de montaje: [montaje con mochila](https://adriancubasalvarez.github.io/radio-mundial/manual/es/mochila.html).
 
 Tapa trasera más profunda para la [carcasa pequeña](../pequena/), con sitio para un
 **DAC PCM5102A con salida de jack** y una **batería**. El **frontal no cambia**: la
@@ -72,9 +72,9 @@ mochila sustituye a la tapa plana y usa los mismos 4 tornillos.
 
 **Impresión:** PETG, el fondo de la mochila sobre la cama, abierta hacia arriba, sin soportes.
 
-**Primera impresión (21-nov):** la mochila estaba modelada en el lado equivocado del frontal (en espejo), así que las patas y el agujero del jack salieron mal. Corregido en esta versión, que además añade el borde de centrado y el agujero redondo del jack. **A comprobar en la siguiente impresión:** el agujero del jack, el ajuste del borde y cómo apoya la radio.
+**Historia:** la primera impresión (21-nov) salió en espejo; la segunda corrigió las patas y el agujero del jack y añadió el borde de centrado; después el agujero del jack pasó a 10 mm para las clavijas con la goma gruesa.
 
-Conexiones: [`boombox/fnk_conexion`](../../boombox/fnk_conexion/) (guía en PDF).
+Conexiones: [`kit_dac`](../../kit_dac/) (guía en PDF).
 
 Regenerar: `python mochila_dac.py` y `python vistas.py` (hace falta CadQuery).
 

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radio Mundial Backpack</title>
+<meta name="description" content="Optional build of Radio Mundial with a line-out DAC, a battery and a power switch in a deeper back cover.">
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<main>
+<a class="idioma" href="es/mochila.html">Español</a>
+<h1>Radio Mundial: the «backpack» build</h1>
+<p class="intro">An optional upgrade of the small radio: a deeper back cover that holds a <strong>line-out DAC</strong> (to play through any amplifier, powered speakers or headphones), a <strong>battery</strong> and a <strong>power switch</strong> for the battery. The front of the case does not change.</p>
+<figure class="web"><img src="img/mochila/fotos/perspectiva.jpg" alt="The radio with a red backpack behind the yellow front, playing a station, with an audio cable in the side jack"><figcaption>The yellow front with the red backpack, playing through the side jack.</figcaption></figure>
+
+<div class="nota"><strong>You do not need any of this.</strong> The <a href="./">basic build</a> uses only what comes with the Freenove kit and works exactly the same. The firmware is the same for both builds: with nothing extra connected, the radio plays through its own speaker and shows no battery or DAC icons.</div>
+
+<nav>
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#parts">Parts</a></li>
+    <li><a href="#print">Print the backpack</a></li>
+    <li><a href="#dac">Wire the DAC</a></li>
+    <li><a href="#battery">Battery and switch</a></li>
+    <li><a href="#assembly">Assembly</a></li>
+    <li><a href="#use">Using it</a></li>
+    <li><a href="#help">Troubleshooting</a></li>
+  </ol>
+</nav>
+
+<h2 id="parts">1. Parts</h2>
+<p>Everything from the <a href="./#need">basic build</a>, plus:</p>
+<table>
+  <tr><th>Part</th><th>Notes</th></tr>
+  <tr><td><strong>PCM5102A DAC board</strong>, WCMCU-5102 type, with a 3.5 mm jack</td><td>32.5 × 24 mm. The backpack is made for this board: its jack comes out through a hole in the side.</td></tr>
+  <tr><td><strong>Battery:</strong> 2 × 18650 cells <strong>in parallel</strong> (1S, 3.7 V) in a holder <strong>with a protection board</strong></td><td>Up to 68 × 38 × 22 mm. <strong>Never in series.</strong> One cell or a LiPo pack also works.</td></tr>
+  <tr><td><strong>Small rocker switch</strong></td><td>Body 20 × 13 mm, 23 mm deep, snap-in. Rated for at least 1 A. A lit switch is fine: leave its third pin unconnected.</td></tr>
+  <tr><td>1.25 mm 2-pin cable</td><td>For the board's <strong>BAT</strong> connector.</td></tr>
+  <tr><td>A second 1.25 mm 4-pin cable</td><td>The kit includes one; the DAC needs two.</td></tr>
+  <tr><td>4 × M3 × 10 mm screws</td><td>Instead of the 4 × M3 × 8 of the flat back cover.</td></tr>
+  <tr><td>2 zip ties, up to 4.8 mm wide</td><td>To hold the battery.</td></tr>
+  <tr><td>Hot glue, soldering iron, heat-shrink tubing, multimeter</td><td>The multimeter is to check the wires before plugging anything in.</td></tr>
+</table>
+
+<h2 id="print">2. Print the backpack</h2>
+<p>PETG, with the <strong>bottom of the backpack on the bed</strong> and the open side up, <strong>no supports</strong>. Same settings as the rest of the case.</p>
+<p><a class="boton" href="https://github.com/adriancubasalvarez/radio-mundial/tree/main/carcasa/dac">Download the backpack files</a></p>
+<div class="fila">
+  <figure><img src="img/mochila/mochila_con_bateria.png" alt="Inside the backpack: battery in blue, DAC in purple"><figcaption>Inside: the battery (blue), the DAC (purple) and the light tube behind the board's LED.</figcaption></figure>
+  <figure><img src="img/mochila/mochila_fondo.png" alt="Outside of the backpack: grille, switch hole and rear feet"><figcaption>Outside: the LED grille, the switch hole and the two rear feet.</figcaption></figure>
+</div>
+
+<h2 id="dac">3. Wire the DAC</h2>
+<p>The DAC uses two of the board's small connectors. Full step-by-step guide with diagrams and two small test programs: <a href="https://github.com/adriancubasalvarez/radio-mundial/tree/main/kit_dac">DAC wiring kit</a> (the PDF is in Spanish; the table below has everything you need).</p>
+<table>
+  <tr><th>Board connector</th><th>Pin</th><th>DAC (WCMCU-5102)</th></tr>
+  <tr><td>IO2 IO3 IO14 IO21</td><td>IO2</td><td>DIN</td></tr>
+  <tr><td>IO2 IO3 IO14 IO21</td><td>IO14</td><td>BCK</td></tr>
+  <tr><td>IO2 IO3 IO14 IO21</td><td>IO21</td><td>LCK</td></tr>
+  <tr><td>IO2 IO3 IO14 IO21</td><td>IO3</td><td>not connected: <strong>insulate it</strong></td></tr>
+  <tr><td>I2C</td><td>3V3</td><td><strong>3.3V</strong> pin</td></tr>
+  <tr><td>I2C</td><td>GND</td><td>GND</td></tr>
+  <tr><td>I2C</td><td>SCL, SDA</td><td>not connected: <strong>insulate them</strong></td></tr>
+  <tr><td colspan="2">On the DAC itself</td><td><strong>SCK to GND</strong> (labelled «SCL» on some boards): required. FLT, DMP, FMT to GND; XMT to 3.3V. VCC not connected.</td></tr>
+</table>
+<div class="nota"><strong>Check the wire colours with a multimeter</strong> before connecting the DAC: the colours of these cables vary. The <code>identificar</code> test program in the wiring kit helps you find each one.</div>
+<div class="fila">
+  <figure class="web"><img src="img/mochila/fotos/conectores.jpg" alt="Back of the board with two cables in the IO and I2C connectors"><figcaption>The two cables, in the IO connector and in I2C. BAT is at the top, next to UART.</figcaption></figure>
+  <figure class="web"><img src="img/mochila/fotos/dac_puentes.jpg" alt="The DAC with its bridges soldered and the LINE OUT jack"><figcaption>The bridges soldered on the DAC.</figcaption></figure>
+  <figure class="web"><img src="img/mochila/fotos/dac_cables.jpg" alt="Wires soldered to the DAC pins"><figcaption>The wires from the board, soldered to the DAC.</figcaption></figure>
+  <figure class="web"><img src="img/mochila/fotos/polimetro.jpg" alt="Multimeter reading 3.305 volts"><figcaption>Checking the 3.3 V wire before connecting the DAC.</figcaption></figure>
+</div>
+
+<h2 id="battery">4. Battery and switch</h2>
+<ol>
+  <li><strong>Charge both cells to the same voltage</strong> before putting them in parallel.</li>
+  <li><strong>The switch goes in the battery's + wire</strong>, between the battery holder and the board.</li>
+  <li><strong>Connect the battery to the BAT connector</strong>, never to SPEAKER. The board's schematic marks the polarity: pin 1 is <strong>+</strong> and pin 2 is <strong>GND</strong>. <strong>Check it with a multimeter</strong> on your cable before plugging it in: a reversed battery can damage the board.</li>
+</ol>
+<ul>
+  <li>The board charges the battery over USB-C at about <strong>290 mA</strong>. Two 3000 mAh cells take around 20 hours to charge from empty.</li>
+  <li><strong>Switch off:</strong> the battery is disconnected. The radio still works on USB-C, but the battery does not charge.</li>
+  <li><strong>Switch on:</strong> the radio runs on the battery when you unplug USB-C, and charges it when you plug it in.</li>
+</ul>
+<div class="fila">
+  <figure class="web"><img src="img/mochila/fotos/prototipo.jpg" alt="Board, DAC and a 2 × 18650 battery pack wired together in a hand"><figcaption>Everything wired before it goes into the backpack: board, DAC and battery.</figcaption></figure>
+  <figure class="web"><img src="img/mochila/fotos/interruptor.jpg" alt="Small red rocker switch"><figcaption>The rocker switch for the battery.</figcaption></figure>
+</div>
+
+<h2 id="assembly">5. Assembly</h2>
+<ol>
+  <li><strong>Snap the switch</strong> into its hole in the back of the backpack.</li>
+  <li><strong>Glue the DAC</strong> with a few dots of hot glue on its flat underside, with the jack pushed against its hole on the USB-C side. Keep glue off the jack and the pins.</li>
+  <li><strong>Put the battery in</strong> between the light tube and the speaker-side wall, slightly tilted, speaker end first. Hold it with the two zip ties under the small bridges on each side. No hot glue on the battery.</li>
+  <li><strong>Close the backpack</strong> onto the front with the 4 × M3 × 10 mm screws. Its rim centres it in the front.</li>
+</ol>
+<div class="fila">
+  <figure class="web"><img src="img/mochila/fotos/abierta.jpg" alt="The radio open: the board in the yellow front and, in the red backpack, the battery, the light tube, the DAC and the switch"><figcaption>Open: the board in the front; the battery, the light tube, the DAC and the switch in the backpack.</figcaption></figure>
+  <figure class="web"><img src="img/mochila/fotos/trasera.jpg" alt="Back of the red backpack with the switch and the LED grille"><figcaption>Closed: the switch and the LED grille at the back.</figcaption></figure>
+  <figure class="web"><img src="img/mochila/fotos/jack.jpg" alt="Side of the radio with an audio cable plugged into the jack, next to the USB-C"><figcaption>The jack comes out on the USB-C side, near the feet.</figcaption></figure>
+</div>
+
+<h2 id="use">6. Using it</h2>
+<p>Install Radio Mundial <strong>v0.6.0 or later</strong> from the <a href="https://adriancubasalvarez.github.io/radio-mundial/install/">install page</a>, as in the basic build.</p>
+<ul>
+  <li><strong>Sound through the DAC:</strong> open Settings (hold the title of the map) and tap the speaker icon in the right-hand column: it turns yellow and says <strong>DAC</strong>. Tap it again to go back to the built-in speaker. While the DAC is selected, the built-in speaker stays silent, and the player screen says <strong>Playing on the DAC</strong>.</li>
+  <li><strong>Battery level:</strong> an icon in the bottom-left corner when the battery is getting low. With a full battery there is no icon.</li>
+  <li><strong>Switch off:</strong> with USB-C plugged in and the switch off, a grey battery with an <strong>✕</strong> appears. Settings shows the battery as <strong>ON</strong> or <strong>OFF</strong> at the top right.</li>
+  <li><strong>Headphones:</strong> the DAC is a line output. It works with headphones, but start with the volume low.</li>
+</ul>
+<div class="fila">
+  <figure class="web"><img src="img/mochila/fotos/terminada.jpg" alt="The finished radio from the front, playing a piano station"><figcaption>Finished: from the front it looks like the basic build.</figcaption></figure>
+  <figure class="web"><img src="img/mochila/fotos/icono_bateria.jpg" alt="The radio showing the world map with a green battery icon at the bottom left"><figcaption>Running on battery: the level icon at the bottom left.</figcaption></figure>
+</div>
+
+<h2 id="help">7. Troubleshooting</h2>
+<table>
+  <tr><th>Problem</th><th>What to try</th></tr>
+  <tr><td>No sound at all</td><td>Check whether Settings says DAC: then the sound goes to the jack, not the speaker.</td></tr>
+  <tr><td>No sound from the DAC</td><td>Check SCK to GND on the DAC, the 3.3V and GND wires and the three audio wires. The <code>tono</code> test program in the wiring kit plays a tone on each channel.</td></tr>
+  <tr><td>The plug does not go all the way in</td><td>The rubber of some plugs is thick: the hole is 10 mm. Make sure the DAC's jack is pressed against the wall.</td></tr>
+  <tr><td>The ✕ appears with the switch on</td><td>Write <code>RMV</code> in a serial monitor (115200 baud) and <a href="https://github.com/adriancubasalvarez/radio-mundial/issues">report the numbers on GitHub</a>.</td></tr>
+  <tr><td>You removed the battery for good and the ✕ stays</td><td>In Settings, tap the small text at the top right twice: the radio forgets the battery.</td></tr>
+</table>
+
+<footer>
+  A project by @Adriancubas1980 · <a href="./">Basic manual</a> · <a href="https://github.com/adriancubasalvarez/radio-mundial">Source code on GitHub</a><br>
+  Code GPL-3.0 · Content CC BY-NC-SA 4.0
+</footer>
+</main>
+</body>
+</html>

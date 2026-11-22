@@ -177,7 +177,7 @@ def main():
             ]),
             ("2. Identificar los cables del conector de los IO (P3)", [
                 "1. Enchufa el otro cable en el conector de serigrafía IO2 IO3 IO14 IO21.",
-                "2. Flashea el firmware «identificar» (desde boombox/fnk_conexion):",
+                "2. Flashea el firmware «identificar» (desde la carpeta kit_dac):",
                 "$ pio run -e identificar -t upload",
                 "3. Polímetro en tensión continua, negro en el GND del paso 1. Prueba cada cable:",
                 "   LED ROJO  → el que da 3,3 V es IO2  → irá a DIN",
@@ -210,7 +210,7 @@ def main():
                 "Si los tres suenan donde deben, los cables están bien.",
             ]),
             ("5. La radio", [
-                "Flashea el firmware de la rama boombox (entorno fnk0104). En Ajustes, el icono",
+                "Instala Radio Mundial v0.6.0 o posterior desde la web. En Ajustes, el icono",
                 "del altavoz (columna de la derecha) pasa a «DAC»: la radio suena por el jack.",
                 "Con auriculares, empieza con el volumen bajo: el DAC da salida de línea.",
             ]),

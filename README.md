@@ -18,6 +18,17 @@ Desktop internet radio with a **touch world map**: tap a region, pick a country,
 
 From Chrome or Edge on a computer: plug the board in over USB, click "Install" and, when it finishes, connect the radio to your Wi-Fi from the same page (or later, from your phone, with the QR code shown on the screen). To publish a new version: `python tools/build_release.py`.
 
+## Choose your build
+
+The firmware is the same for both: install it once and it adapts to what you connect.
+
+| | **Basic** | **Backpack** (optional) |
+|---|---|---|
+| What you need | Only the Freenove kit (and the printed case) | The basic build plus a PCM5102A DAC, 2 × 18650 cells in parallel, a small switch and a deeper back cover |
+| Sound | Built-in speaker | Built-in speaker or line out (3.5 mm jack) to an amplifier, powered speakers or headphones |
+| Power | USB-C | USB-C or battery, with a switch |
+| Guide | [Manual](https://adriancubasalvarez.github.io/radio-mundial/manual/) | [Backpack build](https://adriancubasalvarez.github.io/radio-mundial/manual/backpack.html) · files in [`carcasa/dac`](carcasa/dac) and [`kit_dac`](kit_dac) |
+
 ## Where to buy the board
 
 **Freenove FNK0104, «2.8 Inch IPS Touch» version** (the radio does not work on the version without touch):
@@ -31,7 +42,10 @@ From Chrome or Edge on a computer: plug the board in over USB, click "Install" a
 - About **3,700 tested stations** from 207 countries, tested the way the board requests them.
 - **Search** with an on-screen keyboard and **13 genres** (pop, rock, news, jazz, classical…).
 - **My stations**: add up to 20 stations of your own from the install page, over USB.
-- **Battery level**: if you fit a LiPo battery, an icon shows when it is getting low (no icon when it is full or there is no battery).
+- **Battery level**: if you fit a battery, an icon shows when it is getting low (no icon when it is full or there is no battery), and a grey battery with an ✕ when its switch is off.
+- **External DAC output** (optional): line out through a PCM5102A board, chosen in Settings.
+- **Wi-Fi icon** when the signal is weak or lost, and the signal strength in Settings.
+- A stopped radio **stays silent** after a restart; unexpected restarts and Wi-Fi drops are shown in Settings.
 - **Favorites**, **recent stations**, **random station from anywhere in the world** and the title of the song playing.
 - **Local time** of the station's country (the capital or main city in countries with several time zones).
 - **Alarms** that wake the radio from sleep: a station or a built-in tone, 10-minute snooze and an LED sunrise. **Sleep timer** too.
