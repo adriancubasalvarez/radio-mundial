@@ -41,6 +41,15 @@
 #define PIN_I2S_DOUT 8
 #define PIN_AUDIO_EN 1
 
+/* DAC externo por I2S (PCM5102A o UDA1334A) hacia un amplificador. Va al
+ * conector de expansión P3 (1,25 mm, 4 pines: 1=IO2, 2=IO3, 3=IO14, 4=IO21),
+ * libre en esta placa. P3 no lleva alimentación: el DAC toma +5 V y GND del
+ * conector serie P2 (1=+5 V, 2=GND). Sin MCLK: el DAC saca el reloj de BCK
+ * con su PLL. El IO3 queda libre (el ESP32-S3 lo lee al arrancar). */
+#define PIN_EXT_BCK  14   /* P3-3 */
+#define PIN_EXT_WS   21   /* P3-4: LCK en el PCM5102A, WSEL en el UDA1334A */
+#define PIN_EXT_DOUT 2    /* P3-1: DIN del DAC */
+
 /* LED RGB direccionable WS2812B (ejemplo Sketch_02.1_LedPixel de Freenove).
  * Luce muchísimo (Freenove lo usa a 10 de 255): la intensidad se elige en
  * Ajustes y la «alta» lo pone a tope. */

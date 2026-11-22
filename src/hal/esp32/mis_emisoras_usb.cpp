@@ -104,6 +104,8 @@ static void guardar(void)
     }
 }
 
+void bateria_medir_rizado(void);  /* battery_esp32.cpp */
+
 static void orden(void)
 {
     if (linea[0] != 'R' || linea[1] != 'M') {
@@ -124,6 +126,9 @@ static void orden(void)
         break;
     case '!':
         guardar();
+        break;
+    case 'V':
+        bateria_medir_rizado();  /* diagnóstico de la batería (fase C) */
         break;
     default:
         break;

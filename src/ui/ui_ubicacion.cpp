@@ -23,10 +23,14 @@
 #define ALTO_TECLADO 130
 #define MAX_CIUDADES 8
 #define ICONO_UBICACION "\xEF\x8F\x85"  /* f3c5, en nuestras fuentes */
+#define ANCHO_TEXTO_FILA 230             /* px de texto que caben en una línea de la lista */
 
 typedef struct {
     char nombre[40];   /* lo que se guarda y sale en el reposo: «Lima, Perú» */
-    char detalle[64];  /* para distinguir homónimos: «Provincia de Lima» */
+    char fila[64];     /* lo que se ve en la lista, con la región para distinguir
+                        * homónimos: «Lima, Provincia de Lima» */
+    char corta[40];    /* solo la ciudad, si la fila no cabe en una línea */
+    char pais[3];      /* código del país, a la derecha de la fila: «PE» */
     float latitud, longitud;
 } Ciudad;
 
@@ -78,7 +82,21 @@ static void buscar_en_fondo(void)
         const char *pais = r["country"] | "";
         snprintf(nombre, sizeof(nombre), pais[0] ? "%s, %s" : "%s", r["name"] | "?", pais);
         copiar_seguro(c->nombre, sizeof(c->nombre), nombre);
-        copiar_seguro(c->detalle, sizeof(c->detalle), r["admin1"] | "");
+        /* Fila: ciudad y región (o país, si no hay región o se llama igual).
+         * El texto largo se queda en la columna ancha; a la derecha solo va el
+         * código del país, que no se parte. */
+        const char *region = r["admin1"] | "";
+        const char *ciudad = r["name"] | "?";
+        char fila[96];
+        if (region[0] != '\0' && strcmp(region, ciudad) != 0) {
+            snprintf(fila, sizeof(fila), "%s, %s", ciudad, region);
+        } else {
+            snprintf(fila, sizeof(fila), "%s", nombre);
+        }
+        copiar_seguro(c->fila, sizeof(c->fila), fila);
+        copiar_seguro(c->corta, sizeof(c->corta), ciudad);
+        strncpy(c->pais, r["country_code"] | "", sizeof(c->pais) - 1);
+        c->pais[sizeof(c->pais) - 1] = '\0';
         c->latitud = r["latitude"] | 0.0f;
         c->longitud = r["longitude"] | 0.0f;
     }
@@ -133,7 +151,7 @@ static void nueva_lista(void)
     lv_obj_move_background(lista);  /* el teclado queda por encima */
     ajustar_alto_lista();
 
-    comun_lista_agregar(lista, LV_SYMBOL_WIFI, TR("Automatic (internet)", "Automática (Internet)"),
+    comun_lista_agregar(lista, LV_SYMBOL_WIFI, TR("Automatic", "Automática"),
                         ajustes.ubicacion_fija ? NULL : LV_SYMBOL_OK, false);
     con_actual = ajustes.ubicacion_fija;
     if (con_actual) {
@@ -152,7 +170,12 @@ static void mostrar_resultados(void)
         comun_lista_agregar(lista, NULL, TR("No cities found", "No se encontró la ciudad"), NULL, true);
     } else if (estado == BUSQUEDA_LISTA) {
         for (int i = 0; i < num_ciudades; i++) {
-            comun_lista_agregar(lista, ICONO_UBICACION, ciudades[i].nombre, ciudades[i].detalle, false);
+            /* Una línea por fila: si ciudad y región no caben, solo la ciudad */
+            const char *texto = ciudades[i].fila;
+            if (lv_txt_get_width(texto, strlen(texto), &radio_20, 0, LV_TEXT_FLAG_NONE) > ANCHO_TEXTO_FILA) {
+                texto = ciudades[i].corta;
+            }
+            comun_lista_agregar(lista, ICONO_UBICACION, texto, ciudades[i].pais, false);
         }
     }
 }

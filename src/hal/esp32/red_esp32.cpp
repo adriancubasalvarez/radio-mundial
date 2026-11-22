@@ -33,6 +33,8 @@
 static WiFiManager gestor;
 static EstadoRed estado = RED_CONECTANDO;
 static uint32_t inicio_conexion;
+static uint16_t cortes;          /* veces que se perdió la WiFi */
+static int ultima_senal;          /* dBm, para el registro cuando se pierde */
 static char nombre_portal[24];
 
 /* ---------- Portal ---------- */
@@ -226,12 +228,19 @@ void red_atender(void)
     }
 
     bool conectada = WiFi.status() == WL_CONNECTED;
+    static uint32_t senal_mirada = 0;
+    if (conectada && millis() - senal_mirada > 5000) {
+        senal_mirada = millis();
+        ultima_senal = WiFi.RSSI();
+    }
     if (conectada && estado != RED_CONECTADA) {
         Serial.printf("WiFi conectada a «%s»: IP %s, señal %d dBm\n", WiFi.SSID().c_str(),
                       WiFi.localIP().toString().c_str(), WiFi.RSSI());
         estado = RED_CONECTADA;
     } else if (!conectada && estado == RED_CONECTADA) {
-        Serial.println("WiFi perdida: se reintenta sola");
+        cortes++;
+        Serial.printf("WiFi perdida (señal antes del corte: %d dBm, cortes: %u): se reintenta sola\n",
+                      ultima_senal, (unsigned)cortes);
         estado = RED_CONECTANDO;
         inicio_conexion = millis();
     } else if (!conectada && estado == RED_CONECTANDO && !con_pmf &&
@@ -247,6 +256,21 @@ void red_atender(void)
 EstadoRed hal_red_estado(void)
 {
     return estado;
+}
+
+int hal_red_senal(void)
+{
+    return WiFi.status() == WL_CONNECTED ? WiFi.RSSI() : 0;
+}
+
+uint16_t hal_red_cortes(void)
+{
+    return cortes;
+}
+
+void hal_red_cortes_borrar(void)
+{
+    cortes = 0;
 }
 
 const char *hal_red_portal(void)

@@ -88,6 +88,21 @@ void hal_apagar(uint32_t segundos);
 /* true si esta vez ha despertado el temporizador de una alarma, no un toque */
 bool hal_despertado_por_alarma(void);
 
+/* Reinicios inesperados (fallo del programa, perro guardián o bajada de
+ * tensión), guardados en la memoria permanente para saber si la radio se
+ * reinicia sola y por qué. minuto_del_dia: hora aproximada del último
+ * (hora * 60 + minuto), o -1 si no se sabía la hora. En el simulador, 0. */
+typedef struct {
+    uint16_t veces;
+    char motivo[12];
+    int minuto_del_dia;
+} Reinicios;
+
+void hal_reinicios(Reinicios *r);
+
+/* Pone a cero el registro de reinicios inesperados */
+void hal_reinicios_borrar(void);
+
 /* LED RGB de la placa, 0..255 por color (en placas sin LED no hace nada) */
 void hal_led(uint8_t r, uint8_t g, uint8_t b);
 
@@ -104,6 +119,17 @@ typedef enum {
 } EstadoRed;
 
 EstadoRed hal_red_estado(void);
+
+/* Intensidad de la señal WiFi en dBm (p. ej. -60: buena; -80: mala), o 0 si
+ * no hay conexión. En el simulador, -50 o lo que diga la variable de entorno
+ * RADIO_WIFI (0: sin conexión). */
+int hal_red_senal(void);
+
+/* Veces que se ha perdido la WiFi desde que se encendió la radio */
+uint16_t hal_red_cortes(void);
+
+/* Pone a cero la cuenta de cortes */
+void hal_red_cortes_borrar(void);
 
 /* Nombre de la red que crea la radio cuando el portal está abierto */
 const char *hal_red_portal(void);
@@ -195,6 +221,11 @@ EstadoAudio audio_estado(void);
 /* Volumen de 0 a 100 */
 void audio_volumen(uint8_t volumen);
 
+/* Elige por dónde sale el sonido: false = altavoz integrado, true = DAC
+ * externo por I2S. Si estaba sonando una emisora, vuelve a sonar por la
+ * nueva salida. En el simulador no hace nada. */
+void audio_salida(bool externa);
+
 /* Nivel de la música desde la última llamada (pico), de 0 a 255 */
 uint8_t audio_nivel(void);
 
@@ -213,3 +244,10 @@ enum BatteryLevel {
 
 /* Get battery level with hysteresis */
 BatteryLevel getBatteryLevel();
+
+/* true si hay una batería conectada (interruptor encendido). Se sabe por el
+ * rizado de la tensión en la entrada de batería: sin batería, el cargador deja
+ * un rizado grande (~17 mV); con batería, casi nada (~2 mV). En una radio
+ * que nunca ha tenido batería devuelve siempre false. Tarda ~40 ms.
+ * En el simulador, true salvo con RADIO_BATERIA=x (interruptor apagado). */
+bool hal_bateria_conectada(void);

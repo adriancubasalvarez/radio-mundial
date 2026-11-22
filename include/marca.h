@@ -7,7 +7,7 @@
 
 #define MARCA_NOMBRE  "Radio Mundial"
 #define MARCA_AUTOR   "@Adriancubas1980"
-#define MARCA_VERSION "v0.5.1"
+#define MARCA_VERSION "v0.6.0"
 
 /* De aquí descarga la radio las emisoras nuevas (publicado desde docs/emisoras) */
 #define MARCA_URL_EMISORAS "https://adriancubasalvarez.github.io/radio-mundial/emisoras/"

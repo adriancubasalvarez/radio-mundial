@@ -20,10 +20,12 @@
 static Imagen logo;
 static lv_timer_t *temporizador;
 
-/* Como una radio de verdad: al encender vuelve a sonar la última emisora */
+/* Como una radio de verdad: al encender vuelve a sonar la última emisora,
+ * pero solo si sonaba. Si el usuario la había parado, se queda callada:
+ * si no, un reinicio inesperado de noche la ponía a sonar sola. */
 static void reanudar(void)
 {
-    if (!ajustes.reanudar || !ajustes.hay_ultima || hal_despertado_por_alarma()) {
+    if (!ajustes.reanudar || !ajustes.hay_ultima || !ajustes.sonaba || hal_despertado_por_alarma()) {
         /* Si despertó para una alarma, callada hasta que suene; pero el audio
          * se prepara aquí igual: creado más tarde, la alarma no se oía */
         audio_preparar();

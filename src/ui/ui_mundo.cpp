@@ -51,10 +51,12 @@ static void pie_por_defecto(void)
     if (nav.hay_sonando && (estado == AUDIO_SONANDO || estado == AUDIO_CONECTANDO)) {
         char titulo[120], texto[200];
         comun_texto_seguro(audio_titulo(), titulo, sizeof(titulo));
+        /* con el DAC externo, «DAC ·» delante: el altavoz no suena */
+        const char *dac = ajustes.salida_externa ? "DAC · " : "";
         if (titulo[0] != '\0') {
-            snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s · %s", nav.sonando.nombre, titulo);
+            snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s%s · %s", dac, nav.sonando.nombre, titulo);
         } else {
-            snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s", nav.sonando.nombre);
+            snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s%s", dac, nav.sonando.nombre);
         }
         poner_pie(texto, COLOR_ACENTO);
     } else {
@@ -63,14 +65,15 @@ static void pie_por_defecto(void)
         }
         nav.hay_sonando = false;
         if (hal_red_estado() == RED_CONECTANDO) {
-            poner_pie(TR(LV_SYMBOL_WIFI "  Connecting to Wi-Fi...", LV_SYMBOL_WIFI "  Conectando a la WiFi..."), COLOR_SECUNDARIO);
+            /* sin icono: ya está el rojo de la esquina (bateria.cpp) */
+            poner_pie(TR("Connecting to Wi-Fi...", "Conectando a la WiFi..."), COLOR_SECUNDARIO);
         } else {
             poner_pie(TR("Tap a region", "Toca una región"), COLOR_SECUNDARIO);
         }
     }
 }
 
-/* Vuelve a medir y colocar el pie según el icono de batería. El nivel
+/* Vuelve a medir y colocar el pie según los iconos de batería y WiFi. El nivel
  * puede cambiar con la pantalla ya construida (de llena a media, o al
  * revés) y el texto tiene que arrancar a la derecha del icono, no pasar
  * por debajo. Si la reserva no cambió no se toca nada: reasignar el
@@ -80,7 +83,7 @@ static void recolocar_pie(void)
     if (!pie_colocado) {
         return;
     }
-    lv_coord_t reserva = bateria_reserva();
+    lv_coord_t reserva = bateria_reserva_ancho();
     if (reserva == pie_reserva) {
         return;
     }
@@ -193,6 +196,8 @@ static void al_borrar(lv_event_t *e)
     (void)e;
     lv_timer_del(temporizador_pie);
     temporizador_pie = NULL;
+    pie_colocado = false;
+    bateria_al_cambiar(NULL);
     mapa_liberar(&mapa_mundo);
 }
 
@@ -241,6 +246,9 @@ lv_obj_t *pantalla_mundo(void)
     pie_colocado = true;
     pie_reserva = -1;  /* fuerza la primera colocación, aunque no cambie */
     recolocar_pie();
+    /* y en cuanto aparezca o desaparezca un icono de la esquina, al momento:
+     * esperando al refresco del pie, el icono pisaba el texto un instante */
+    bateria_al_cambiar(recolocar_pie);
     lv_obj_add_flag(etiqueta_pie, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_ext_click_area(etiqueta_pie, 16);
     lv_obj_add_event_cb(etiqueta_pie, al_tocar_pie, LV_EVENT_CLICKED, NULL);
@@ -257,9 +265,12 @@ void ui_inicio(void)
                                              true, &radio_14);
     lv_disp_set_theme(disp, tema);
 
-    bateria_iniciar();  /* icono de batería, encima de cualquier pantalla */
-
     ajustes_cargar();
+    /* Iconos de batería y WiFi, encima de cualquier pantalla. DESPUÉS de
+     * cargar los ajustes: la batería puede guardarlos (bateria_vista) y,
+     * antes de cargarlos, se guardarían vacíos y se perdería todo */
+    bateria_iniciar();
+    audio_salida(ajustes.salida_externa);
     audio_volumen(ajustes.volumen);
 
     if (!datos_cargar_indice(&nav.indice)) {

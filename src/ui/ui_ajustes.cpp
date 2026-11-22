@@ -3,22 +3,105 @@
  * mapamundi. Permite cambiar el idioma, la red WiFi, la luz y la ubicación
  * del tiempo, y apagar la radio.
  * Se dibuja en la capa superior de LVGL, encima del mapamundi.
+ *
+ * Distribución (320x240): título arriba; botones grandes en dos columnas a
+ * la izquierda (cuatro filas: idioma y alarmas, WiFi y luz, deslizador de
+ * apagado, brillo y Cerrar) y una columna de iconos a la derecha, uno por
+ * fila (ubicación, actualizar emisoras, salida de audio).
  */
 #include "ui.h"
 #include "nav.h"
 #include "comun.h"
 #include "ajustes.h"
+#include "bateria.h"
 #include "alarmas.h"
 #include "hal.h"
 #include "idioma.h"
 #include "luz.h"
 
 #include <lvgl.h>
+#include <stdio.h>
+#include <string.h>
+
+#define X_IZQUIERDA    8
+#define ANCHO_BOTON    120
+#define SEPARACION     8
+#define ANCHO_IZQUIERDA (2 * ANCHO_BOTON + SEPARACION)    /* 248 */
+#define X_ICONOS       (PANTALLA_ANCHO - 8 - ANCHO_ICONO)  /* 266 */
+#define ANCHO_ICONO    46
+#define Y_FILA(n)      (44 + (n) * 48)                     /* 44, 92, 140, 188 */
 
 static lv_obj_t *capa;
 
+/* Texto de diagnóstico (reinicios y cortes) y el plazo para confirmar su borrado */
+static lv_obj_t *etiqueta_diag;
+static char texto_diag[96];
+static lv_timer_t *temporizador_borrar;
+
+static void quitar_temporizador_borrar(void)
+{
+    if (temporizador_borrar != NULL) {
+        lv_timer_del(temporizador_borrar);
+        temporizador_borrar = NULL;
+    }
+}
+
+/* Aviso breve arriba (p. ej. al pasar al DAC): tapa el título unos segundos */
+#define TIEMPO_AVISO_DAC 3500  /* ms */
+static lv_obj_t *aviso;
+static lv_timer_t *temporizador_aviso;
+
+static void quitar_aviso(void)
+{
+    if (temporizador_aviso != NULL) {
+        lv_timer_del(temporizador_aviso);
+        temporizador_aviso = NULL;
+    }
+    if (aviso != NULL) {
+        lv_obj_del(aviso);
+        aviso = NULL;
+    }
+}
+
+static void al_acabar_aviso(lv_timer_t *t)
+{
+    (void)t;
+    temporizador_aviso = NULL;  /* de una sola vez: LVGL lo borra al acabar */
+    quitar_aviso();
+}
+
+static void mostrar_aviso(const char *texto)
+{
+    quitar_aviso();
+    aviso = lv_obj_create(capa);
+    lv_obj_remove_style_all(aviso);
+    lv_obj_set_size(aviso, PANTALLA_ANCHO - 16, 40);
+    lv_obj_set_pos(aviso, 8, 2);
+    lv_obj_set_style_radius(aviso, 8, 0);
+    lv_obj_set_style_bg_color(aviso, lv_color_hex(COLOR_ACENTO), 0);
+    lv_obj_set_style_bg_opa(aviso, LV_OPA_COVER, 0);
+    lv_obj_clear_flag(aviso, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_t *etiqueta = lv_label_create(aviso);
+    lv_label_set_text(etiqueta, texto);
+    lv_label_set_long_mode(etiqueta, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(etiqueta, PANTALLA_ANCHO - 32);
+    lv_obj_set_style_text_font(etiqueta, &radio_14, 0);
+    lv_obj_set_style_text_color(etiqueta, lv_color_hex(COLOR_FONDO), 0);
+    lv_obj_set_style_text_align(etiqueta, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_center(etiqueta);
+    temporizador_aviso = lv_timer_create(al_acabar_aviso, TIEMPO_AVISO_DAC, NULL);
+    lv_timer_set_repeat_count(temporizador_aviso, 1);
+}
+
 static void cerrar(void)
 {
+    quitar_temporizador_borrar();
+    if (temporizador_aviso != NULL) {
+        lv_timer_del(temporizador_aviso);
+        temporizador_aviso = NULL;
+    }
+    aviso = NULL;  /* se borra con la capa */
+    etiqueta_diag = NULL;
     if (capa != NULL) {
         lv_obj_del_async(capa);
         capa = NULL;
@@ -105,6 +188,33 @@ static void al_brillo(lv_event_t *e)
     lv_label_set_text(lv_obj_get_child(lv_event_get_target(e), 0), texto_brillo());
 }
 
+/* Salida de audio: altavoz integrado o DAC externo (I2S) hacia un
+ * amplificador. Si suena una emisora, sigue sonando por la nueva salida. */
+static const char *texto_salida(void)
+{
+    return ajustes.salida_externa ? "DAC" : LV_SYMBOL_VOLUME_MAX;
+}
+
+static void al_salida(lv_event_t *e)
+{
+    ajustes.salida_externa = !ajustes.salida_externa;
+    ajustes_guardar();
+    audio_salida(ajustes.salida_externa);
+    /* resaltado (como un botón marcado) mientras se usa el DAC externo */
+    lv_obj_t *b = lv_event_get_target(e);
+    lv_obj_t *etiqueta = lv_obj_get_child(b, 0);
+    lv_obj_set_style_bg_color(b, lv_color_hex(ajustes.salida_externa ? COLOR_ACENTO : COLOR_LINEA), 0);
+    lv_obj_set_style_text_color(etiqueta, lv_color_hex(ajustes.salida_externa ? COLOR_FONDO : COLOR_TEXTO), 0);
+    lv_label_set_text(etiqueta, texto_salida());
+    lv_obj_set_style_text_font(etiqueta, ajustes.salida_externa ? &radio_14 : &radio_20, 0);
+    if (ajustes.salida_externa) {
+        mostrar_aviso(TR("Sound now goes to the external DAC: the speaker stays silent",
+                         "El sonido sale por el DAC externo: el altavoz queda en silencio"));
+    } else {
+        quitar_aviso();
+    }
+}
+
 /* El deslizador vale si el dedo empieza en su mitad izquierda y llega cerca
  * del final: así cuesta poco apagar, pero un toque suelto no apaga */
 static bool empezo_a_la_izquierda;
@@ -135,7 +245,8 @@ static void al_deslizar(lv_event_t *e)
 static void deslizador_apagar(lv_obj_t *padre)
 {
     lv_obj_t *d = lv_slider_create(padre);
-    lv_obj_set_size(d, 260 - 40, 40);  /* el botón sobresale media altura a cada lado */
+    lv_obj_set_size(d, ANCHO_IZQUIERDA - 40, 40);  /* el botón sobresale media altura a cada lado */
+    lv_obj_set_pos(d, X_IZQUIERDA + 20, Y_FILA(2));
     lv_slider_set_range(d, 0, 100);
     lv_obj_set_ext_click_area(d, 8);
     lv_obj_set_style_radius(d, 20, LV_PART_MAIN);
@@ -154,6 +265,94 @@ static void deslizador_apagar(lv_obj_t *padre)
     lv_obj_center(etiqueta);
 }
 
+/* Arriba a la derecha, en pequeño, lo que ayuda a saber si algo va mal (solo
+ * si lo hay):
+ *   - reinicios inesperados: cuántos, por qué el último y a qué hora más o
+ *     menos (por ejemplo, si la radio se reinicia sola de noche);
+ *   - cortes de la WiFi desde que se encendió (si está lejos del router).
+ * Para borrarlos, se toca el texto: pide confirmación («¿Borrar? Toca otra
+ * vez») y, si se vuelve a tocar antes de TIEMPO_BORRAR, se borran; si no,
+ * vuelve a como estaba. Así no se borran por un toque sin querer. */
+#define TIEMPO_BORRAR 3000  /* ms para confirmar */
+
+static void mostrar_diag(const char *texto, uint32_t color)
+{
+    lv_label_set_text(etiqueta_diag, texto);
+    lv_obj_set_style_text_color(etiqueta_diag, lv_color_hex(color), 0);
+    /* una línea, a la altura del título; dos, una encima y otra debajo */
+    lv_obj_align(etiqueta_diag, LV_ALIGN_TOP_RIGHT, -8, strchr(texto, '\n') != NULL ? 6 : 16);
+}
+
+static void al_caducar_borrar(lv_timer_t *t)
+{
+    (void)t;
+    temporizador_borrar = NULL;  /* de una sola vez: LVGL lo borra al acabar */
+    if (etiqueta_diag != NULL) {
+        mostrar_diag(texto_diag, COLOR_SECUNDARIO);
+    }
+}
+
+static void al_tocar_diag(lv_event_t *e)
+{
+    (void)e;
+    if (temporizador_borrar == NULL) {
+        mostrar_diag(TR("Clear? Tap again", "¿Borrar? Toca otra vez"), COLOR_ACENTO);
+        temporizador_borrar = lv_timer_create(al_caducar_borrar, TIEMPO_BORRAR, NULL);
+        lv_timer_set_repeat_count(temporizador_borrar, 1);
+        return;
+    }
+    quitar_temporizador_borrar();
+    hal_reinicios_borrar();
+    hal_red_cortes_borrar();
+    /* y se olvida la batería: si sigue conectada, se vuelve a ver en 5 s;
+     * si se quitó para siempre, ya no sale la batería con la ✕ */
+    ajustes.bateria_vista = false;
+    ajustes_guardar();
+    /* se oculta en vez de borrarlo: estamos dentro de su propio evento */
+    lv_obj_add_flag(etiqueta_diag, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void diagnostico(lv_obj_t *padre)
+{
+    char *texto = texto_diag;
+    texto[0] = '\0';
+    size_t tam = sizeof(texto_diag);
+    Reinicios r;
+    hal_reinicios(&r);
+    if (r.veces > 0) {
+        if (r.minuto_del_dia >= 0) {
+            snprintf(texto, tam, LV_SYMBOL_REFRESH " %u · %s · %02d:%02d", (unsigned)r.veces, r.motivo,
+                     r.minuto_del_dia / 60, r.minuto_del_dia % 60);
+        } else {
+            snprintf(texto, tam, LV_SYMBOL_REFRESH " %u · %s", (unsigned)r.veces, r.motivo);
+        }
+    }
+    uint16_t cortes = hal_red_cortes();
+    if (cortes > 0) {
+        size_t usado = strlen(texto);
+        snprintf(texto + usado, tam - usado, "%s%s %u", usado > 0 ? "\n" : "",
+                 TR("Wi-Fi drops:", "Cortes WiFi:"), (unsigned)cortes);
+    }
+    /* Interruptor de la batería, si la radio ha tenido batería alguna vez:
+     * en la misma línea que los cortes (o en una nueva) */
+    if (ajustes.bateria_vista) {
+        size_t usado = strlen(texto);
+        const char *separador = cortes > 0 ? " · " : (usado > 0 ? "\n" : "");
+        snprintf(texto + usado, tam - usado, "%s%s", separador,
+                 bateria_conectada() ? LV_SYMBOL_BATTERY_FULL " ON" : LV_SYMBOL_BATTERY_EMPTY " OFF");
+    }
+    if (texto[0] == '\0') {
+        return;
+    }
+    etiqueta_diag = lv_label_create(padre);
+    lv_obj_set_style_text_font(etiqueta_diag, &radio_14, 0);
+    lv_obj_set_style_text_align(etiqueta_diag, LV_TEXT_ALIGN_RIGHT, 0);
+    lv_obj_add_flag(etiqueta_diag, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(etiqueta_diag, 10);  /* texto pequeño: algo más de margen para el dedo */
+    lv_obj_add_event_cb(etiqueta_diag, al_tocar_diag, LV_EVENT_CLICKED, NULL);
+    mostrar_diag(texto, COLOR_SECUNDARIO);
+}
+
 static lv_obj_t *boton(lv_obj_t *padre, const char *texto, bool marcado, lv_event_cb_t accion, void *dato,
                        lv_coord_t ancho = 260)
 {
@@ -166,7 +365,20 @@ static lv_obj_t *boton(lv_obj_t *padre, const char *texto, bool marcado, lv_even
     lv_label_set_text(etiqueta, texto);
     lv_obj_set_style_text_font(etiqueta, &radio_20, 0);
     lv_obj_set_style_text_color(etiqueta, lv_color_hex(marcado ? COLOR_FONDO : COLOR_TEXTO), 0);
+    /* Si el texto no cabe (p. ej. «Light: beat» en un botón estrecho), letra pequeña */
+    if (lv_txt_get_width(texto, strlen(texto), &radio_20, 0, LV_TEXT_FLAG_NONE) > ancho - 12) {
+        lv_obj_set_style_text_font(etiqueta, &radio_14, 0);
+    }
     lv_obj_center(etiqueta);
+    return b;
+}
+
+/* Botón en una posición fija de la pantalla */
+static lv_obj_t *boton_en(lv_coord_t x, lv_coord_t y, lv_coord_t ancho, const char *texto, bool marcado,
+                          lv_event_cb_t accion, void *dato = NULL)
+{
+    lv_obj_t *b = boton(capa, texto, marcado, accion, dato, ancho);
+    lv_obj_set_pos(b, x, y);
     return b;
 }
 
@@ -181,55 +393,44 @@ void ui_ajustes_abrir(void)
     lv_obj_set_style_bg_color(capa, lv_color_hex(COLOR_FONDO), 0);
     lv_obj_set_style_bg_opa(capa, LV_OPA_COVER, 0);
     lv_obj_add_flag(capa, LV_OBJ_FLAG_CLICKABLE);  /* que no pasen toques debajo */
-    lv_obj_set_flex_flow(capa, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(capa, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_top(capa, 10, 0);
-    lv_obj_set_style_pad_row(capa, 8, 0);
+    lv_obj_clear_flag(capa, LV_OBJ_FLAG_SCROLLABLE);  /* que nada lo desplace */
 
+    /* Título arriba, solo, sobre los botones grandes */
     lv_obj_t *titulo = lv_label_create(capa);
     lv_label_set_text(titulo, TR(LV_SYMBOL_SETTINGS "  Settings", LV_SYMBOL_SETTINGS "  Ajustes"));
     lv_obj_set_style_text_font(titulo, &radio_20, 0);
     lv_obj_set_style_text_color(titulo, lv_color_hex(COLOR_ACENTO), 0);
+    lv_obj_set_pos(titulo, X_IZQUIERDA + 4, 12);
+    diagnostico(capa);
 
-    /* Actualizar emisoras: en la esquina, que el menú ya va lleno */
-    lv_obj_t *actualizar = boton(capa, LV_SYMBOL_DOWNLOAD, false, al_actualizar, NULL, 46);
-    lv_obj_add_flag(actualizar, LV_OBJ_FLAG_IGNORE_LAYOUT);
-    lv_obj_set_height(actualizar, 32);
-    lv_obj_align(actualizar, LV_ALIGN_TOP_RIGHT, -30, 6);
-
-    /* Ubicación del tiempo y la hora: en la otra esquina (amarilla si se
-     * eligió una ciudad a mano) */
-    lv_obj_t *ubicacion = boton(capa, "\xEF\x8F\x85", ajustes.ubicacion_fija, al_ubicacion, NULL, 46);
-    lv_obj_add_flag(ubicacion, LV_OBJ_FLAG_IGNORE_LAYOUT);
-    lv_obj_set_height(ubicacion, 32);
-    lv_obj_align(ubicacion, LV_ALIGN_TOP_LEFT, 30, 6);
-
-    /* Idioma (el botón ofrece el otro) y alarmas, en una fila */
-    lv_obj_t *fila = lv_obj_create(capa);
-    lv_obj_remove_style_all(fila);
-    lv_obj_set_size(fila, 260, LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(fila, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(fila, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    boton(fila, ajustes.espanol ? "English" : "Español", false, al_elegir_idioma, (void *)(uintptr_t)!ajustes.espanol, 126);
-    boton(fila, TR(LV_SYMBOL_BELL " Alarms", LV_SYMBOL_BELL " Alarmas"), false, al_alarmas, NULL, 126);
-
-    /* Red WiFi y luz, en otra fila */
-    fila = lv_obj_create(capa);
-    lv_obj_remove_style_all(fila);
-    lv_obj_set_size(fila, 260, LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(fila, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(fila, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    boton(fila, TR(LV_SYMBOL_WIFI " Wi-Fi", LV_SYMBOL_WIFI " Red WiFi"), false, al_wifi, NULL, 126);
-    boton(fila, texto_luz(), false, al_luz, NULL, 126);
+    /* Botones grandes, a la izquierda, en dos columnas */
+    const lv_coord_t x1 = X_IZQUIERDA, x2 = X_IZQUIERDA + ANCHO_BOTON + SEPARACION;
+    boton_en(x1, Y_FILA(0), ANCHO_BOTON, ajustes.espanol ? "English" : "Español", false, al_elegir_idioma,
+             (void *)(uintptr_t)!ajustes.espanol);
+    boton_en(x2, Y_FILA(0), ANCHO_BOTON, TR(LV_SYMBOL_BELL " Alarms", LV_SYMBOL_BELL " Alarmas"), false,
+             al_alarmas);
+    /* El botón de la WiFi dice la señal (dBm) si está conectada */
+    char texto_wifi[24];
+    int senal = hal_red_senal();
+    if (senal != 0) {
+        snprintf(texto_wifi, sizeof(texto_wifi), LV_SYMBOL_WIFI " %d dBm", senal);
+    } else {
+        snprintf(texto_wifi, sizeof(texto_wifi), "%s", TR(LV_SYMBOL_WIFI " Wi-Fi", LV_SYMBOL_WIFI " WiFi"));
+    }
+    boton_en(x1, Y_FILA(1), ANCHO_BOTON, texto_wifi, false, al_wifi);
+    boton_en(x2, Y_FILA(1), ANCHO_BOTON, texto_luz(), false, al_luz);
     deslizador_apagar(capa);
+    boton_en(x1, Y_FILA(3), ANCHO_BOTON, texto_brillo(), false, al_brillo);
+    boton_en(x2, Y_FILA(3), ANCHO_BOTON, TR("Close", "Cerrar"), false, al_cerrar);
 
-    /* Intensidad de la luz y Cerrar, en la última fila */
-    fila = lv_obj_create(capa);
-    lv_obj_remove_style_all(fila);
-    lv_obj_set_size(fila, 260, LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(fila, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(fila, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_t *brillo = boton(fila, texto_brillo(), false, al_brillo, NULL, 126);
-    lv_obj_set_style_text_font(lv_obj_get_child(brillo, 0), &radio_14, 0);  /* texto largo */
-    boton(fila, TR("Close", "Cerrar"), false, al_cerrar, NULL, 126);
+    /* Columna de iconos a la derecha, uno por fila: ubicación del tiempo y la
+     * hora, actualizar emisoras y salida de audio. Amarillos si están activos
+     * (ciudad elegida a mano, DAC externo). */
+    boton_en(X_ICONOS, Y_FILA(0), ANCHO_ICONO, "\xEF\x8F\x85", ajustes.ubicacion_fija, al_ubicacion);
+    boton_en(X_ICONOS, Y_FILA(1), ANCHO_ICONO, LV_SYMBOL_DOWNLOAD, false, al_actualizar);
+    lv_obj_t *salida = boton_en(X_ICONOS, Y_FILA(2), ANCHO_ICONO, texto_salida(), ajustes.salida_externa,
+                                al_salida);
+    if (ajustes.salida_externa) {
+        lv_obj_set_style_text_font(lv_obj_get_child(salida, 0), &radio_14, 0);
+    }
 }
