@@ -29,10 +29,13 @@ The firmware is the same for both: install it once and it adapts to what you con
 | Power | USB-C | USB-C or battery, with a switch |
 | Guide | [Manual](https://adriancubasalvarez.github.io/radio-mundial/manual/) | [Backpack build](https://adriancubasalvarez.github.io/radio-mundial/manual/backpack.html) · files in [`carcasa/dac`](carcasa/dac) and [`kit_dac`](kit_dac) |
 
-## Where to buy the board
+## Where to buy
 
 **Freenove FNK0104, «2.8 Inch IPS Touch» version** (the radio does not work on the version without touch):
 [Amazon US](https://link.amazon/A0fZ7EvDX) · [Amazon Spain](https://link.amazon/B0c9qnA3x)
+
+**PCM5102A DAC board** (only for the optional backpack build):
+[Amazon US](https://link.amazon/B0ffhmyiR) · [Amazon Spain](https://link.amazon/B0gVLuIq0)
 
 <sub>Affiliate links: as an Amazon Associate I earn from qualifying purchases, at no extra cost to you.</sub>
 
