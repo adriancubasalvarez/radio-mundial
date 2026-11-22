@@ -47,6 +47,13 @@ static void mostrar_estado(const char *texto, uint32_t color)
     lv_obj_set_style_text_color(etiqueta_estado, lv_color_hex(color), 0);
 }
 
+/* «Sonando», o «Sonando por el DAC» si el sonido va al DAC externo (el
+ * altavoz se queda en silencio y conviene que se note) */
+static const char *texto_sonando(void)
+{
+    return ajustes.salida_externa ? TR("Playing on the DAC", "Sonando por el DAC") : TR("Playing", "Sonando");
+}
+
 static void pintar_favorito(void)
 {
     bool es = ajustes_es_favorito(nav.emisora.url);
@@ -175,7 +182,7 @@ static void vigilar(lv_timer_t *t)
             snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s", titulo);
             mostrar_estado(texto, COLOR_ACENTO);
         } else {
-            mostrar_estado(TR("Playing", "Sonando"), COLOR_ACENTO);
+            mostrar_estado(texto_sonando(), COLOR_ACENTO);
         }
         break;
     }
@@ -326,9 +333,17 @@ lv_obj_t *pantalla_sonando(void)
     /* Volumen. El icono va pegado a la barra (no en la esquina: abajo a la
      * izquierda está el icono de batería, si hay batería) */
     lv_obj_t *icono_vol = lv_label_create(pantalla);
-    lv_label_set_text(icono_vol, LV_SYMBOL_VOLUME_MID);
-    lv_obj_set_style_text_font(icono_vol, &radio_20, 0);
-    lv_obj_set_style_text_color(icono_vol, lv_color_hex(COLOR_SECUNDARIO), 0);
+    if (ajustes.salida_externa) {
+        /* con el DAC externo, «DAC» en amarillo en lugar del altavoz: que se
+         * vea siempre por qué el altavoz no suena */
+        lv_label_set_text(icono_vol, "DAC");
+        lv_obj_set_style_text_font(icono_vol, &radio_14, 0);
+        lv_obj_set_style_text_color(icono_vol, lv_color_hex(COLOR_ACENTO), 0);
+    } else {
+        lv_label_set_text(icono_vol, LV_SYMBOL_VOLUME_MID);
+        lv_obj_set_style_text_font(icono_vol, &radio_20, 0);
+        lv_obj_set_style_text_color(icono_vol, lv_color_hex(COLOR_SECUNDARIO), 0);
+    }
 
     lv_obj_t *barra = lv_slider_create(pantalla);
     lv_slider_set_range(barra, 0, 100);
@@ -353,7 +368,7 @@ lv_obj_t *pantalla_sonando(void)
     if (misma && (estado == AUDIO_SONANDO || estado == AUDIO_CONECTANDO)) {
         lv_label_set_text(icono_boton, LV_SYMBOL_STOP);
         llego_a_sonar = (estado == AUDIO_SONANDO);
-        mostrar_estado(llego_a_sonar ? TR("Playing", "Sonando") : TR("Connecting...", "Conectando..."),
+        mostrar_estado(llego_a_sonar ? texto_sonando() : TR("Connecting...", "Conectando..."),
                        llego_a_sonar ? COLOR_ACENTO : COLOR_SECUNDARIO);
     } else {
         empezar();

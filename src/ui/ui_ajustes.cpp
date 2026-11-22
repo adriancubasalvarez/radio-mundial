@@ -46,9 +46,61 @@ static void quitar_temporizador_borrar(void)
     }
 }
 
+/* Aviso breve arriba (p. ej. al pasar al DAC): tapa el título unos segundos */
+#define TIEMPO_AVISO_DAC 3500  /* ms */
+static lv_obj_t *aviso;
+static lv_timer_t *temporizador_aviso;
+
+static void quitar_aviso(void)
+{
+    if (temporizador_aviso != NULL) {
+        lv_timer_del(temporizador_aviso);
+        temporizador_aviso = NULL;
+    }
+    if (aviso != NULL) {
+        lv_obj_del(aviso);
+        aviso = NULL;
+    }
+}
+
+static void al_acabar_aviso(lv_timer_t *t)
+{
+    (void)t;
+    temporizador_aviso = NULL;  /* de una sola vez: LVGL lo borra al acabar */
+    quitar_aviso();
+}
+
+static void mostrar_aviso(const char *texto)
+{
+    quitar_aviso();
+    aviso = lv_obj_create(capa);
+    lv_obj_remove_style_all(aviso);
+    lv_obj_set_size(aviso, PANTALLA_ANCHO - 16, 40);
+    lv_obj_set_pos(aviso, 8, 2);
+    lv_obj_set_style_radius(aviso, 8, 0);
+    lv_obj_set_style_bg_color(aviso, lv_color_hex(COLOR_ACENTO), 0);
+    lv_obj_set_style_bg_opa(aviso, LV_OPA_COVER, 0);
+    lv_obj_clear_flag(aviso, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_t *etiqueta = lv_label_create(aviso);
+    lv_label_set_text(etiqueta, texto);
+    lv_label_set_long_mode(etiqueta, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(etiqueta, PANTALLA_ANCHO - 32);
+    lv_obj_set_style_text_font(etiqueta, &radio_14, 0);
+    lv_obj_set_style_text_color(etiqueta, lv_color_hex(COLOR_FONDO), 0);
+    lv_obj_set_style_text_align(etiqueta, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_center(etiqueta);
+    temporizador_aviso = lv_timer_create(al_acabar_aviso, TIEMPO_AVISO_DAC, NULL);
+    lv_timer_set_repeat_count(temporizador_aviso, 1);
+}
+
 static void cerrar(void)
 {
     quitar_temporizador_borrar();
+    if (temporizador_aviso != NULL) {
+        lv_timer_del(temporizador_aviso);
+        temporizador_aviso = NULL;
+    }
+    aviso = NULL;  /* se borra con la capa */
     etiqueta_diag = NULL;
     if (capa != NULL) {
         lv_obj_del_async(capa);
@@ -155,6 +207,12 @@ static void al_salida(lv_event_t *e)
     lv_obj_set_style_text_color(etiqueta, lv_color_hex(ajustes.salida_externa ? COLOR_FONDO : COLOR_TEXTO), 0);
     lv_label_set_text(etiqueta, texto_salida());
     lv_obj_set_style_text_font(etiqueta, ajustes.salida_externa ? &radio_14 : &radio_20, 0);
+    if (ajustes.salida_externa) {
+        mostrar_aviso(TR("Sound now goes to the external DAC: the speaker stays silent",
+                         "El sonido sale por el DAC externo: el altavoz queda en silencio"));
+    } else {
+        quitar_aviso();
+    }
 }
 
 /* El deslizador vale si el dedo empieza en su mitad izquierda y llega cerca

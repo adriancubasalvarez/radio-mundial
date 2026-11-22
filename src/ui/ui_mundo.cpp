@@ -51,10 +51,12 @@ static void pie_por_defecto(void)
     if (nav.hay_sonando && (estado == AUDIO_SONANDO || estado == AUDIO_CONECTANDO)) {
         char titulo[120], texto[200];
         comun_texto_seguro(audio_titulo(), titulo, sizeof(titulo));
+        /* con el DAC externo, «DAC ·» delante: el altavoz no suena */
+        const char *dac = ajustes.salida_externa ? "DAC · " : "";
         if (titulo[0] != '\0') {
-            snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s · %s", nav.sonando.nombre, titulo);
+            snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s%s · %s", dac, nav.sonando.nombre, titulo);
         } else {
-            snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s", nav.sonando.nombre);
+            snprintf(texto, sizeof(texto), LV_SYMBOL_AUDIO "  %s%s", dac, nav.sonando.nombre);
         }
         poner_pie(texto, COLOR_ACENTO);
     } else {
