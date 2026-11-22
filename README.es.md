@@ -29,10 +29,13 @@ El firmware es el mismo para los dos: se instala una vez y se adapta a lo que co
 | Alimentación | USB-C | USB-C o batería, con interruptor |
 | Guía | [Manual](https://adriancubasalvarez.github.io/radio-mundial/manual/es/) | [Montaje con mochila](https://adriancubasalvarez.github.io/radio-mundial/manual/es/mochila.html) · archivos en [`carcasa/dac`](carcasa/dac) y [`kit_dac`](kit_dac) |
 
-## Dónde comprar la placa
+## Dónde comprar
 
 **Freenove FNK0104, versión «2.8 Inch IPS Touch»** (la radio no funciona en la versión sin táctil):
 [Amazon España](https://link.amazon/B0c9qnA3x) · [Amazon EE. UU.](https://link.amazon/A0fZ7EvDX)
+
+**Placa DAC PCM5102A** (solo para el montaje opcional con mochila):
+[Amazon España](https://link.amazon/B0gVLuIq0) · [Amazon EE. UU.](https://link.amazon/B0ffhmyiR)
 
 <sub>Enlaces de afiliado: en calidad de Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables, sin coste extra para ti.</sub>
 
