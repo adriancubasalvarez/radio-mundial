@@ -26,8 +26,11 @@ BatteryLevel getBatteryLevel() {
     return (BatteryLevel)nivel;
 }
 
+/* Sin RADIO_BATERIA, como la mayoría de radios: sin batería (y como nunca
+ * ha visto una, no se avisa del interruptor). Con un nivel o «ciclo», hay
+ * batería; con «x», la hubo pero el interruptor está apagado. */
 bool hal_bateria_conectada(void)
 {
     const char *valor = getenv("RADIO_BATERIA");
-    return !(valor != NULL && valor[0] == 'x');
+    return valor != NULL && valor[0] != '\0' && valor[0] != 'x';
 }

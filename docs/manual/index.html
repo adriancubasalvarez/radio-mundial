@@ -44,7 +44,7 @@
   <figure class="web"><img src="img/fotos/placa.jpg" alt="Freenove FNK0104 board"><figcaption>The Freenove FNK0104 board.</figcaption></figure>
   <figure class="web"><img src="img/fotos/tamano.jpg" alt="The radio in the palm of a hand"><figcaption>The finished radio fits in your hand.</figcaption></figure>
 </div>
-<p>The radio stays plugged in over USB-C: it has no battery. No account and nothing to pay for. The only soldering is to lengthen the speaker cable, explained below.</p>
+<p>The radio stays plugged in over USB-C. Want a battery, a power switch and a line output for an amplifier? See the optional <a href="backpack.html">backpack build</a>. No account and nothing to pay for. The only soldering is to lengthen the speaker cable, explained below.</p>
 <p><small>* Affiliate links: as an Amazon Associate I earn from qualifying purchases, at no extra cost to you.</small></p>
 
 <h2 id="build">2. Build the case</h2>
@@ -141,7 +141,8 @@
   <tr><td>Slider</td><td>Volume.</td></tr>
 </table>
 <p>You also see the <strong>local time</strong> of the station's country and, if the station sends it, the song title. In countries with several time zones, the time is that of the capital or main city. Song titles in Arabic, Chinese, Japanese or Korean are not shown, because the screen font does not include those alphabets.</p>
-<p>When you turn the radio on, the last station starts playing again.</p>
+<p>When you turn the radio on, the last station starts playing again, but only if it was playing: if you stopped it, the radio stays silent.</p>
+<p>Two small icons can appear in the bottom-left corner: the <strong>Wi-Fi</strong> icon, yellow when the signal is weak and red when the connection is lost (with a good signal there is no icon), and the <strong>battery</strong> icon, only if you fitted one (see the <a href="backpack.html">backpack build</a>).</p>
 
 <h2 id="favorites">7. Favorites, recent and search</h2>
 <div class="fila">
@@ -157,14 +158,16 @@
 <figure><img src="img/en/13_ajustes.png" alt="Settings menu"></figure>
 <table>
   <tr><th>Button</th><th>What it does</th></tr>
-  <tr><td>Download icon, top right</td><td><a href="#update">Updates the stations.</a></td></tr>
-  <tr><td>Pin icon, top left</td><td>Chooses the city for the weather and the sleep-screen clock: type its name, tap ✓ and pick it from the list. <strong>Automatic</strong> takes it from your internet connection (some providers report a city far away). It turns yellow when you have chosen a city.</td></tr>
+  <tr><td>Pin icon, right column</td><td>Chooses the city for the weather and the sleep-screen clock: type its name, tap ✓ and pick it from the list. <strong>Automatic</strong> takes it from your internet connection (some providers report a city far away). It turns yellow when you have chosen a city.</td></tr>
+  <tr><td>Download icon, right column</td><td><a href="#update">Updates the stations.</a></td></tr>
+  <tr><td>Speaker icon, right column</td><td>Sound output: the built-in speaker or, if you fitted one, the external <strong>DAC</strong> (it turns yellow). With the DAC selected the built-in speaker stays silent. See the <a href="backpack.html">backpack build</a>.</td></tr>
   <tr><td>Español / English</td><td>Changes the language.</td></tr>
   <tr><td>Alarms</td><td><a href="#alarms">Opens your alarms.</a></td></tr>
-  <tr><td>Wi-Fi</td><td>Connects the radio to another network.</td></tr>
+  <tr><td>Wi-Fi</td><td>Shows the signal strength (in dBm: -50 is very good, -80 is poor) and connects the radio to another network.</td></tr>
   <tr><td>Light</td><td>Board LED: <strong>beat</strong> (rainbow that pulses with the music), <strong>on</strong> (the color of the station's region) or <strong>off</strong>.</td></tr>
   <tr><td>Glow</td><td>LED brightness: low, medium or high.</td></tr>
   <tr><td>Slide to power off</td><td>Drag the red button to the right. <strong>Touch the screen to turn it back on.</strong> If an alarm is set, the radio wakes up by itself.</td></tr>
+  <tr><td>Small text, top right</td><td>Only appears when there is something to report: unexpected restarts (how many, why and roughly when), Wi-Fi drops since it was turned on, and the battery switch (ON or OFF). Tap it twice to clear it.</td></tr>
 </table>
 
 <figure class="web" style="max-width:360px"><img src="img/fotos/luz.jpg" alt="The LED glowing through the back grille"><figcaption>The LED shines through the back of the case.</figcaption></figure>
@@ -189,7 +192,7 @@
 <h2 id="update">10. Update the stations</h2>
 <p>Stations change address over time, so the list can be renewed without installing anything again.</p>
 <ol>
-  <li>Open Settings and tap the <strong>download icon</strong> at the top right.</li>
+  <li>Open Settings and tap the <strong>download icon</strong> in the right-hand column.</li>
   <li>If there is a new list, tap <strong>Update</strong>. The music stops while it installs.</li>
   <li>Wait: the radio restarts by itself when it finishes.</li>
 </ol>
@@ -213,8 +216,9 @@
   <tr><td>It does not connect to the Wi-Fi</td><td>Make sure the network is 2.4 GHz. Check the password in Settings → Wi-Fi.</td></tr>
   <tr><td>“This station could not be played”</td><td>The station may be down. Try another one. If many fail, check your internet connection.</td></tr>
   <tr><td>A station is gray</td><td>It failed twice. You can still tap it: if it plays, it goes back to its place.</td></tr>
-  <tr><td>No sound</td><td>Check the volume. If the station appears as playing but you hear nothing, unplug the radio for a few seconds and plug it in again.</td></tr>
+  <tr><td>No sound</td><td>Check the volume, and that the speaker icon in Settings does not say DAC. If the station appears as playing but you hear nothing, unplug the radio for a few seconds and plug it in again.</td></tr>
   <tr><td>The time or weather is wrong</td><td>They are based on your internet connection. A VPN can change them.</td></tr>
+  <tr><td>The radio played by itself</td><td>It restarted while it was playing. Settings shows the restarts at the top right: <a href="https://github.com/adriancubasalvarez/radio-mundial/issues">report them on GitHub</a>.</td></tr>
   <tr><td>Nothing helps</td><td>Run the install page again, or <a href="https://github.com/adriancubasalvarez/radio-mundial/issues">report the problem on GitHub</a>.</td></tr>
 </table>
 
