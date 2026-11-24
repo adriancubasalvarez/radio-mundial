@@ -1,5 +1,7 @@
 # Radio Mundial
 
+> **Branch `boombox`: finished, to be removed in the future.** Its radio features shipped in `main` (v0.6.0), including the external DAC fix by Jay ([@jsissom](https://github.com/jsissom)), [pull request 3](https://github.com/adriancubasalvarez/radio-mundial/pull/3): thank you! The Bluetooth amplifier and measuring tools continue in [TuneAmp32](https://github.com/adriancubasalvarez/tuneamp32). This branch is preserved in the `boombox-final` tag.
+
 **English** · [Español](README.es.md)
 
 Desktop internet radio with a **touch world map**: tap a region, pick a country, a station… and it plays. Built for the maker community: a cheap board, no servers of its own, no API keys, and easy to install. Interface in English and Spanish.

@@ -1,5 +1,7 @@
 # Radio Mundial
 
+> **Rama `boombox`: terminada, se suprimirá en el futuro.** Sus funciones de radio ya están en `main` (v0.6.0), incluido el arreglo del DAC externo de Jay ([@jsissom](https://github.com/jsissom)), [pull request 3](https://github.com/adriancubasalvarez/radio-mundial/pull/3): ¡gracias! El amplificador Bluetooth y las medidas siguen en [TuneAmp32](https://github.com/adriancubasalvarez/tuneamp32). La rama se conserva en la etiqueta `boombox-final`.
+
 [English](README.md) · **Español**
 
 Radio por Internet de escritorio con **mapamundi táctil**: tocas una región, eliges un país, una emisora… y suena. Pensada para la comunidad maker: placa barata, sin servidores propios ni claves de API, y fácil de instalar. Interfaz en inglés y en español.
