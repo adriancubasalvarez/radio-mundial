@@ -94,6 +94,7 @@
   <figcaption>La página de instalación. No hay que descargar ningún programa: el navegador lo hace todo.</figcaption>
 </figure>
 <div class="nota"><strong>¿No aparece la placa en la lista?</strong> Prueba con otro cable u otro puerto USB. Si sigue sin salir, mantén pulsado el botón BOOT de la placa mientras conectas el cable.</div>
+<div class="nota"><strong>Linux: ¿no sale el puerto o da error al abrirlo?</strong> En Ubuntu, Linux Mint y Debian, abre un terminal y escribe exactamente esto: <code>sudo usermod -aG dialout $USER</code> (con el <code>$</code>; se cambia solo por tu nombre de usuario). Después cierra la sesión y vuelve a entrar, o reinicia, y prueba otra vez en Chrome, Chromium o Edge. En sistemas basados en Arch el grupo suele ser <code>uucp</code> en lugar de <code>dialout</code>.</div>
 
 <h2 id="wifi">4. Primer arranque y WiFi</h2>
 <p>La primera vez que arranca, la radio pregunta el idioma.</p>

@@ -94,6 +94,7 @@
   <figcaption>The install page. No software to download: the browser does everything.</figcaption>
 </figure>
 <div class="nota"><strong>Board not in the list?</strong> Try another cable or USB port. If it still does not appear, hold the board's BOOT button while you plug in the cable.</div>
+<div class="nota"><strong>Linux: port missing, or an error when opening it?</strong> On Ubuntu, Linux Mint and Debian, open a terminal and type exactly this: <code>sudo usermod -aG dialout $USER</code> (keep the <code>$</code>; it is replaced by your user name). Then log out and back in, or restart, and try again in Chrome, Chromium or Edge. On Arch-based systems the group is usually <code>uucp</code> instead of <code>dialout</code>.</div>
 
 <h2 id="wifi">4. First start and Wi-Fi</h2>
 <p>The first time it starts, the radio asks for your language.</p>

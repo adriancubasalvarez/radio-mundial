@@ -161,6 +161,7 @@
     <li>Try another USB cable or another port on your computer.</li>
     <li>The FNK0104 connects through the ESP32-S3's own USB, so no driver is needed. If its port doesn't show up, hold the <strong>BOOT</strong> button while you plug in the cable.</li>
     <li>Still not there? Hold the board's <strong>BOOT</strong> button while you plug it in.</li>
+    <li><strong>Linux: port missing, or an error when opening it?</strong> On Ubuntu, Linux Mint and Debian, open a terminal and type exactly this: <code>sudo usermod -aG dialout $USER</code> (keep the <code>$</code>; it is replaced by your user name). Then log out and back in, or restart, and try again in Chrome, Chromium or Edge. On Arch-based systems the group is usually <code>uucp</code> instead of <code>dialout</code>.</li>
   </ul>
 
   <footer>
