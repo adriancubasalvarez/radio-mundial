@@ -19,9 +19,10 @@
  * Los iconos viven en la capa superior de LVGL, por encima de cualquier
  * pantalla: sobreviven a los cambios de pantalla y no se borran nunca.
  * Sin LV_OBJ_FLAG_CLICKABLE los toques pasan al mapa o botón de debajo.
- * Las capas que tapan toda la pantalla (reposo, portal WiFi, menú de
- * ajustes, aviso de alarma) se crean después, así que los tapan mientras
- * están abiertas y al cerrarse vuelven a verse.
+ * Las capas que tapan toda la pantalla (portal WiFi, menú de ajustes,
+ * aviso de alarma) se crean después, así que los tapan mientras están
+ * abiertas y al cerrarse vuelven a verse. El reposo también los tapa,
+ * pero pinta su propio icono de batería con bateria_icono_actual().
  *
  * Las pantallas reservan esa esquina con bateria_reserva() (alto) y
  * bateria_reserva_ancho() (ancho) para no poner nada debajo de los iconos
@@ -125,28 +126,15 @@ static bool mirar_bateria(void)
     nivel = nuevo;
     interruptor_apagado = apagado;
 
-    if (interruptor_apagado) {
+    const char *texto;
+    uint32_t color;
+    if (bateria_icono_actual(&texto, &color)) {
         lv_obj_clear_flag(icono, LV_OBJ_FLAG_HIDDEN);
-        lv_label_set_text(icono, texto_bateria());
-        lv_obj_set_style_text_color(icono, lv_color_hex(COLOR_SECUNDARIO), 0);
-        return true;
-    }
-
-    /* sin batería, o cargada a tope: no se muestra nada */
-    if (nivel == BAT_LEVEL_FULL) {
+        lv_label_set_text(icono, texto);
+        lv_obj_set_style_text_color(icono, lv_color_hex(color), 0);
+    } else {
         lv_obj_add_flag(icono, LV_OBJ_FLAG_HIDDEN);
-        return true;
     }
-    lv_obj_clear_flag(icono, LV_OBJ_FLAG_HIDDEN);
-    lv_label_set_text(icono, simbolo(nivel));
-    /* vacía en rojo, un nivel en amarillo y dos o más en verde */
-    uint32_t color = COLOR_VERDE;
-    if (nivel == BAT_LEVEL_EMPTY) {
-        color = COLOR_ERROR;
-    } else if (nivel == BAT_LEVEL_1) {
-        color = COLOR_ACENTO;
-    }
-    lv_obj_set_style_text_color(icono, lv_color_hex(color), 0);
     return true;
 }
 
@@ -211,6 +199,32 @@ void bateria_iniciar(void)
      * aún no ha tenido tiempo de conectar: no se avisa hasta la siguiente */
     mirar_bateria();
     colocar();
+}
+
+/* El icono de la batería según el estado actual: su texto y color; false
+ * si no hay nada que mostrar. La usa mirar_bateria() para el de la
+ * esquina de la interfaz y el reposo para el suyo */
+bool bateria_icono_actual(const char **texto, uint32_t *color)
+{
+    if (interruptor_apagado) {
+        *texto = texto_bateria();
+        *color = COLOR_SECUNDARIO;
+        return true;
+    }
+
+    /* sin batería, o cargada a tope: no se muestra nada */
+    if (nivel == BAT_LEVEL_FULL) {
+        return false;
+    }
+    *texto = simbolo(nivel);
+    /* vacía en rojo, un nivel en amarillo y dos o más en verde */
+    *color = COLOR_VERDE;
+    if (nivel == BAT_LEVEL_EMPTY) {
+        *color = COLOR_ERROR;
+    } else if (nivel == BAT_LEVEL_1) {
+        *color = COLOR_ACENTO;
+    }
+    return true;
 }
 
 bool bateria_hay(void)

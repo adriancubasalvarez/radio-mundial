@@ -18,6 +18,13 @@ bool bateria_conectada(void);
 /* true si se ve algún icono (batería o WiFi) */
 bool bateria_hay(void);
 
+/* Estado actual de la batería como icono: texto (el símbolo del nivel o,
+ * con el interruptor apagado, la batería vacía con una ✕) y color; false
+ * si no hay nada que mostrar (sin batería o llena). La pantalla de reposo
+ * lo usa para pintar su propio icono: su capa negra tapa el de la
+ * interfaz. Los datos se actualizan cada 5 s (bateria_iniciar) */
+bool bateria_icono_actual(const char **texto, uint32_t *color);
+
 /* Alto en píxeles que las pantallas deben dejar libre abajo, en la esquina
  * izquierda, para que nada quede debajo de los iconos (0 si no se ve ninguno) */
 lv_coord_t bateria_reserva(void);
