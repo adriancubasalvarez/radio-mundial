@@ -9,12 +9,18 @@
  * está fundida a negro, así no se ve moverse), para no marcar la pantalla.
  * Al tocar, desaparece y se vuelve a donde se estaba.
  *
+ * En la esquina inferior izquierda de cada página va también el icono de la
+ * batería (bateria.cpp): el de la interfaz queda tapado por la capa negra
+ * del reposo, así que cada página pinta el suyo, y así se funde y deriva
+ * con ellas como cualquier otro elemento.
+ *
  * Se dibuja en la capa superior de LVGL (lv_layer_top), por encima de
  * cualquier pantalla, así que no altera la navegación.
  */
 #include "ui.h"
 #include "nav.h"
 #include "comun.h"
+#include "bateria.h"
 #include "ajustes.h"
 #include "alarmas.h"
 #include "hal.h"
@@ -59,6 +65,14 @@ static lv_obj_t *dia_nombre[DIAS_PREVISION - 1], *dia_icono[DIAS_PREVISION - 1],
 
 /* Página del aire */
 static lv_obj_t *aire_nivel, *aire_valores, *aire_marca, *sol;
+
+/* Icono de la batería: uno por página, para que se funda y derive con
+ * ellas. Con la caché (lo pintado la última vez) solo se redibuja si
+ * cambia el estado */
+static lv_obj_t *bat[NUM_PAGINAS];
+static bool bat_hay;
+static const char *bat_texto;
+static uint32_t bat_color;
 
 static const char *nombre_dia(int d, bool corto)
 {
@@ -119,6 +133,17 @@ static lv_obj_t *nueva_pagina(void)
     lv_obj_clear_flag(p, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_style_opa(p, LV_OPA_TRANSP, 0);
     return p;
+}
+
+/* El icono de la batería de una página: abajo a la izquierda, como el de
+ * la esquina de la interfaz */
+static lv_obj_t *crear_bateria(lv_obj_t *p)
+{
+    lv_obj_t *e = lv_label_create(p);
+    lv_obj_set_style_text_font(e, &radio_20, 0);
+    lv_obj_align(e, LV_ALIGN_BOTTOM_LEFT, 8, -8);
+    lv_obj_add_flag(e, LV_OBJ_FLAG_HIDDEN);
+    return e;
 }
 
 static void crear_reloj(lv_obj_t *p)
@@ -281,6 +306,31 @@ static void actualizar_aire(void)
                           t->sale_sol, t->pone_sol);
 }
 
+/* El icono de la batería de las páginas: el mismo estado que el de la
+ * esquina de la interfaz (bateria.cpp lo lee cada 5 s; aquí se mira cada
+ * segundo y solo se repinta si cambió) */
+static void actualizar_bateria(void)
+{
+    const char *texto = NULL;
+    uint32_t color = 0;
+    bool hay = bateria_icono_actual(&texto, &color);
+    if (hay == bat_hay && texto == bat_texto && color == bat_color) {
+        return;
+    }
+    bat_hay = hay;
+    bat_texto = texto;
+    bat_color = color;
+    for (int i = 0; i < NUM_PAGINAS; i++) {
+        if (hay) {
+            lv_obj_clear_flag(bat[i], LV_OBJ_FLAG_HIDDEN);
+            lv_label_set_text(bat[i], texto);
+            lv_obj_set_style_text_color(bat[i], lv_color_hex(color), 0);
+        } else {
+            lv_obj_add_flag(bat[i], LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+}
+
 /* ---------- Movimiento ---------- */
 
 static bool pagina_disponible(int p)
@@ -345,6 +395,9 @@ static void dormir(void)
     crear_reloj(pagina[PAG_RELOJ]);
     crear_tiempo(pagina[PAG_TIEMPO]);
     crear_aire(pagina[PAG_AIRE]);
+    for (int i = 0; i < NUM_PAGINAS; i++) {
+        bat[i] = crear_bateria(pagina[i]);
+    }
     visible = PAG_RELOJ;
     lv_obj_set_style_opa(pagina[PAG_RELOJ], LV_OPA_COVER, 0);
 
@@ -353,6 +406,10 @@ static void dormir(void)
     actualizar_reloj();
     actualizar_tiempo();
     actualizar_aire();
+    bat_hay = false;   /* forzar el repintado sobre las páginas nuevas */
+    bat_texto = NULL;
+    bat_color = 0;
+    actualizar_bateria();
     hal_brillo(BRILLO_REPOSO);
 }
 
@@ -364,6 +421,7 @@ static void vigilar(lv_timer_t *t)
         actualizar_reloj();
         actualizar_tiempo();
         actualizar_aire();
+        actualizar_bateria();
         if (segundos % SEGUNDOS_PAGINA == 0) {
             pasar_pagina();
         }
